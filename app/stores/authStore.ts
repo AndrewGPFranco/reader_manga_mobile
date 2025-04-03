@@ -1,64 +1,54 @@
 import { create } from "zustand";
 import { jwtDecode } from "jwt-decode";
 import { User } from "@/app/class/User";
-import { UserSession } from "@/app/class/UserSession";
 import { api } from "@/app/network/axiosInstance";
-import type { UserRegister } from "@/app/class/UserRegister";
 import iDecodedToken from "@/app/_types/iDecodedToken";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-interface AuthState {
-  user: User;
-  usuarioLogado: UserSession | null;
-  efetuarLogin: (email: string, password: string) => Promise<void>;
-  getUserAutenticado: () => Promise<User>;
-  isUserAutenticado: () => boolean;
-  efetuarLogout: () => Promise<void>;
-  getRoleUser: () => Promise<string>;
-  register: (user: UserRegister) => Promise<string>;
-  getIdUsuario: () => Promise<string | null>;
-  changePassword: (
-    oldPassword: string,
-    newPassword: string
-  ) => Promise<Map<boolean, string>>;
-}
-
-const setToken = async (token: string, id: string) => {
-  await AsyncStorage.setItem("id", id);
-  await AsyncStorage.setItem("token", token);
-};
-
-const getToken = async () => await AsyncStorage.getItem("token");
-
-const getUserId = async () => await AsyncStorage.getItem("id");
-
-const removeToken = async () => await AsyncStorage.removeItem("token");
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import AuthState from "@/app/stores/_types/iAuthStore"
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: new User("", "", "", ""),
   usuarioLogado: null,
 
+  async setToken(token: string, id: string): Promise<void> {
+    await AsyncStorage.setItem("id", id);
+    await AsyncStorage.setItem("token", token);
+  },
+
+  async getToken(): Promise<string | null> {
+    return await AsyncStorage.getItem("token");
+  },
+
+  async getUserId(): Promise<string | null> {
+    return await AsyncStorage.getItem("id");
+  },
+
+  async removeToken(): Promise<void> {
+    await AsyncStorage.removeItem("token");
+  },
+
   async efetuarLogin(email, password) {
     try {
       const user = new User(email, password);
-      console.log(user)
       const { data } = await api.post("/user/login", user);
       const decodedToken = jwtDecode(data.token) as iDecodedToken;
 
+      const userId = String(decodedToken.id);
+
       user.setToken(data.token);
-      user.setId(decodedToken.id);
+      user.setId(userId);
 
       set({ user });
-      setToken(data.token, decodedToken.id);
+      await this.setToken(data.token, userId);
     } catch (error: any) {
-      console.log(error)
+      console.log(error);
       throw new Error(error);
     }
   },
 
   async getUserAutenticado(): Promise<User> {
-    const token = await getToken();
-    const id = await getUserId();
+    const token = await this.getToken();
+    const id = await this.getUserId();
 
     if (token && id) {
       const user = new User("", "");
@@ -71,16 +61,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   isUserAutenticado(): boolean {
-    return !!getToken();
+    return !!this.getToken();
   },
 
   async efetuarLogout() {
-    removeToken();
+    await this.removeToken();
     set({ user: new User("", "", "", ""), usuarioLogado: null });
   },
 
   async getRoleUser(): Promise<string> {
-    const token = await getToken();
+    const token = await this.getToken();
     if (token) {
       const decoded = jwtDecode(token) as iDecodedToken;
       return decoded.role;
@@ -99,7 +89,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   async getIdUsuario(): Promise<string | null> {
-    const token = await getToken();
+    const token = await this.getToken();
     if (token) {
       const decoded = jwtDecode(token) as iDecodedToken;
       return decoded.id;
@@ -108,7 +98,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   async changePassword(oldPassword, newPassword) {
-    const token = getToken();
+    const token = this.getToken();
     if (!token) return new Map([[false, "Token inválido!"]]);
 
     try {

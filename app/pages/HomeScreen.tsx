@@ -13,15 +13,22 @@ import { Ionicons } from "@expo/vector-icons";
 import Navbar from "@/components/home/Navbar";
 import { api } from "@/app/network/axiosInstance";
 import iMangaData from "@/app/_types/iManga";
+import { useAuthStore } from "../stores/authStore";
 
 const HomeScreen = () => {
   const [mangas, setMangas] = useState<iMangaData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const authStore = useAuthStore();
+
   const getMangas = async () => {
     try {
-      const response = await api.get("/manga/readAll/9");
+      const response = await api.get(`/manga/readAll/${await authStore.getIdUsuario()}`, {
+        headers: {
+          Authorization: `${await authStore.getToken()}`
+        },
+      });
       setMangas(response.data);
     } catch (err) {
       console.log(err);
