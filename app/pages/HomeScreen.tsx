@@ -10,10 +10,15 @@ import {
 } from "react-native";
 import { Button, Card } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import Navbar from "@/components/home/Navbar";
 import { api } from "@/app/network/axiosInstance";
 import iMangaData from "@/app/_types/iManga";
 import useAuthStore from "../stores/authStore";
+
+type NavigationProps = {
+  navigate: (screen: string, params?: any) => void;
+};
 
 const HomeScreen = () => {
   const [mangas, setMangas] = useState<iMangaData[]>([]);
@@ -21,14 +26,18 @@ const HomeScreen = () => {
   const [error, setError] = useState("");
 
   const authStore = useAuthStore();
+  const navigation = useNavigation<NavigationProps>();
 
   const getMangas = async () => {
     try {
-      const response = await api.get(`/manga/readAll/${await authStore.getIdUsuario()}`, {
-        headers: {
-          Authorization: `${await authStore.getToken()}`
-        },
-      });
+      const response = await api.get(
+        `/manga/readAll/${await authStore.getIdUsuario()}`,
+        {
+          headers: {
+            Authorization: `${await authStore.getToken()}`,
+          },
+        }
+      );
       setMangas(response.data);
     } catch (err) {
       console.log(err);
@@ -41,6 +50,44 @@ const HomeScreen = () => {
   useEffect(() => {
     getMangas();
   }, []);
+
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <ActivityIndicator size="large" color="#BB86FC" style={styles.loader} />
+      );
+    }
+
+    if (error !== "")
+      return <Text style={styles.errorText}>{error}</Text>;
+
+    return (
+      <View style={styles.mangaGrid}>
+        {mangas.map((item) => (
+          <TouchableOpacity
+            key={item.id}
+            style={styles.mangaCard}
+            onPress={() =>
+              navigation.navigate("ProgressReading", { mangaId: item.id })
+            }
+          >
+            <Image source={{ uri: item.image }} style={styles.mangaImage} />
+            <View style={styles.overlay}>
+              <Text style={styles.mangaTitle}>{item.title}</Text>
+              <Button
+                mode="contained"
+                onPress={() =>
+                  navigation.navigate("ProgressReading", { mangaId: item.id })
+                }
+              >
+                Ver detalhes
+              </Button>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </View>
+    );
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -67,27 +114,7 @@ const HomeScreen = () => {
           <Text style={styles.sectionTitle}>Mangás Populares</Text>
         </View>
 
-        {loading ? (
-          <ActivityIndicator
-            size="large"
-            color="#BB86FC"
-            style={styles.loader}
-          />
-        ) : error !== "" ? (
-          <Text style={styles.errorText}>{error}</Text>
-        ) : (
-          <View style={styles.mangaGrid}>
-            {mangas.map((item, index) => (
-              <TouchableOpacity key={index} style={styles.mangaCard}>
-                <Image source={{ uri: item.image }} style={styles.mangaImage} />
-                <View style={styles.overlay}>
-                  <Text style={styles.mangaTitle}>{item.title}</Text>
-                  <Button mode="contained">Ler agora</Button>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
+        {renderContent()}
       </Card>
       <View style={styles.bottomSpacing} />
     </ScrollView>
@@ -122,7 +149,6 @@ const styles = StyleSheet.create({
     color: "white",
     marginBottom: 8,
   },
-  chip: { backgroundColor: "#333", margin: 4 },
   loader: { marginVertical: 20 },
   errorText: { color: "#CF6679", textAlign: "center", marginVertical: 10 },
   mangaGrid: {
