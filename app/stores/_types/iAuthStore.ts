@@ -2,7 +2,7 @@ import { User } from "@/app/class/User";
 import { UserSession } from "@/app/class/UserSession";
 import { UserRegister } from "@/app/class/UserRegister";
 
-interface AuthState {
+interface AuthStore {
     user: User;
     usuarioLogado: UserSession | null;
     setToken(token: string, id: string): Promise<void>;
@@ -22,4 +22,4 @@ interface AuthState {
     ) => Promise<Map<boolean, string>>;
 }
 
-export default AuthState;
+export default AuthStore;

@@ -1,11 +1,10 @@
 import { create } from "zustand";
 import iChapterData from "../_types/iChapter";
-import { User } from "../class/User";
 import { api } from "../network/axiosInstance";
 import ChapterStore from "./_types/iChapterStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const createChapterStore = () => create<ChapterStore>((set, get) => ({
+const useChapterStore = () => create<ChapterStore>((set, get) => ({
     chapter: {} as Array<iChapterData>,
     allChapter: [] as Array<iChapterData>,
     sizePaginaCapitulo: null,
@@ -23,11 +22,11 @@ export const createChapterStore = () => create<ChapterStore>((set, get) => ({
         try {
             const response = await api.get(`/chapter/read/${id}`, {
                 headers: {
-                    Authorization: `${this.getTokenUser()}`,
+                    Authorization: `${get().getTokenUser()}`,
                 },
             });
-            this.chapter = response.data;
-            return this.chapter;
+            get().chapter = response.data;
+            return get().chapter;
         } catch (error: any) {
             throw new Error(error.response.data);
         }
@@ -39,12 +38,12 @@ export const createChapterStore = () => create<ChapterStore>((set, get) => ({
                 `/chapter/readAll?size=${size}&pageNumber=${pageNumber}`,
                 {
                     headers: {
-                        Authorization: `${this.getTokenUser()}`,
+                        Authorization: `${get().getTokenUser()}`,
                     },
                 }
             );
-            this.allChapter = response.data;
-            return this.allChapter;
+            get().allChapter = response.data;
+            return get().allChapter;
         } catch (error: any) {
             throw new Error(error.response.data);
         }
@@ -54,7 +53,7 @@ export const createChapterStore = () => create<ChapterStore>((set, get) => ({
         try {
             await api.post("/chapter/create", data, {
                 headers: {
-                    Authorization: `${this.getTokenUser()}`,
+                    Authorization: `${get().getTokenUser()}`,
                 },
             });
             callback();
@@ -69,7 +68,7 @@ export const createChapterStore = () => create<ChapterStore>((set, get) => ({
         try {
             await api.put(`/chapter/edit/${id}`, data, {
                 headers: {
-                    Authorization: `${this.getTokenUser()}`,
+                    Authorization: `${get().getTokenUser()}`,
                 },
             });
             callback();
@@ -84,7 +83,7 @@ export const createChapterStore = () => create<ChapterStore>((set, get) => ({
         try {
             const response = await api.delete(`/chapter/delete/${id}`, {
                 headers: {
-                    Authorization: `${this.getTokenUser()}`,
+                    Authorization: `${get().getTokenUser()}`,
                 },
             });
             return response.data;
@@ -99,7 +98,7 @@ export const createChapterStore = () => create<ChapterStore>((set, get) => ({
                 `/chapter/getAll-pages?size=${size}&pageNumber=${pageNumber}`,
                 {
                     headers: {
-                        Authorization: `${this.getTokenUser()}`,
+                        Authorization: `${get().getTokenUser()}`,
                     },
                 }
             );
@@ -113,7 +112,7 @@ export const createChapterStore = () => create<ChapterStore>((set, get) => ({
         try {
             const response = await api.delete(`/chapter/delete/page/${id}`, {
                 headers: {
-                    Authorization: `${this.getTokenUser()}`,
+                    Authorization: `${get().getTokenUser()}`,
                 },
             });
             return response.data;
@@ -126,7 +125,7 @@ export const createChapterStore = () => create<ChapterStore>((set, get) => ({
         try {
             await api.put(`/chapter/edit/page/${id}`, data, {
                 headers: {
-                    Authorization: `${this.getTokenUser()}`,
+                    Authorization: `${get().getTokenUser()}`,
                 },
             });
             callback();
@@ -141,7 +140,7 @@ export const createChapterStore = () => create<ChapterStore>((set, get) => ({
         try {
             await api.post("/chapter/register/page", data, {
                 headers: {
-                    Authorization: `${this.getTokenUser()}`,
+                    Authorization: `${get().getTokenUser()}`,
                 },
             });
             callback();
@@ -156,7 +155,7 @@ export const createChapterStore = () => create<ChapterStore>((set, get) => ({
         const response = await api.get(`/chapter/image/${idCapitulo}/${index}`, {
             responseType: "blob",
             headers: {
-                Authorization: `${this.getTokenUser()}`,
+                Authorization: `${get().getTokenUser()}`,
             },
         });
 
@@ -164,20 +163,20 @@ export const createChapterStore = () => create<ChapterStore>((set, get) => ({
     },
 
     async getQuantidadePaginasDoCapitulo(idCapitulo: string) {
-        const response = await this.getChapterByID(idCapitulo);
+        const response = await get().getChapterByID(idCapitulo);
 
         return response.length;
     },
     getQuantidade(id: string) {
-        if (this.sizePaginaCapitulo != null) {
-            return this.sizePaginaCapitulo;
+        if (get().sizePaginaCapitulo != null) {
+            return get().sizePaginaCapitulo;
         }
-        return this.getQuantidadePaginasDoCapitulo(id);
+        return get().getQuantidadePaginasDoCapitulo(id);
     },
 
     async updateReadingProgress(idChapter: string, currentProgress: number) {
         try {
-            const idUser = localStorage.getItem("id");
+            const idUser = await AsyncStorage.getItem("id");
             const data = {
                 idUser: idUser,
                 idChapter: idChapter,
@@ -186,7 +185,7 @@ export const createChapterStore = () => create<ChapterStore>((set, get) => ({
 
             await api.put(`/api/user/chapter`, data, {
                 headers: {
-                    Authorization: `${this.getTokenUser()}`,
+                    Authorization: `${get().getTokenUser()}`,
                 },
             });
         } catch (error) {
@@ -200,7 +199,7 @@ export const createChapterStore = () => create<ChapterStore>((set, get) => ({
                 `/chapter/reading-progress/${idChapter}`,
                 {
                     headers: {
-                        Authorization: `${this.getTokenUser()}`,
+                        Authorization: `${get().getTokenUser()}`,
                     },
                 }
             );
@@ -216,7 +215,7 @@ export const createChapterStore = () => create<ChapterStore>((set, get) => ({
                 `/chapter/reading-progress?pageNumber=${pageNumber}`,
                 {
                     headers: {
-                        Authorization: `${this.getTokenUser()}`,
+                        Authorization: `${get().getTokenUser()}`,
                     },
                 }
             );
@@ -226,3 +225,5 @@ export const createChapterStore = () => create<ChapterStore>((set, get) => ({
         }
     },
 }));
+
+export default useChapterStore;

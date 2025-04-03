@@ -1,5 +1,4 @@
 import iChapterData from "../../_types/iChapter";
-import { User } from "../../class/User";
 
 interface ChapterStore {
     chapter: Array<iChapterData>;

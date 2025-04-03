@@ -4,9 +4,9 @@ import { User } from "@/app/class/User";
 import { api } from "@/app/network/axiosInstance";
 import iDecodedToken from "@/app/_types/iDecodedToken";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import AuthState from "@/app/stores/_types/iAuthStore"
+import AuthStore from "@/app/stores/_types/iAuthStore"
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+const useAuthStore = create<AuthStore>((set, get) => ({
   user: new User("", "", "", ""),
   usuarioLogado: null,
 
@@ -39,7 +39,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       user.setId(userId);
 
       set({ user });
-      await this.setToken(data.token, userId);
+      await get().setToken(data.token, userId);
     } catch (error: any) {
       console.log(error);
       throw new Error(error);
@@ -47,8 +47,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   async getUserAutenticado(): Promise<User> {
-    const token = await this.getToken();
-    const id = await this.getUserId();
+    const token = await get().getToken();
+    const id = await get().getUserId();
 
     if (token && id) {
       const user = new User("", "");
@@ -61,16 +61,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   isUserAutenticado(): boolean {
-    return !!this.getToken();
+    return !!get().getToken();
   },
 
   async efetuarLogout() {
-    await this.removeToken();
+    await get().removeToken();
     set({ user: new User("", "", "", ""), usuarioLogado: null });
   },
 
   async getRoleUser(): Promise<string> {
-    const token = await this.getToken();
+    const token = await get().getToken();
     if (token) {
       const decoded = jwtDecode(token) as iDecodedToken;
       return decoded.role;
@@ -89,7 +89,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   async getIdUsuario(): Promise<string | null> {
-    const token = await this.getToken();
+    const token = await get().getToken();
     if (token) {
       const decoded = jwtDecode(token) as iDecodedToken;
       return decoded.id;
@@ -98,7 +98,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   async changePassword(oldPassword, newPassword) {
-    const token = this.getToken();
+    const token = get().getToken();
     if (!token) return new Map([[false, "Token inválido!"]]);
 
     try {
@@ -120,3 +120,5 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 }));
+
+export default useAuthStore;
