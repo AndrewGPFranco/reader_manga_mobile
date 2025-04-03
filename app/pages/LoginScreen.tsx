@@ -14,7 +14,7 @@ import { Svg, Path } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { validationFieldsLogin } from "@/app/utils/validation";
-import { useAuthStore } from "@/app/stores/authStore";
+import useAuthStore from "@/app/stores/authStore";
 
 type RootStackParamList = {
   Login: undefined;

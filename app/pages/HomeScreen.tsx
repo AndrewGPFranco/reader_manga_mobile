@@ -13,7 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Navbar from "@/components/home/Navbar";
 import { api } from "@/app/network/axiosInstance";
 import iMangaData from "@/app/_types/iManga";
-import { useAuthStore } from "../stores/authStore";
+import useAuthStore from "../stores/authStore";
 
 const HomeScreen = () => {
   const [mangas, setMangas] = useState<iMangaData[]>([]);

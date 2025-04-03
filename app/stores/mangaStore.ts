@@ -23,7 +23,7 @@ const useMangaStore = () => create<MangaStore>((set, get) => ({
         try {
             const response = await api.get(`/manga/readAll/${await get().getIdUsuario()}`, {
                 headers: {
-                    Authorization: `${get().getTokenUser()}`
+                    Authorization: `${await get().getTokenUser()}`
                 }
             })
             get().manga = response.data
@@ -40,7 +40,7 @@ const useMangaStore = () => create<MangaStore>((set, get) => ({
                 `/manga/get-pageable?pageNumber=${pageNumber}&size=${size}&idUser=${idUser}`,
                 {
                     headers: {
-                        Authorization: `${get().getTokenUser()}`
+                        Authorization: `${await get().getTokenUser()}`
                     }
                 }
             )
@@ -55,7 +55,7 @@ const useMangaStore = () => create<MangaStore>((set, get) => ({
         try {
             const response = await api.get(`/manga/read/${id}`, {
                 headers: {
-                    Authorization: `${get().getTokenUser()}`
+                    Authorization: `${await get().getTokenUser()}`
                 }
             })
             return response.data
@@ -65,10 +65,10 @@ const useMangaStore = () => create<MangaStore>((set, get) => ({
     },
 
     async getInfoManga(tituloManga: string) {
-        const idUser = localStorage.getItem("id");
+        const idUser = await AsyncStorage.getItem("id");
         const response = await api.get(`/manga/get-info-manga/${tituloManga}/${idUser}`, {
             headers: {
-                Authorization: `${get().getTokenUser()}`
+                Authorization: `${await get().getTokenUser()}`
             }
         })
         return response.data
@@ -79,7 +79,7 @@ const useMangaStore = () => create<MangaStore>((set, get) => ({
         try {
             const response = await api.get('/manga/my-covers/30', {
                 headers: {
-                    Authorization: `${get().getTokenUser()}`
+                    Authorization: `${await get().getTokenUser()}`
                 }
             })
             return response.data
@@ -95,7 +95,7 @@ const useMangaStore = () => create<MangaStore>((set, get) => ({
             const response = await api.delete(`/manga/delete`, {
                 data: dadosBack,
                 headers: {
-                    Authorization: `${get().getTokenUser()}`
+                    Authorization: `${await get().getTokenUser()}`
                 }
             })
             return response.data
@@ -108,7 +108,7 @@ const useMangaStore = () => create<MangaStore>((set, get) => ({
         try {
             await api.post('/manga/create', data, {
                 headers: {
-                    Authorization: `${get().getTokenUser()}`
+                    Authorization: `${await get().getTokenUser()}`
                 }
             })
             callback()
@@ -123,7 +123,7 @@ const useMangaStore = () => create<MangaStore>((set, get) => ({
         try {
             await api.put(`/manga/edit/${id}`, data, {
                 headers: {
-                    Authorization: `${get().getTokenUser()}`
+                    Authorization: `${await get().getTokenUser()}`
                 }
             })
             callback()
@@ -141,7 +141,7 @@ const useMangaStore = () => create<MangaStore>((set, get) => ({
                 null,
                 {
                     headers: {
-                        Authorization: `${get().getTokenUser()}`
+                        Authorization: `${await get().getTokenUser()}`
                     }
                 }
             )
@@ -156,12 +156,12 @@ const useMangaStore = () => create<MangaStore>((set, get) => ({
     },
 
     async getAllFavorites() {
-        const token = localStorage.getItem('token')
+        const token = await AsyncStorage.getItem('token')
         if (token != undefined) {
             const id = await get().getIdUsuario()
             const response = await api.get(`/user/manga-favorite-list/${id}`, {
                 headers: {
-                    Authorization: `${get().getTokenUser()}`
+                    Authorization: `${await get().getTokenUser()}`
                 }
             })
             return response.data.mangaList
@@ -172,7 +172,7 @@ const useMangaStore = () => create<MangaStore>((set, get) => ({
         try {
             const response = await api.get(`/user/manga-list/${id}`, {
                 headers: {
-                    Authorization: `${get().getTokenUser()}`
+                    Authorization: `${await get().getTokenUser()}`
                 }
             })
             return response.data
@@ -183,13 +183,13 @@ const useMangaStore = () => create<MangaStore>((set, get) => ({
 
     async adicionaMangaNaListaDoUsuario(idManga: number) {
         try {
-            const idUser = localStorage.getItem("id");
+            const idUser = await AsyncStorage.getItem("id");
             const response = await api.post(
                 `/user/add-manga?idManga=${idManga}&idUser=${idUser}`,
                 {},
                 {
                     headers: {
-                        Authorization: `${get().getTokenUser()}`
+                        Authorization: `${await get().getTokenUser()}`
                     }
                 }
             )
@@ -207,7 +207,7 @@ const useMangaStore = () => create<MangaStore>((set, get) => ({
                 {},
                 {
                     headers: {
-                        Authorization: `${get().getTokenUser()}`
+                        Authorization: `${await get().getTokenUser()}`
                     }
                 }
             )
@@ -228,7 +228,7 @@ const useMangaStore = () => create<MangaStore>((set, get) => ({
     async getApenasNomeDosMangas() {
         const result = await api.get("/manga/nome-mangas", {
             headers: {
-                Authorization: `${get().getTokenUser()}`
+                Authorization: `${await get().getTokenUser()}`
             }
         });
         return result.data;
@@ -238,7 +238,7 @@ const useMangaStore = () => create<MangaStore>((set, get) => ({
         const result = await api
             .get(`/manga?pesquisado=${mangaPesquisado}`, {
                 headers: {
-                    Authorization: `${get().getTokenUser()}`
+                    Authorization: `${await get().getTokenUser()}`
                 }
             });
         return result.data;

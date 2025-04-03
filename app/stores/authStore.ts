@@ -31,7 +31,7 @@ const useAuthStore = create<AuthStore>((set, get) => ({
     try {
       const user = new User(email, password);
       const { data } = await api.post("/user/login", user);
-      const decodedToken = jwtDecode(data.token) as iDecodedToken;
+      const decodedToken: iDecodedToken = jwtDecode(data.token);
 
       const userId = String(decodedToken.id);
 
@@ -60,8 +60,8 @@ const useAuthStore = create<AuthStore>((set, get) => ({
     return new User("", "", "", "");
   },
 
-  isUserAutenticado(): boolean {
-    return !!get().getToken();
+  async isUserAutenticado(): Promise<boolean> {
+    return !!await get().getToken();
   },
 
   async efetuarLogout() {
@@ -72,7 +72,7 @@ const useAuthStore = create<AuthStore>((set, get) => ({
   async getRoleUser(): Promise<string> {
     const token = await get().getToken();
     if (token) {
-      const decoded = jwtDecode(token) as iDecodedToken;
+      const decoded: iDecodedToken = jwtDecode(token);
       return decoded.role;
     }
     return "USER";
@@ -91,14 +91,14 @@ const useAuthStore = create<AuthStore>((set, get) => ({
   async getIdUsuario(): Promise<string | null> {
     const token = await get().getToken();
     if (token) {
-      const decoded = jwtDecode(token) as iDecodedToken;
+      const decoded: iDecodedToken = jwtDecode(token);
       return decoded.id;
     }
     return null;
   },
 
   async changePassword(oldPassword, newPassword) {
-    const token = get().getToken();
+    const token = await get().getToken();
     if (!token) return new Map([[false, "Token inválido!"]]);
 
     try {

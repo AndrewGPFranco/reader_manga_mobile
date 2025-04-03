@@ -22,7 +22,7 @@ const useChapterStore = () => create<ChapterStore>((set, get) => ({
         try {
             const response = await api.get(`/chapter/read/${id}`, {
                 headers: {
-                    Authorization: `${get().getTokenUser()}`,
+                    Authorization: `${await get().getTokenUser()}`,
                 },
             });
             get().chapter = response.data;
@@ -38,7 +38,7 @@ const useChapterStore = () => create<ChapterStore>((set, get) => ({
                 `/chapter/readAll?size=${size}&pageNumber=${pageNumber}`,
                 {
                     headers: {
-                        Authorization: `${get().getTokenUser()}`,
+                        Authorization: `${await get().getTokenUser()}`,
                     },
                 }
             );
@@ -53,7 +53,7 @@ const useChapterStore = () => create<ChapterStore>((set, get) => ({
         try {
             await api.post("/chapter/create", data, {
                 headers: {
-                    Authorization: `${get().getTokenUser()}`,
+                    Authorization: `${await get().getTokenUser()}`,
                 },
             });
             callback();
@@ -68,7 +68,7 @@ const useChapterStore = () => create<ChapterStore>((set, get) => ({
         try {
             await api.put(`/chapter/edit/${id}`, data, {
                 headers: {
-                    Authorization: `${get().getTokenUser()}`,
+                    Authorization: `${await get().getTokenUser()}`,
                 },
             });
             callback();
@@ -83,7 +83,7 @@ const useChapterStore = () => create<ChapterStore>((set, get) => ({
         try {
             const response = await api.delete(`/chapter/delete/${id}`, {
                 headers: {
-                    Authorization: `${get().getTokenUser()}`,
+                    Authorization: `${await get().getTokenUser()}`,
                 },
             });
             return response.data;
@@ -98,7 +98,7 @@ const useChapterStore = () => create<ChapterStore>((set, get) => ({
                 `/chapter/getAll-pages?size=${size}&pageNumber=${pageNumber}`,
                 {
                     headers: {
-                        Authorization: `${get().getTokenUser()}`,
+                        Authorization: `${await get().getTokenUser()}`,
                     },
                 }
             );
@@ -112,7 +112,7 @@ const useChapterStore = () => create<ChapterStore>((set, get) => ({
         try {
             const response = await api.delete(`/chapter/delete/page/${id}`, {
                 headers: {
-                    Authorization: `${get().getTokenUser()}`,
+                    Authorization: `${await get().getTokenUser()}`,
                 },
             });
             return response.data;
@@ -125,7 +125,7 @@ const useChapterStore = () => create<ChapterStore>((set, get) => ({
         try {
             await api.put(`/chapter/edit/page/${id}`, data, {
                 headers: {
-                    Authorization: `${get().getTokenUser()}`,
+                    Authorization: `${await get().getTokenUser()}`,
                 },
             });
             callback();
@@ -140,7 +140,7 @@ const useChapterStore = () => create<ChapterStore>((set, get) => ({
         try {
             await api.post("/chapter/register/page", data, {
                 headers: {
-                    Authorization: `${get().getTokenUser()}`,
+                    Authorization: `${await get().getTokenUser()}`,
                 },
             });
             callback();
@@ -155,7 +155,7 @@ const useChapterStore = () => create<ChapterStore>((set, get) => ({
         const response = await api.get(`/chapter/image/${idCapitulo}/${index}`, {
             responseType: "blob",
             headers: {
-                Authorization: `${get().getTokenUser()}`,
+                Authorization: `${await get().getTokenUser()}`,
             },
         });
 
@@ -185,7 +185,7 @@ const useChapterStore = () => create<ChapterStore>((set, get) => ({
 
             await api.put(`/api/user/chapter`, data, {
                 headers: {
-                    Authorization: `${get().getTokenUser()}`,
+                    Authorization: `${await get().getTokenUser()}`,
                 },
             });
         } catch (error) {
@@ -199,7 +199,7 @@ const useChapterStore = () => create<ChapterStore>((set, get) => ({
                 `/chapter/reading-progress/${idChapter}`,
                 {
                     headers: {
-                        Authorization: `${get().getTokenUser()}`,
+                        Authorization: `${await get().getTokenUser()}`,
                     },
                 }
             );
@@ -215,7 +215,7 @@ const useChapterStore = () => create<ChapterStore>((set, get) => ({
                 `/chapter/reading-progress?pageNumber=${pageNumber}`,
                 {
                     headers: {
-                        Authorization: `${get().getTokenUser()}`,
+                        Authorization: `${await get().getTokenUser()}`,
                     },
                 }
             );
