@@ -5,7 +5,7 @@ interface ChapterStore {
     chapter: Array<iChapterData>;
     allChapter: Array<iChapterData>;
     sizePaginaCapitulo: null;
-    getTokenUser(user: User): Promise<string | undefined>;
+    getTokenUser(): Promise<string | null | undefined>;
     getChapterByID(id: string): Promise<Array<iChapterData>>;
     getAllChapter(pageNumber: number, size: number): Promise<any>;
     registerChapter(data: {}, callback: Function): Promise<string>;

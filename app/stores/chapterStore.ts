@@ -3,15 +3,16 @@ import iChapterData from "../_types/iChapter";
 import { User } from "../class/User";
 import { api } from "../network/axiosInstance";
 import ChapterStore from "./_types/iChapterStore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const createChapterStore = () => create<ChapterStore>((set, get) => ({
     chapter: {} as Array<iChapterData>,
     allChapter: [] as Array<iChapterData>,
     sizePaginaCapitulo: null,
 
-    async getTokenUser(user: User) {
+    async getTokenUser() {
         try {
-            return user.getToken();
+            return await AsyncStorage.getItem("token");
         } catch (error) {
             console.error("Erro ao obter token do usuário:", error);
             return undefined;

@@ -27,7 +27,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     await AsyncStorage.removeItem("token");
   },
 
-  async efetuarLogin(email, password) {
+  async efetuarLogin(email: string, password: string) {
     try {
       const user = new User(email, password);
       const { data } = await api.post("/user/login", user);
