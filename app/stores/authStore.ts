@@ -5,35 +5,34 @@ import { UserSession } from "@/app/class/UserSession";
 import { api } from "@/app/network/axiosInstance";
 import type { UserRegister } from "@/app/class/UserRegister";
 import iDecodedToken from "@/app/_types/iDecodedToken";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface AuthState {
   user: User;
   usuarioLogado: UserSession | null;
   efetuarLogin: (email: string, password: string) => Promise<void>;
-  getUserAutenticado: () => User;
+  getUserAutenticado: () => Promise<User>;
   isUserAutenticado: () => boolean;
   efetuarLogout: () => Promise<void>;
-  getRoleUser: () => string;
+  getRoleUser: () => Promise<string>;
   register: (user: UserRegister) => Promise<string>;
-  getIdUsuario: () => string | null;
+  getIdUsuario: () => Promise<string | null>;
   changePassword: (
     oldPassword: string,
     newPassword: string
   ) => Promise<Map<boolean, string>>;
 }
 
-// // 🔹 Funções auxiliares para manipular o token no localStorage
-// const setToken = (token: string, id: string) => {
-//   localStorage.setItem("token", token);
-//   localStorage.setItem("id", id);
-// };
-
-const getToken = () => localStorage.getItem("token");
-const getUserId = () => localStorage.getItem("id");
-const removeToken = () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("id");
+const setToken = async (token: string, id: string) => {
+  await AsyncStorage.setItem("id", id);
+  await AsyncStorage.setItem("token", token);
 };
+
+const getToken = async () => await AsyncStorage.getItem("token");
+
+const getUserId = async () => await AsyncStorage.getItem("id");
+
+const removeToken = async () => await AsyncStorage.removeItem("token");
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: new User("", "", "", ""),
@@ -50,16 +49,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       user.setId(decodedToken.id);
 
       set({ user });
-      // setToken(data.token, decodedToken.id);
+      setToken(data.token, decodedToken.id);
     } catch (error: any) {
       console.log(error)
       throw new Error(error);
     }
   },
 
-  getUserAutenticado() {
-    const token = getToken();
-    const id = getUserId();
+  async getUserAutenticado(): Promise<User> {
+    const token = await getToken();
+    const id = await getUserId();
 
     if (token && id) {
       const user = new User("", "");
@@ -71,7 +70,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     return new User("", "", "", "");
   },
 
-  isUserAutenticado() {
+  isUserAutenticado(): boolean {
     return !!getToken();
   },
 
@@ -80,8 +79,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ user: new User("", "", "", ""), usuarioLogado: null });
   },
 
-  getRoleUser() {
-    const token = getToken();
+  async getRoleUser(): Promise<string> {
+    const token = await getToken();
     if (token) {
       const decoded = jwtDecode(token) as iDecodedToken;
       return decoded.role;
@@ -99,8 +98,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  getIdUsuario() {
-    const token = getToken();
+  async getIdUsuario(): Promise<string | null> {
+    const token = await getToken();
     if (token) {
       const decoded = jwtDecode(token) as iDecodedToken;
       return decoded.id;
