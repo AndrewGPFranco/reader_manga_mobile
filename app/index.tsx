@@ -8,26 +8,16 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
-import { Button, Card, Chip } from "react-native-paper";
+import { Button, Card } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { Manga } from "./_types/Manga";
+import Navbar from "@/components/home/Navbar";
 
 const HomeScreen = () => {
   const [mangas, setMangas] = useState<Manga[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  const categories = [
-    "Ação",
-    "Aventura",
-    "Romance",
-    "Fantasia",
-    "Sci-Fi",
-    "Horror",
-    "Comédia",
-    "Drama",
-  ];
 
   const getMangas = async () => {
     try {
@@ -37,7 +27,7 @@ const HomeScreen = () => {
           headers: {
             Authorization:
               "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJyZWFkZXItbWFuZ2EiLC" +
-              "JpZCI6MSwicm9sZSI6IlVTRVIsQURNSU4iLCJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJl" + 
+              "JpZCI6MSwicm9sZSI6IlVTRVIsQURNSU4iLCJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJl" +
               "eHAiOjE3NDM3MjE4NTh9.JL_SIerI72S95rTF_61WyaUxdxtV5fWQ791MgVab4fA",
           },
         }
@@ -57,6 +47,7 @@ const HomeScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
+      <Navbar />
       <Card style={styles.card}>
         <View style={styles.header}>
           <Text style={styles.title}>Descubra Novos Mangás</Text>
@@ -73,17 +64,6 @@ const HomeScreen = () => {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Categorias Populares</Text>
-          <View style={styles.chipContainer}>
-            {categories.map((category) => (
-              <Chip
-                key={category}
-                style={styles.chip}
-                textStyle={{ color: "white" }}
-              >
-                {category}
-              </Chip>
-            ))}
-          </View>
         </View>
 
         <View style={styles.section}>
@@ -118,9 +98,9 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#121212", padding: 16 },
+  container: { flex: 1, backgroundColor: "#121212" },
   card: {
-    backgroundColor: "#1E1E1E",
+    backgroundColor: "#121212",
     padding: 16,
     borderRadius: 8,
     display: "flex",
@@ -145,7 +125,6 @@ const styles = StyleSheet.create({
     color: "white",
     marginBottom: 8,
   },
-  chipContainer: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   chip: { backgroundColor: "#333", margin: 4 },
   loader: { marginVertical: 20 },
   errorText: { color: "#CF6679", textAlign: "center", marginVertical: 10 },
@@ -179,7 +158,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 4,
   },
-  bottomSpacing: { height: 20 },
+  bottomSpacing: { height: 20 }
 });
 
 export default HomeScreen;
