@@ -10,9 +10,9 @@ import {
 } from "react-native";
 import { Button, Card } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
-import axios from "axios";
-import { Manga } from "./_types/Manga";
+import { Manga } from "./_types/iManga";
 import Navbar from "@/components/home/Navbar";
+import { api } from "./network/axiosInstance";
 
 const HomeScreen = () => {
   const [mangas, setMangas] = useState<Manga[]>([]);
@@ -21,17 +21,7 @@ const HomeScreen = () => {
 
   const getMangas = async () => {
     try {
-      const response = await axios.get(
-        "http://192.168.15.17:8080/api/v1/manga/readAll/9",
-        {
-          headers: {
-            Authorization:
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJyZWFkZXItbWFuZ2EiLC" +
-              "JpZCI6MSwicm9sZSI6IlVTRVIsQURNSU4iLCJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJl" +
-              "eHAiOjE3NDM3MjE4NTh9.JL_SIerI72S95rTF_61WyaUxdxtV5fWQ791MgVab4fA",
-          },
-        }
-      );
+      const response = await api.get("/manga/readAll/9");
       setMangas(response.data);
     } catch (err) {
       console.log(err);
