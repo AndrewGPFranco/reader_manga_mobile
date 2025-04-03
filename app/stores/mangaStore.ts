@@ -7,7 +7,7 @@ import { jwtDecode } from "jwt-decode";
 import iDecodedToken from "../_types/iDecodedToken";
 import { UserData } from "../class/UserData";
 
-const useMangaStore = () => create<MangaStore>((set, get) => ({
+const useMangaStore = create<MangaStore>((set, get) => ({
     manga: [] as Array<iMangaData>,
 
     async getTokenUser() {

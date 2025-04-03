@@ -4,7 +4,7 @@ import { api } from "../network/axiosInstance";
 import ChapterStore from "./_types/iChapterStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const useChapterStore = () => create<ChapterStore>((set, get) => ({
+const useChapterStore = create<ChapterStore>((set, get) => ({
     chapter: {} as Array<iChapterData>,
     allChapter: [] as Array<iChapterData>,
     sizePaginaCapitulo: null,
