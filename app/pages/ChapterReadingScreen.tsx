@@ -168,8 +168,8 @@ const MangaViewer = () => {
                             setCurrentPageIndex(index);
                         }}
                     >
-                        {allImages.map((image) => (
-                            <View key={image.id} style={styles.imageContainer}>
+                        {allImages.map((image, key) => (
+                            <View key={key} style={styles.imageContainer}>
                                 <Image
                                     source={{ uri: image }}
                                     style={styles.image}

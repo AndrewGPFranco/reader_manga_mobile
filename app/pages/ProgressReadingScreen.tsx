@@ -11,9 +11,23 @@ import {
 import { Card, Button } from "react-native-paper";
 import useChapterStore from "@/app/stores/chapterStore";
 import iChapterData from "../_types/iChapter";
+import { useNavigation } from "expo-router";
+import { RouteProp, useRoute } from "@react-navigation/native";
+
+type NavigationProps = {
+    navigate: (screen: string, params?: any) => void;
+};
+
+type MangaViewerRouteParams = {
+    id?: string;
+    title?: string;
+    progress?: number | string;
+};
 
 const ProgressReadingScreen = () => {
+    const navigation = useNavigation<NavigationProps>();
     const chapterStore = useChapterStore();
+    const route = useRoute<RouteProp<Record<string, MangaViewerRouteParams>, string>>();
 
     const [chapters, setChapters] = useState<iChapterData[]>([]);
     const [page, setPage] = useState(1);
@@ -53,7 +67,7 @@ const ProgressReadingScreen = () => {
                         renderItem={({ item }) => (
                             <TouchableOpacity
                                 style={styles.chapterCard}
-                                onPress={() => askContinueReading(item)}
+                                onPress={() => askContinueReading(item)} // Ao pressionar, chama a função
                             >
                                 <Image
                                     source={{ uri: item.urlImageManga }}
@@ -74,7 +88,6 @@ const ProgressReadingScreen = () => {
                 </Card.Content>
             </Card>
 
-            {/* Modal de Confirmação */}
             <Modal
                 visible={isShowDialog}
                 transparent={true}
@@ -85,11 +98,18 @@ const ProgressReadingScreen = () => {
                     <Card style={styles.modalCard}>
                         <Card.Title title="Deseja continuar de onde parou?" />
                         <Card.Content>
+                            {selectedChapter && ( // Verifica se existe um capítulo selecionado
+                                <View>
+                                    <Text>Capítulo: {selectedChapter.title}</Text>
+                                    <Text>Progresso: {selectedChapter.readingProgress}</Text>
+                                </View>
+                            )}
                             <View style={styles.modalButtons}>
                                 <Button
                                     mode="contained"
                                     onPress={() => {
                                         setIsShowDialog(false);
+                                        navigation.navigate("ChapterReading", { id: selectedChapter.id });
                                     }}
                                     style={styles.confirmButton}
                                 >
