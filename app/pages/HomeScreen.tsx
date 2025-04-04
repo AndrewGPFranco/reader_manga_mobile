@@ -80,7 +80,7 @@ const HomeScreen = () => {
                   navigation.navigate("ProgressReading", { mangaId: item.id })
                 }
               >
-                Ver detalhes
+                Ler agora
               </Button>
             </View>
           </TouchableOpacity>
@@ -102,6 +102,15 @@ const HomeScreen = () => {
               icon={() => <Ionicons name="refresh" size={16} color="white" />}
             >
               Atualizar
+            </Button>
+            <Button
+              mode="contained"
+              onPress={() =>
+                navigation.navigate("ChapterReading", { id: 1 })
+              }
+              icon={() => <Ionicons name="refresh" size={16} color="white" />}
+            >
+              Leitura
             </Button>
           </View>
         </View>
