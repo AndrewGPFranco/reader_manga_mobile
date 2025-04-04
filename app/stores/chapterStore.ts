@@ -159,7 +159,7 @@ const useChapterStore = create<ChapterStore>((set, get) => ({
             },
         });
 
-        return response.data;
+        return await this.blobToBase64(response.data);
     },
 
     async getQuantidadePaginasDoCapitulo(idCapitulo: string) {
@@ -182,12 +182,6 @@ const useChapterStore = create<ChapterStore>((set, get) => ({
                 idChapter: idChapter,
                 progress: currentProgress,
             };
-
-            await api.put(`/api/user/chapter`, data, {
-                headers: {
-                    Authorization: `${await get().getTokenUser()}`,
-                },
-            });
         } catch (error) {
             console.error(error);
         }
@@ -224,6 +218,16 @@ const useChapterStore = create<ChapterStore>((set, get) => ({
             console.error(error);
         }
     },
+
+    async blobToBase64(blob: Blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    }
+    
 }));
 
 export default useChapterStore;

@@ -36,7 +36,6 @@ const MangaViewer = () => {
     const chapterStore = useChapterStore();
     const scrollViewRef = useRef(null);
 
-    // Estado
     const [currentProgress, setCurrentProgress] = useState(1);
     const [showModalResetReading, setShowModalResetReading] = useState(false);
     const [showThumbnails, setShowThumbnails] = useState(false);
@@ -53,7 +52,6 @@ const MangaViewer = () => {
     const [allImages, setAllImages] = useState<Array<any>>([]);
     const [modalShownForThisChapter, setModalShownForThisChapter] = useState(false);
 
-    // Variáveis derivadas
     const currentPageNumber = currentPageIndex + 1;
     const currentImage = allImages[currentPageIndex] || '';
     const canNavigateNext = currentPageIndex < totalPages - 1;
@@ -88,14 +86,7 @@ const MangaViewer = () => {
     
             const loadPromises = Array.from({ length: total }, async (_, index) => {
                 try {
-                    const response: any = await chapterStore.getPaginaDoCapitulo(chapterId, index);
-                    console.log("Resposta da API:", response);
-    
-                    if (response._data?.blobId) {
-                        return `blob://${response._data.blobId}`;
-                    }
-    
-                    return null;
+                    return await chapterStore.getPaginaDoCapitulo(chapterId, index);
                 } catch (error) {
                     console.error(`Erro ao carregar página ${index}:`, error);
                     return null;
@@ -103,10 +94,17 @@ const MangaViewer = () => {
             });
     
             const images = await Promise.all(loadPromises);
-            setAllImages(images.filter(Boolean)); // Remove valores null
+            const validImages = images.filter(Boolean); 
+            setAllImages(validImages);
     
-            setCurrentPageIndex(currentProgress - 1);
+            if (validImages.length === 0) {
+                console.warn('Nenhuma imagem válida carregada!');
+                setError('Nenhuma imagem válida foi carregada para este capítulo.');
+            }
+    
+            setCurrentPageIndex(Math.min(currentProgress - 1, total - 1));
         } catch (err) {
+            console.error('Erro em loadAllPages:', err);
             const errorMsg = err instanceof Error ? err.message : "Erro ao carregar o capítulo";
             setError(errorMsg);
             Alert.alert("Erro", errorMsg);
@@ -114,7 +112,7 @@ const MangaViewer = () => {
             setIsLoading(false);
         }
     }, [chapterStore, currentProgress, resetState]);
-       
+
     const atualizaProgresso = useCallback(async () => {
         if (
             idChapter &&
@@ -169,7 +167,6 @@ const MangaViewer = () => {
         await loadAllPages(id);
     }, [chapterStore, loadAllPages]);
 
-    // Efeito para inicializar o componente
     useEffect(() => {
         const id = route.params?.id ?? '';
         const title = route.params?.title ?? '';
@@ -177,13 +174,11 @@ const MangaViewer = () => {
 
         handleChapterChange(id, title, progress);
 
-        // Limpeza ao desmontar
         return () => {
             atualizaProgresso();
         };
     }, []);
 
-    // Efeito para lidar com mudanças na rota
     useFocusEffect(
         useCallback(() => {
             const id = route.params?.id;
@@ -197,17 +192,15 @@ const MangaViewer = () => {
                 });
             }
 
-            return () => { }; // Função de limpeza vazia
+            return () => { }; 
         }, [route.params, idChapter, atualizaProgresso, resetState, handleChapterChange])
     );
 
-    // Efeito para monitorar mudanças na página atual
     useEffect(() => {
         if (currentPageIndex >= currentProgress - 1) {
             setCurrentProgress(currentPageIndex + 1);
         }
 
-        // Mostrar modal ao concluir a leitura
         if (
             currentProgress === currentChapter.readingProgress &&
             !modalShownForThisChapter &&
@@ -224,7 +217,7 @@ const MangaViewer = () => {
     const navigateToMangaDetail = useCallback(() => {
         atualizaProgresso().then(() => {
             resetState();
-            navigation.navigate('MangaDetail', { id: titleManga });
+            navigation.navigate('Home');
         });
     }, [atualizaProgresso, resetState, navigation, titleManga]);
 

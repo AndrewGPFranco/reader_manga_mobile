@@ -17,7 +17,7 @@ interface ChapterStore {
     getPaginaDoCapitulo(
         idCapitulo: string,
         index: number
-    ): Promise<Blob | MediaSource>;
+    ): Promise<any>;
     getQuantidadePaginasDoCapitulo(idCapitulo: string): Promise<number>;
     updateReadingProgress(
         idChapter: string,
@@ -25,6 +25,7 @@ interface ChapterStore {
     ): Promise<void>;
     getReadingProgress(idChapter: string): Promise<iChapterData>;
     getAllReadingProgress(pageNumber: number): Promise<Array<iChapterData>>;
+    blobToBase64(blob: Blob): Promise<string>;
 }
 
 export default ChapterStore;
