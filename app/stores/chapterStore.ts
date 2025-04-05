@@ -3,6 +3,7 @@ import iChapterData from "../_types/iChapter";
 import { api } from "../network/axiosInstance";
 import ChapterStore from "./_types/iChapterStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as FileSystem from 'expo-file-system';
 
 const useChapterStore = create<ChapterStore>((set, get) => ({
     chapter: {} as Array<iChapterData>,
@@ -153,13 +154,27 @@ const useChapterStore = create<ChapterStore>((set, get) => ({
 
     async getPaginaDoCapitulo(idCapitulo: string, index: number) {
         const response = await api.get(`/chapter/image/${idCapitulo}/${index}`, {
-            responseType: "blob",
+            responseType: 'blob',
             headers: {
                 Authorization: `${await get().getTokenUser()}`,
             },
         });
 
-        return await this.blobToBase64(response.data);
+        const reader = new FileReader();
+        const base64 = await new Promise<string>((resolve, reject) => {
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(response.data);
+        });
+
+        const base64Data = base64.split(',')[1];
+        const path = `${FileSystem.cacheDirectory}page-${idCapitulo}-${index}.jpg`;
+
+        await FileSystem.writeAsStringAsync(path, base64Data, {
+            encoding: FileSystem.EncodingType.Base64,
+        });
+
+        return path;
     },
 
     async getQuantidadePaginasDoCapitulo(idCapitulo: string) {
@@ -167,6 +182,7 @@ const useChapterStore = create<ChapterStore>((set, get) => ({
 
         return response.length;
     },
+
     getQuantidade(id: string) {
         if (get().sizePaginaCapitulo != null) {
             return get().sizePaginaCapitulo;
@@ -217,17 +233,8 @@ const useChapterStore = create<ChapterStore>((set, get) => ({
         } catch (error) {
             console.error(error);
         }
-    },
-
-    async blobToBase64(blob: Blob) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-        });
     }
-    
+
 }));
 
 export default useChapterStore;

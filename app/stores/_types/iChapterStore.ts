@@ -25,7 +25,6 @@ interface ChapterStore {
     ): Promise<void>;
     getReadingProgress(idChapter: string): Promise<iChapterData>;
     getAllReadingProgress(pageNumber: number): Promise<Array<iChapterData>>;
-    blobToBase64(blob: Blob): Promise<string>;
 }
 
 export default ChapterStore;
