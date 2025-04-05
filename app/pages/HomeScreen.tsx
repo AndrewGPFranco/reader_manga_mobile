@@ -103,15 +103,6 @@ const HomeScreen = () => {
             >
               Atualizar
             </Button>
-            <Button
-              mode="contained"
-              onPress={() =>
-                navigation.navigate("ChapterReading", { id: 1 })
-              }
-              icon={() => <Ionicons name="refresh" size={16} color="white" />}
-            >
-              Leitura
-            </Button>
           </View>
         </View>
 

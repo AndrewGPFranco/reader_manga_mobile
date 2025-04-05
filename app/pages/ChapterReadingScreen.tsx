@@ -27,7 +27,7 @@ type MangaViewerRouteParams = {
     progress?: number | string;
 };
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get('screen');
 
 const MangaViewer = () => {
     const route = useRoute<RouteProp<Record<string, MangaViewerRouteParams>, string>>();
@@ -91,10 +91,6 @@ const MangaViewer = () => {
         }
     }, [currentPageIndex]);
 
-    const handleImageLoad = useCallback(() => {
-        // handle image load if needed
-    }, []);
-
     const handleImageError = useCallback(() => {
         const errorMsg = 'Failed to load image';
         setError(errorMsg);
@@ -148,11 +144,10 @@ const MangaViewer = () => {
 
         return (
             <View style={styles.contentContainer}>
-                <TouchableOpacity
-                    style={styles.btnBack}
-                    onPress={navigateToMangaDetail}
-                >
-                    <Ionicons name="arrow-back-outline" size={24} color="#fff" />
+                <TouchableOpacity style={styles.btnBack} onPress={navigateToMangaDetail}>
+                    <View style={styles.backIconWrapper}>
+                        <Ionicons name="arrow-back" size={32} color="#fff" />
+                    </View>
                 </TouchableOpacity>
 
                 {allImages.length > 0 && (
@@ -172,9 +167,8 @@ const MangaViewer = () => {
                             <View key={key} style={styles.imageContainer}>
                                 <Image
                                     source={{ uri: image }}
-                                    style={styles.image}
+                                    style={styles.fullscreenImage}
                                     resizeMode="contain"
-                                    onLoad={handleImageLoad}
                                     onError={handleImageError}
                                 />
                             </View>
@@ -242,19 +236,31 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
-        paddingBottom: 70,
-    },
-    btnBack: {
-        position: 'absolute',
-        top: 10,
-        left: 10,
-        zIndex: 10,
     },
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    fullscreenImage: {
+        width: width,
+        height: height,
+        resizeMode: 'contain',
+        backgroundColor: '#000',
+    },
+    btnBack: {
+        position: 'absolute',
+        top: 60,
+        left: 20,
+        zIndex: 10,
+    },
+    backIconWrapper: {
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        borderRadius: 25,
+        padding: 8,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
 
