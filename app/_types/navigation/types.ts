@@ -1,4 +1,5 @@
 type RootStackParamList = {
+  Job: undefined;
   Home: undefined;
   Login: undefined;
   RegisterUser: undefined;

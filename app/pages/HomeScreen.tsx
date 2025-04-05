@@ -103,6 +103,14 @@ const HomeScreen = () => {
             >
               Atualizar
             </Button>
+            <Button
+              mode="contained"
+              onPress={() =>
+                navigation.navigate("Job")
+              }
+            >
+              Jobs
+            </Button>
           </View>
         </View>
 

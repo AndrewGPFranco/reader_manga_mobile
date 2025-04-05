@@ -1,3 +1,4 @@
+import JobScreen from "@/app/pages/JobScreen";
 import HomeScreen from "@/app/pages/HomeScreen";
 import LoginScreen from "@/app/pages/LoginScreen";
 import RegisterScreen from "./pages/RegisterScreen";
@@ -10,6 +11,7 @@ const Stack = createNativeStackNavigator();
 export default function App() {
   return (
     <Stack.Navigator initialRouteName="Login">
+      <Stack.Screen name="Job" options={{ headerShown: false }} component={JobScreen} />
       <Stack.Screen name="Home" options={{ headerShown: false }} component={HomeScreen} />
       <Stack.Screen name="Login" options={{ headerShown: false }} component={LoginScreen} />
       <Stack.Screen name="RegisterUser" options={{ headerShown: false }} component={RegisterScreen} />
