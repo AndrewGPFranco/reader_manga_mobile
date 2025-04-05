@@ -16,12 +16,6 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { validationFieldsLogin } from "@/app/utils/validation";
 import useAuthStore from "@/app/stores/authStore";
 
-type RootStackParamList = {
-  Login: undefined;
-  Home: undefined;
-  RegisterUser: undefined;
-};
-
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Login">;
 
 const LoginScreen = () => {
@@ -176,7 +170,6 @@ const LoginScreen = () => {
   );
 };
 
-// Estilos permanecem iguais
 const styles = StyleSheet.create({
   container: {
     flex: 1,

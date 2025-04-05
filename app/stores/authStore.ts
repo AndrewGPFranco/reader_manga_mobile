@@ -80,7 +80,7 @@ const useAuthStore = create<AuthStore>((set, get) => ({
 
   async register(user) {
     try {
-      const result = await api.post("/api/v1/user/register", user);
+      const result = await api.post("/user/register", user);
       if (result.status === 200) return "Usuário cadastrado com sucesso!";
       throw new Error("Falha ao cadastrar usuário");
     } catch (error: any) {
@@ -105,7 +105,7 @@ const useAuthStore = create<AuthStore>((set, get) => ({
       const idUser = get().getIdUsuario();
       const data = { oldPassword, newPassword, idUser };
       const { data: response } = await api.post(
-        "/api/v1/user/change-password",
+        "/user/change-password",
         data,
         {
           headers: { Authorization: `${token}` },
