@@ -1,17 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
-    View,
-    Text,
-    Image,
-    StyleSheet,
-    TouchableOpacity,
-    Dimensions,
+    ActivityIndicator,
     Alert,
+    Dimensions,
+    Image,
     KeyboardAvoidingView,
     Modal,
-    ActivityIndicator,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import useChapterStore from '@/app/stores/chapterStore';
 import iChapterData from '../_types/iChapter';
@@ -24,66 +24,76 @@ type NavigationProps = {
 type MangaViewerRouteParams = {
     id?: string;
     title?: string;
-    progress?: number | string;
+    progress?: number;
 };
 
-const { width, height } = Dimensions.get('screen');
+type MangaScreenRouteProp = RouteProp<
+    Record<string, MangaViewerRouteParams>,
+    string
+>;
+
+const {width, height} = Dimensions.get('screen');
 
 const MangaScreen = () => {
-    const route = useRoute<RouteProp<Record<string, MangaViewerRouteParams>, string>>();
+    const route = useRoute<MangaScreenRouteProp>();
     const navigation = useNavigation<NavigationProps>();
     const chapterStore = useChapterStore();
 
-    const [id, setId] = useState<number | string>();
+    const [id, setId] = useState<string | undefined>(route.params?.id);
     const [isCarregandoProxima, setIsCarregandoProxima] = useState(false);
-    const [progressoAtual, setProgressoAtual] = useState(1);
+    const [paginaAtual, setPaginaAtual] = useState<number>(0);
     const [isCarregando, setIsCarregando] = useState(true);
     const [erro, setErro] = useState<string | null>(null);
-    const [capituloAtual, setCapituloAtual] = useState<iChapterData>({} as iChapterData);
-    const [paginaAtual, setPaginaAtual] = useState(0);
-    const [todasImagens, setTodasImagens] = useState<Array<any>>([]);
+    const [capituloAtual, setCapituloAtual] = useState<iChapterData>(
+        {} as iChapterData
+    );
+    const [imagem, setImagem] = useState<string>('');
     const [totalPages, setTotalPages] = useState(0);
 
     const atualizaProgresso = useCallback(async () => {
-        if (
-            capituloAtual?.status !== 'FINISHED' &&
-            progressoAtual > capituloAtual.readingProgress &&
-            id
-        ) {
-            let idCapitulo = String(id);
-            await chapterStore.updateReadingProgress(idCapitulo, progressoAtual);
+        if (capituloAtual?.status !== 'FINISHED' && id) {
+            await chapterStore.updateReadingProgress(id, paginaAtual);
         }
-    }, [capituloAtual, progressoAtual, id, chapterStore]);
+    }, [capituloAtual, paginaAtual, id, chapterStore]);
 
-    const carregaPaginaUnica = useCallback(async (chapterId: any, pageNumber: number) => {
-        try {
-            const imagePath = await chapterStore.getPaginaDoCapitulo(chapterId, pageNumber);
-            setTodasImagens(prev => [...prev, imagePath]);
-        } catch (error) {
-            console.error(`Erro ao carregar página ${pageNumber}:`, error);
-        }
-    }, [chapterStore]);
+    const carregaPaginaUnica = useCallback(
+        async (chapterId: string | undefined, pageNumber: number) => {
+            if (!chapterId) {
+                console.error('Chapter ID is undefined');
+                return;
+            }
+            try {
+                const imagePath = await chapterStore.getPaginaDoCapitulo(
+                    chapterId,
+                    pageNumber
+                );
+                setImagem(imagePath);
+            } catch (error) {
+                console.error(`Erro ao carregar página ${pageNumber}:`, error);
+                setErro('Erro ao carregar a página.');
+            }
+        },
+        [chapterStore, id]);
 
     const proximaPagina = useCallback(() => {
         if (paginaAtual < totalPages - 1) {
             const nextIndex = paginaAtual + 1;
             setPaginaAtual(nextIndex);
-
-            if (!isCarregandoProxima && nextIndex === todasImagens.length && todasImagens.length < totalPages) {
-                setIsCarregandoProxima(true);
-                carregaPaginaUnica(id, todasImagens.length).finally(() => setIsCarregandoProxima(false));
-            }
+            setIsCarregandoProxima(true);
+            carregaPaginaUnica(id, nextIndex).finally(() =>
+                setIsCarregandoProxima(false)
+            );
         }
-    }, [paginaAtual, totalPages, todasImagens, id, isCarregandoProxima, carregaPaginaUnica]);
+    }, [paginaAtual, totalPages, id, carregaPaginaUnica]);
 
     const paginaAnterior = useCallback(() => {
         if (paginaAtual > 0) {
-            setPaginaAtual(prev => prev - 1);
+            setPaginaAtual((prev) => prev - 1);
         }
     }, [paginaAtual]);
 
     const lidaErroImagem = useCallback(() => {
-        const errorMsg = 'Failed to load image';
+        const errorMsg = 'Falha ao carregar a imagem.';
         setErro(errorMsg);
         Alert.alert('Erro', errorMsg);
     }, []);
@@ -92,47 +102,70 @@ const MangaScreen = () => {
         navigation.navigate('Home');
     }, [navigation]);
 
-    const lidaMudancaCapitulo = useCallback(async (id: string, title: string, progress: number) => {
-        if (!id) {
-            setErro('Invalid chapter ID');
-            setIsCarregando(false);
-            return;
-        }
+    const lidaMudancaCapitulo = useCallback(
+        async (chapterId: string | undefined, progress: number) => {
+            if (!chapterId) {
+                setErro('ID do capítulo inválido.');
+                setIsCarregando(false);
+                return;
+            }
 
-        setProgressoAtual(progress === 0 ? 1 : progress);
-        await chapterStore.updateReadingProgress(id, progress);
-        const chapter = await chapterStore.getReadingProgress(id);
-        setCapituloAtual(chapter);
+            setIsCarregando(true);
+            setErro(null);
 
-        const total = await chapterStore.getQuantidadePaginasDoCapitulo(id);
-        setTotalPages(total);
-        setTodasImagens([]);
-        await carregaPaginaUnica(id, progress);
-        setIsCarregando(false);
-    }, [chapterStore, carregaPaginaUnica]);
+            try {
+                const chapter = await chapterStore.getReadingProgress(chapterId);
+                setCapituloAtual(chapter);
+
+                const total = await chapterStore.getQuantidadePaginasDoCapitulo(
+                    chapterId
+                );
+                setTotalPages(total);
+                setImagem('');
+                await carregaPaginaUnica(chapterId, progress);
+                setPaginaAtual(progress);
+            } catch (e) {
+                console.error('Erro ao carregar capítulo:', e);
+                setErro('Erro ao carregar o capítulo.');
+            } finally {
+                setIsCarregando(false);
+            }
+        },
+        [chapterStore, carregaPaginaUnica]
+    );
 
     useEffect(() => {
-        const id = route.params?.id ?? '';
-        const title = route.params?.title ?? '';
-        const progress = Number(route.params?.progress ?? 1);
-
-        setId(id);
-        lidaMudancaCapitulo(id, title, progress);
+        (async () => {
+            if (route.params?.id) {
+                setId(route.params.id);
+                try {
+                    await lidaMudancaCapitulo(route.params.id, 1);
+                } catch (error) {
+                    console.error("Erro ao carregar o capítulo inicial:", error);
+                    setErro("Erro ao carregar o capítulo inicial.");
+                    setIsCarregando(false);
+                }
+            }
+        })();
     }, [route.params, lidaMudancaCapitulo]);
 
     useEffect(() => {
-        const unsubscribe = navigation.addListener('beforeRemove', () => {
-            atualizaProgresso();
-        });
+        const unsubscribeBeforeRemove = navigation.addListener(
+            'beforeRemove',
+            async (e: { preventDefault: () => void; data: { action: any; }; }) => {
+                e.preventDefault();
+                try {
+                    await atualizaProgresso();
+                } catch (error) {
+                    console.error("Erro ao atualizar o progresso antes de sair:", error);
+                }
+            }
+        );
 
-        return unsubscribe;
-    }, [navigation, atualizaProgresso]);
-
-    useEffect(() => {
         return () => {
-            atualizaProgresso();
+            unsubscribeBeforeRemove();
         };
-    }, [atualizaProgresso]);
+    }, [navigation, atualizaProgresso]);
 
     const renderizaConteudo = () => {
         if (isCarregando) {
@@ -153,40 +186,49 @@ const MangaScreen = () => {
 
         return (
             <View style={styles.contentContainer}>
-                <TouchableOpacity style={styles.btnBack} onPress={async () => {
-                    await atualizaProgresso();
-                    navegaParaTelaDetalhes();
-                }}>
+                <TouchableOpacity
+                    style={styles.btnBack}
+                    onPress={async () => {
+                        await atualizaProgresso();
+                        navegaParaTelaDetalhes();
+                    }}
+                >
                     <View style={styles.backIconWrapper}>
-                        <Ionicons name="arrow-back" size={32} color="#fff" />
+                        <Ionicons name="arrow-back" size={32} color="#fff"/>
                     </View>
                 </TouchableOpacity>
 
-                {todasImagens.length > 0 && (
+                {imagem.length > 0 && (
                     <View style={styles.imageWrapper}>
                         <Image
-                            source={{ uri: todasImagens[paginaAtual] }}
+                            source={{uri: imagem}}
                             style={styles.fullscreenImage}
                             resizeMode="contain"
                             onError={lidaErroImagem}
                         />
                         <View style={styles.navigationButtons}>
                             <TouchableOpacity
-                                style={[styles.navButton, paginaAtual === 0 && styles.disabledButton]}
+                                style={[
+                                    styles.navButton,
+                                    paginaAtual === 0 && styles.disabledButton,
+                                ]}
                                 onPress={paginaAnterior}
                                 disabled={paginaAtual === 0}
                             >
-                                <Ionicons name="chevron-back" size={24} color="#fff" />
+                                <Ionicons name="chevron-back" size={24} color="#fff"/>
                             </TouchableOpacity>
                             <Text style={styles.pageIndicator}>
-                                {paginaAtual + 1} / {totalPages}
+                                {paginaAtual} / {totalPages}
                             </Text>
                             <TouchableOpacity
-                                style={[styles.navButton, paginaAtual === totalPages - 1 && styles.disabledButton]}
+                                style={[
+                                    styles.navButton,
+                                    paginaAtual === totalPages - 1 && styles.disabledButton,
+                                ]}
                                 onPress={proximaPagina}
                                 disabled={paginaAtual === totalPages - 1}
                             >
-                                <Ionicons name="chevron-forward" size={24} color="#fff" />
+                                <Ionicons name="chevron-forward" size={24} color="#fff"/>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -197,11 +239,7 @@ const MangaScreen = () => {
 
     return (
         <KeyboardAvoidingView style={styles.container}>
-            <Modal
-                visible={false}
-                transparent={true}
-                animationType="fade"
-            >
+            <Modal visible={false} transparent={true} animationType="fade">
                 <View style={styles.modalContainer}>
                     <Text>Finalizado!</Text>
                 </View>
@@ -248,7 +286,6 @@ const styles = StyleSheet.create({
     fullscreenImage: {
         width: width,
         height: height * 0.85,
-        resizeMode: 'contain',
         backgroundColor: '#000',
     },
     btnBack: {
