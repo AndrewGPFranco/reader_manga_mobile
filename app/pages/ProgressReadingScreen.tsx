@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import {
     View,
     Text,
@@ -8,11 +8,10 @@ import {
     StyleSheet,
     Modal,
 } from "react-native";
-import { Card, Button } from "react-native-paper";
+import {Card, Button} from "react-native-paper";
 import useChapterStore from "@/app/stores/chapterStore";
 import iChapterData from "../_types/iChapter";
-import { useNavigation } from "expo-router";
-import { RouteProp, useRoute } from "@react-navigation/native";
+import {useNavigation} from "expo-router";
 
 type NavigationProps = {
     navigate: (screen: string, params?: any) => void;
@@ -49,7 +48,7 @@ const ProgressReadingScreen = () => {
     return (
         <View style={styles.container}>
             <Card style={styles.card}>
-                <Card.Title title="Leituras em andamento" />
+                <Card.Title title="Leituras em andamento"/>
                 <Card.Content>
                     <Text style={styles.sectionTitle}>Capítulos</Text>
                     <FlatList
@@ -57,13 +56,13 @@ const ProgressReadingScreen = () => {
                         keyExtractor={(item) => item.id.toString()}
                         numColumns={2}
                         contentContainerStyle={styles.gridContainer}
-                        renderItem={({ item }) => (
+                        renderItem={({item}) => (
                             <TouchableOpacity
                                 style={styles.chapterCard}
                                 onPress={() => askContinueReading(item)}
                             >
                                 <Image
-                                    source={{ uri: item.urlImageManga }}
+                                    source={{uri: item.urlImageManga}}
                                     style={styles.chapterImage}
                                 />
                                 <View style={styles.chapterInfo}>
@@ -89,7 +88,7 @@ const ProgressReadingScreen = () => {
             >
                 <View style={styles.modalBackground}>
                     <Card style={styles.modalCard}>
-                        <Card.Title title="Deseja continuar de onde parou?" />
+                        <Card.Title title="Deseja continuar de onde parou?"/>
                         <Card.Content>
                             {selectedChapter && (
                                 <View>
@@ -102,7 +101,10 @@ const ProgressReadingScreen = () => {
                                     mode="contained"
                                     onPress={() => {
                                         setIsShowDialog(false);
-                                        navigation.navigate("ChapterReading", { id: selectedChapter.id });
+                                        navigation.navigate("ChapterReading", {
+                                            id: selectedChapter.id,
+                                            progress: selectedChapter.readingProgress
+                                        });
                                     }}
                                     style={styles.confirmButton}
                                 >
@@ -112,6 +114,10 @@ const ProgressReadingScreen = () => {
                                     mode="contained"
                                     onPress={() => {
                                         setIsShowDialog(false);
+                                        navigation.navigate("ChapterReading", {
+                                            id: selectedChapter.id,
+                                            progress: 1
+                                        });
                                     }}
                                     style={styles.cancelButton}
                                 >

@@ -40,6 +40,7 @@ const MangaScreen = () => {
     const chapterStore = useChapterStore();
 
     const [id, setId] = useState<string | undefined>(route.params?.id);
+    const [progress, setProgress] = useState<number>(1);
     const [isCarregandoProxima, setIsCarregandoProxima] = useState(false);
     const [paginaAtual, setPaginaAtual] = useState<number>(0);
     const [isCarregando, setIsCarregando] = useState(true);
@@ -136,10 +137,11 @@ const MangaScreen = () => {
 
     useEffect(() => {
         (async () => {
-            if (route.params?.id) {
+            if (route.params?.id && route.params?.progress) {
                 setId(route.params.id);
+                setProgress(route.params.progress);
                 try {
-                    await lidaMudancaCapitulo(route.params.id, 1);
+                    await lidaMudancaCapitulo(route.params.id, route.params.progress);
                 } catch (error) {
                     console.error("Erro ao carregar o capítulo inicial:", error);
                     setErro("Erro ao carregar o capítulo inicial.");
