@@ -77,7 +77,7 @@ const HomeScreen = () => {
               <Button
                 mode="contained"
                 onPress={() =>
-                  navigation.navigate("ProgressReading", { mangaId: item.id })
+                  navigation.navigate("MangaDetails", { title: item.title })
                 }
               >
                 Ler agora

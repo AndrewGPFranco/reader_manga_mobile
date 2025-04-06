@@ -5,6 +5,7 @@ import RegisterScreen from "./pages/RegisterScreen";
 import ChapterReadingScreen from "./pages/ChapterReadingScreen";
 import ProgressReadingScreen from "./pages/ProgressReadingScreen";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import MangaDetails from "./pages/MangaDetailsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -15,6 +16,7 @@ export default function App() {
       <Stack.Screen name="Home" options={{ headerShown: false }} component={HomeScreen} />
       <Stack.Screen name="Login" options={{ headerShown: false }} component={LoginScreen} />
       <Stack.Screen name="RegisterUser" options={{ headerShown: false }} component={RegisterScreen} />
+      <Stack.Screen name="MangaDetails" options={{ headerShown: false }} component={MangaDetails} />
       <Stack.Screen name="ChapterReading" options={{ headerShown: false }} component={ChapterReadingScreen} />
       <Stack.Screen name="ProgressReading" options={{ headerShown: false }} component={ProgressReadingScreen} />
     </Stack.Navigator>

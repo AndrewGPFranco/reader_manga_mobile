@@ -152,8 +152,8 @@ const useChapterStore = create<ChapterStore>((set, get) => ({
         }
     },
 
-    async getPaginaDoCapitulo(idCapitulo: string, index: number) {
-        const response = await api.get(`/chapter/image/${idCapitulo}/${index}`, {
+    async getPaginaDoCapitulo(idCapitulo: string, pageNumber: number) {
+        const response = await api.get(`/chapter/image/${idCapitulo}/${pageNumber}`, {
             responseType: 'blob',
             headers: {
                 Authorization: `${await get().getTokenUser()}`,
@@ -168,7 +168,7 @@ const useChapterStore = create<ChapterStore>((set, get) => ({
         });
 
         const base64Data = base64.split(',')[1];
-        const path = `${FileSystem.cacheDirectory}page-${idCapitulo}-${index}.jpg`;
+        const path = `${FileSystem.cacheDirectory}page-${idCapitulo}-${pageNumber}.jpg`;
 
         await FileSystem.writeAsStringAsync(path, base64Data, {
             encoding: FileSystem.EncodingType.Base64,
@@ -198,6 +198,13 @@ const useChapterStore = create<ChapterStore>((set, get) => ({
                 idChapter: idChapter,
                 progress: currentProgress,
             };
+
+            await api.put(`/api/user/chapter`, data, {
+                baseURL: 'http://192.168.15.17:8080',
+                headers: {
+                    Authorization: `${await get().getTokenUser()}`
+                }
+            });
         } catch (error) {
             console.error(error);
         }
