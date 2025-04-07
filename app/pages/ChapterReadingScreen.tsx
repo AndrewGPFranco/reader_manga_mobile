@@ -173,7 +173,7 @@ const MangaScreen = () => {
         if (isCarregando) {
             return (
                 <View style={styles.loaderContainer}>
-                    <ActivityIndicator size="large" color="#BB86FC" />
+                    <ActivityIndicator size="large" color="#BB86FC"/>
                 </View>
             );
         }
@@ -240,7 +240,7 @@ const MangaScreen = () => {
     };
 
     return (
-        <KeyboardAvoidingView style={styles.container}>
+        <View style={styles.container}>
             <Modal visible={false} transparent={true} animationType="fade">
                 <View style={styles.modalContainer}>
                     <Text>Finalizado!</Text>
@@ -248,7 +248,7 @@ const MangaScreen = () => {
             </Modal>
 
             {renderizaConteudo()}
-        </KeyboardAvoidingView>
+        </View>
     );
 };
 
@@ -256,18 +256,29 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#121212',
+        width: '100%',
+        height: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
     },
     loaderContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 20,
+        width: '100%',
+        height: '100%',
     },
     errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
         padding: 16,
         backgroundColor: 'rgba(255, 0, 0, 0.1)',
-        borderRadius: 8,
-        margin: 10,
+        width: '100%',
+        height: '100%',
     },
     errorText: {
         color: '#CF6679',
@@ -278,16 +289,20 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
+        width: '100%',
+        height: '100%',
     },
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        width: '100%',
+        height: '100%',
     },
     fullscreenImage: {
         width: width,
-        height: height * 0.85,
+        height: height * 1.1,
         backgroundColor: '#000',
     },
     btnBack: {
@@ -308,14 +323,17 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         width: width,
+        height: height,
+        overflow: 'hidden',
     },
     navigationButtons: {
         position: 'absolute',
-        bottom: 20,
+        bottom: 40,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         width: width * 0.9,
+        zIndex: 10,
     },
     navButton: {
         backgroundColor: 'rgba(0, 0, 0, 0.6)',

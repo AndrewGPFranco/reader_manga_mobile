@@ -362,7 +362,7 @@ const JobScreen = () => {
                                     <View style={styles.formGroup}>
                                         <Text style={styles.label}>PDF do capítulo</Text>
                                         <TouchableOpacity style={styles.uploadButton} onPress={pickDocument}>
-                                            <Feather name="upload" size={24} color="#f8f8f2"/>
+                                            <Feather name="upload" size={24} color="#000000"/>
                                             <Text style={styles.uploadButtonText}>
                                                 {selectedFile ? 'Arquivo selecionado' : 'Selecionar arquivo'}
                                             </Text>
@@ -412,13 +412,13 @@ const JobScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#282a36',
+        backgroundColor: '#121212',
     },
     card: {
         flex: 1,
         margin: 15,
         padding: 20,
-        backgroundColor: '#44475a',
+        backgroundColor: '#1E1E1E',
         borderRadius: 10,
         shadowColor: '#000',
         shadowOffset: {width: 0, height: 2},
