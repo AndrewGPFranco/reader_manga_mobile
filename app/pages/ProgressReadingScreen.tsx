@@ -7,7 +7,7 @@ import {
     Image,
     StyleSheet,
     Modal,
-    Alert,
+    Alert, Dimensions,
 } from "react-native";
 import {Card, Button} from "react-native-paper";
 import useChapterStore from "@/app/stores/chapterStore";
@@ -57,35 +57,33 @@ const ProgressReadingScreen = () => {
     return (
         <View style={styles.container}>
             <Card style={styles.card}>
-                <Card.Title title="Leituras em andamento"/>
+                <Card.Title titleStyle={{color: "#ffffff"}} title="Leituras em andamento"/>
                 <Card.Content>
                     <Text style={styles.sectionTitle}>Capítulos</Text>
-                    <FlatList
-                        data={chapters}
-                        keyExtractor={(item) => item.id.toString()}
-                        numColumns={2}
-                        contentContainerStyle={styles.gridContainer}
-                        renderItem={({item}) => (
-                            <TouchableOpacity
-                                style={styles.chapterCard}
-                                onPress={() => askContinueReading(item)}
-                            >
-                                <Image
-                                    source={{uri: item.urlImageManga}}
-                                    style={styles.chapterImage}
-                                />
-                                <View style={styles.chapterInfo}>
-                                    <Text style={styles.chapterTitle}>{item.title}</Text>
-                                    <Text style={styles.chapterDetails}>
-                                        Páginas: {item.numberPages}
-                                    </Text>
-                                    <Text style={styles.chapterDetails}>
-                                        Progresso: {item.readingProgress}
-                                    </Text>
-                                </View>
-                            </TouchableOpacity>
-                        )}
-                    />
+                    <View style={styles.scrollWrapper}>
+                        <FlatList
+                            data={chapters}
+                            keyExtractor={(item) => item.id.toString()}
+                            numColumns={2}
+                            contentContainerStyle={styles.gridContainer}
+                            renderItem={({item}) => (
+                                <TouchableOpacity
+                                    style={styles.chapterCard}
+                                    onPress={() => askContinueReading(item)}
+                                >
+                                    <Image
+                                        source={{uri: item.urlImageManga}}
+                                        style={styles.chapterImage}
+                                    />
+                                    <View style={styles.chapterInfo}>
+                                        <Text style={styles.chapterTitle}>{item.title}</Text>
+                                        <Text style={styles.chapterDetails}>Páginas: {item.numberPages}</Text>
+                                        <Text style={styles.chapterDetails}>Progresso: {item.readingProgress}</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            )}
+                        />
+                    </View>
                 </Card.Content>
             </Card>
 
@@ -97,12 +95,12 @@ const ProgressReadingScreen = () => {
             >
                 <View style={styles.modalBackground}>
                     <Card style={styles.modalCard}>
-                        <Card.Title title="Continuar de onde parou?"/>
+                        <Card.Title title="Continuar de onde parou?" titleStyle={{ color: "#ffffff" }} />
                         <Card.Content>
                             {selectedChapter && (
                                 <View>
-                                    <Text>Capítulo: {selectedChapter.title}</Text>
-                                    <Text>Progresso: {selectedChapter.readingProgress}</Text>
+                                    <Text style={styles.modalText}>Capítulo: {selectedChapter.title}</Text>
+                                    <Text style={styles.modalText}>Progresso: {selectedChapter.readingProgress}</Text>
                                 </View>
                             )}
                             <View style={styles.modalButtons}>
@@ -156,27 +154,38 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 15,
-        backgroundColor: "#f5f5f5",
+        backgroundColor: "#121212",
     },
     card: {
-        flex: 1,
+        backgroundColor: "#1e1e1e",
+        borderRadius: 10,
         padding: 10,
+        elevation: 3,
+        height: Dimensions.get("screen").height * 0.93,
+        maxHeight: Dimensions.get("screen").height,
+        borderWidth: 1,
+    },
+    scrollWrapper: {
+        maxHeight: Dimensions.get("screen").height * 0.80,
     },
     sectionTitle: {
         fontSize: 18,
         fontWeight: "bold",
         marginBottom: 10,
+        color: "#ffffff",
     },
     gridContainer: {
         alignItems: "center",
     },
     chapterCard: {
         width: 160,
-        backgroundColor: "white",
+        backgroundColor: "#1e1e1e",
         borderRadius: 10,
         overflow: "hidden",
         margin: 8,
         elevation: 3,
+        borderWidth: 1,
+        borderColor: "#cccccc",
     },
     chapterImage: {
         width: "100%",
@@ -188,23 +197,29 @@ const styles = StyleSheet.create({
     chapterTitle: {
         fontSize: 16,
         fontWeight: "bold",
-        color: "#333",
+        color: "#ffffff",
     },
     chapterDetails: {
         fontSize: 14,
-        color: "#666",
+        color: "#cccccc",
     },
     modalBackground: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        backgroundColor: "rgba(0, 0, 0, 0.7)",
     },
     modalCard: {
         width: 300,
         padding: 15,
-        backgroundColor: "white",
+        color: "#cccccc",
+        backgroundColor: "#2c2c2c",
         borderRadius: 12,
+        borderWidth: 1,
+    },
+    modalText: {
+        color: "#ffffff",
+        fontSize: 16,
     },
     modalButtons: {
         flexDirection: "row",
@@ -214,9 +229,9 @@ const styles = StyleSheet.create({
         marginTop: 20,
     },
     confirmButton: {
-        backgroundColor: "#16a34a",
+        backgroundColor: "#22c55e", // green-500
     },
     cancelButton: {
-        backgroundColor: "#4b5563",
+        backgroundColor: "#6b7280", // gray-500
     },
 });

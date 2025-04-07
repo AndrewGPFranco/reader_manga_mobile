@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
     View,
     Text,
@@ -13,11 +13,11 @@ import {
     FlatList,
     ViewStyle
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
-import { Feather } from '@expo/vector-icons';
+import {Feather} from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { api } from '../network/axiosInstance';
+import {api} from '../network/axiosInstance';
 import useMangaStore from '../stores/mangaStore';
 
 interface SimpleProgressBarProps {
@@ -29,12 +29,12 @@ interface SimpleProgressBarProps {
 }
 
 const SimpleProgressBar: React.FC<SimpleProgressBarProps> = ({
-    progress,
-    width = '100%',
-    height = 10,
-    color = '#4CAF50',
-    backgroundColor = '#e0e0e0'
-}) => {
+                                                                 progress,
+                                                                 width = '100%',
+                                                                 height = 10,
+                                                                 color = '#50fa7b',
+                                                                 backgroundColor = '#282a36'
+                                                             }) => {
     return (
         <View style={{
             height,
@@ -266,7 +266,7 @@ const JobScreen = () => {
         </TouchableOpacity>
     );
 
-    const renderMangaItem = ({ item }: { item: string }) => (
+    const renderMangaItem = ({item}: { item: string }) => (
         <TouchableOpacity
             style={styles.mangaItem}
             onPress={() => selectManga(item)}
@@ -281,7 +281,6 @@ const JobScreen = () => {
                 <Text style={styles.cardTitle}>Jobs</Text>
 
                 <View style={styles.jobContainer}>
-                    {/* Lista de Jobs */}
                     <View style={styles.jobList}>
                         <Text style={styles.sectionTitle}>Jobs Disponíveis</Text>
                         <ScrollView style={styles.listContainer}>
@@ -289,7 +288,6 @@ const JobScreen = () => {
                         </ScrollView>
                     </View>
 
-                    {/* Formulário de Job */}
                     {selectedJob ? (
                         <View style={styles.jobForm}>
                             <Text style={styles.sectionTitle}>
@@ -302,6 +300,7 @@ const JobScreen = () => {
                                     <TextInput
                                         style={styles.input}
                                         placeholder="Digite os parâmetros"
+                                        placeholderTextColor="#6272a4"
                                         value={parametros}
                                         onChangeText={setParametros}
                                     />
@@ -315,6 +314,7 @@ const JobScreen = () => {
                                         <TextInput
                                             style={styles.input}
                                             placeholder="Digite o número do capítulo"
+                                            placeholderTextColor="#6272a4"
                                             value={titleChapter}
                                             onChangeText={setTitleChapter}
                                             keyboardType="numeric"
@@ -330,11 +330,10 @@ const JobScreen = () => {
                                             <Text style={styles.pickerButtonText}>
                                                 {titleManga || "Escolha o nome do mangá"}
                                             </Text>
-                                            <Feather name="chevron-down" size={20} color="#555" />
+                                            <Feather name="chevron-down" size={20} color="#bd93f9"/>
                                         </TouchableOpacity>
                                     </View>
 
-                                    {/* Modal para seleção de mangá */}
                                     <Modal
                                         animationType="slide"
                                         transparent={true}
@@ -363,7 +362,7 @@ const JobScreen = () => {
                                     <View style={styles.formGroup}>
                                         <Text style={styles.label}>PDF do capítulo</Text>
                                         <TouchableOpacity style={styles.uploadButton} onPress={pickDocument}>
-                                            <Feather name="upload" size={24} color="#fff" />
+                                            <Feather name="upload" size={24} color="#f8f8f2"/>
                                             <Text style={styles.uploadButtonText}>
                                                 {selectedFile ? 'Arquivo selecionado' : 'Selecionar arquivo'}
                                             </Text>
@@ -377,23 +376,21 @@ const JobScreen = () => {
                                 </>
                             )}
 
-                            {/* Barra de Progresso Customizada */}
                             {isExibirProgresso && (
                                 <View style={styles.progressContainer}>
                                     <Text style={styles.progressTitle}>Progresso do Job:</Text>
-                                    <SimpleProgressBar progress={progress} />
+                                    <SimpleProgressBar progress={progress}/>
                                     <Text style={styles.progressText}>{Math.round(progress)}%</Text>
                                 </View>
                             )}
 
-                            {/* Botão de Execução */}
                             <TouchableOpacity
                                 style={[styles.executeButton, isLoading && styles.disabledButton]}
                                 onPress={executeJob}
                                 disabled={isLoading}
                             >
                                 {isLoading ? (
-                                    <ActivityIndicator color="#fff" size="small" />
+                                    <ActivityIndicator color="#f8f8f2" size="small"/>
                                 ) : (
                                     <Text style={styles.executeButtonText}>Executar Job</Text>
                                 )}
@@ -415,25 +412,25 @@ const JobScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#282a36',
     },
     card: {
         flex: 1,
         margin: 15,
         padding: 20,
-        backgroundColor: '#fff',
+        backgroundColor: '#44475a',
         borderRadius: 10,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
+        shadowOffset: {width: 0, height: 2},
+        shadowOpacity: 0.3,
         shadowRadius: 4,
-        elevation: 3,
+        elevation: 5,
     },
     cardTitle: {
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 20,
-        color: '#333',
+        color: '#f8f8f2',
     },
     jobContainer: {
         flex: 1,
@@ -448,31 +445,31 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '600',
         marginBottom: 10,
-        color: '#333',
+        color: '#bd93f9',
     },
     listContainer: {
         borderWidth: 1,
-        borderColor: '#ddd',
+        borderColor: '#6272a4',
         borderRadius: 8,
         padding: 5,
     },
     jobItem: {
         padding: 15,
-        backgroundColor: '#f9f9f9',
+        backgroundColor: '#313442',
         borderBottomWidth: 1,
-        borderBottomColor: '#eee',
+        borderBottomColor: '#44475a',
         borderRadius: 5,
         marginBottom: 5,
     },
     jobText: {
         fontSize: 16,
-        color: '#333',
+        color: '#f8f8f2',
     },
     jobForm: {
         flex: 2,
         paddingTop: 10,
         borderTopWidth: 1,
-        borderTopColor: '#ddd',
+        borderTopColor: '#6272a4',
     },
     formGroup: {
         marginBottom: 15,
@@ -480,41 +477,42 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 16,
         marginBottom: 5,
-        color: '#333',
+        color: '#8be9fd',
         fontWeight: '500',
     },
     input: {
         borderWidth: 1,
-        borderColor: '#ddd',
+        borderColor: '#6272a4',
         borderRadius: 8,
         padding: 12,
         fontSize: 16,
-        backgroundColor: '#fafafa',
+        backgroundColor: '#313442',
+        color: '#f8f8f2',
     },
     pickerButton: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#ddd',
+        borderColor: '#6272a4',
         borderRadius: 8,
         padding: 12,
-        backgroundColor: '#fafafa',
+        backgroundColor: '#313442',
     },
     pickerButtonText: {
         fontSize: 16,
-        color: '#555',
+        color: '#f8f8f2',
     },
     modalOverlay: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
     },
     modalContent: {
         width: '80%',
         maxHeight: '70%',
-        backgroundColor: 'white',
+        backgroundColor: '#282a36',
         borderRadius: 10,
         padding: 20,
         shadowColor: '#000',
@@ -525,12 +523,15 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5,
+        borderWidth: 1,
+        borderColor: '#6272a4',
     },
     modalTitle: {
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 15,
         textAlign: 'center',
+        color: '#bd93f9',
     },
     mangaList: {
         maxHeight: 300,
@@ -538,26 +539,26 @@ const styles = StyleSheet.create({
     mangaItem: {
         padding: 15,
         borderBottomWidth: 1,
-        borderBottomColor: '#eee',
+        borderBottomColor: '#44475a',
     },
     mangaText: {
         fontSize: 16,
-        color: '#333',
+        color: '#f8f8f2',
     },
     closeButton: {
         marginTop: 15,
         padding: 12,
-        backgroundColor: '#f44336',
+        backgroundColor: '#ff5555',
         borderRadius: 8,
         alignItems: 'center',
     },
     closeButtonText: {
-        color: 'white',
+        color: '#f8f8f2',
         fontSize: 16,
         fontWeight: '600',
     },
     uploadButton: {
-        backgroundColor: '#4a90e2',
+        backgroundColor: '#8be9fd',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
@@ -565,7 +566,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
     uploadButtonText: {
-        color: '#fff',
+        color: '#282a36',
         marginLeft: 10,
         fontSize: 16,
         fontWeight: '500',
@@ -573,7 +574,7 @@ const styles = StyleSheet.create({
     fileName: {
         marginTop: 5,
         fontSize: 14,
-        color: '#666',
+        color: '#bd93f9',
     },
     progressContainer: {
         marginVertical: 20,
@@ -582,28 +583,28 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '500',
         marginBottom: 10,
-        color: '#333',
+        color: '#f8f8f2',
     },
     progressText: {
         fontSize: 14,
-        color: '#666',
+        color: '#50fa7b',
         textAlign: 'right',
         marginTop: 5,
     },
     executeButton: {
-        backgroundColor: '#4CAF50',
+        backgroundColor: '#50fa7b',
         padding: 15,
         borderRadius: 8,
         alignItems: 'center',
         marginTop: 10,
     },
     executeButtonText: {
-        color: '#fff',
+        color: '#282a36',
         fontSize: 16,
         fontWeight: '600',
     },
     disabledButton: {
-        backgroundColor: '#a0d8a3',
+        backgroundColor: '#28614d',
     },
     noSelection: {
         flex: 2,
@@ -611,11 +612,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 20,
         borderTopWidth: 1,
-        borderTopColor: '#ddd',
+        borderTopColor: '#6272a4',
     },
     noSelectionText: {
         fontSize: 16,
-        color: '#666',
+        color: '#bd93f9',
         textAlign: 'center',
     }
 });

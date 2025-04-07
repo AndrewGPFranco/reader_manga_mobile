@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     View,
     Text,
@@ -6,13 +6,14 @@ import {
     Image,
     TouchableOpacity,
     Modal,
-    StyleSheet,
+    StyleSheet, Dimensions,
 } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import {useRoute, useNavigation} from '@react-navigation/native';
 
-import { formatDate } from '@/app/utils/utils';
-import { StatusType } from '@/app/enums/StatusType';
+import {formatDate} from '@/app/utils/utils';
+import {StatusType} from '@/app/enums/StatusType';
 import useMangaStore from '@/app/stores/mangaStore';
+import {Card} from "react-native-paper";
 
 export default function MangaDetails() {
     const route = useRoute<any>();
@@ -52,109 +53,129 @@ export default function MangaDetails() {
     };
 
     return (
-        <ScrollView style={styles.container}>
-            <View style={styles.header}>
-                <Image source={{ uri: manga.image }} style={styles.image} />
-                <Text style={styles.title}>{manga.title}</Text>
-            </View>
+        <View style={styles.container}>
+            <Card style={styles.card}>
+                <ScrollView showsVerticalScrollIndicator={false}>
+                    <View style={styles.header}>
+                        <Image source={{uri: manga.image}} style={styles.image}/>
+                        <Text style={styles.title}>{manga.title}</Text>
+                    </View>
 
-            <View style={styles.meta}>
-                <Text style={styles.metaText}><Text style={styles.bold}>Qtde. Capítulos:</Text> {manga.size}</Text>
-                <Text style={styles.metaText}><Text style={styles.bold}>Gênero:</Text> {manga.gender}</Text>
-                <Text style={styles.metaText}><Text style={styles.bold}>Status:</Text> {manga.status}</Text>
-                <Text style={styles.metaText}><Text style={styles.bold}>Autor:</Text> {manga.author}</Text>
-                <Text style={styles.metaText}><Text style={styles.bold}>Data de criação:</Text> {formatDate(manga.creationDate)}</Text>
-                <Text style={styles.metaText}><Text style={styles.bold}>Finalizado em:</Text> {verifyEndDate(manga)}</Text>
-                <Text style={styles.metaText}><Text style={styles.bold}>Descrição:</Text> {manga.description}</Text>
-            </View>
+                    <View style={styles.meta}>
+                        <Text style={styles.metaText}><Text style={styles.bold}>Qtde. Capítulos:</Text> {manga.size}
+                        </Text>
+                        <Text style={styles.metaText}><Text style={styles.bold}>Gênero:</Text> {manga.gender}</Text>
+                        <Text style={styles.metaText}><Text style={styles.bold}>Status:</Text> {manga.status}</Text>
+                        <Text style={styles.metaText}><Text style={styles.bold}>Autor:</Text> {manga.author}</Text>
+                        <Text style={styles.metaText}><Text style={styles.bold}>Data de
+                            criação:</Text> {formatDate(manga.creationDate)}</Text>
+                        <Text style={styles.metaText}><Text style={styles.bold}>Finalizado
+                            em:</Text> {verifyEndDate(manga)}</Text>
+                        <Text style={styles.metaText}><Text style={styles.bold}>Descrição:</Text> {manga.description}
+                        </Text>
+                    </View>
 
-            <Text style={styles.chapterHeader}>Capítulos</Text>
+                    <Text style={styles.chapterHeader}>Capítulos</Text>
 
-            {chapters.map((chapter) => (
-                <View
-                    key={chapter.id}
-                    style={[
-                        styles.chapterCard,
-                        chapter.status === StatusType.FINISHED && { backgroundColor: '#D1FAE5' },
-                    ]}
-                >
-                    {chapter.readingProgress !== 0 ? (
-                        <TouchableOpacity onPress={() => askContinueReading(chapter)}>
-                            <Text style={styles.chapterTitle}>{chapter.title}</Text>
-                        </TouchableOpacity>
-                    ) : (
-                        <TouchableOpacity
-                            onPress={() =>
-                                navigation.navigate('ChapterReading', {
-                                    id: chapter.id,
-                                    title: manga.title,
-                                    progress: 1,
-                                })
-                            }
+                    {chapters.map((chapter) => (
+                        <View
+                            key={chapter.id}
+                            style={[
+                                styles.chapterCard,
+                                chapter.status === StatusType.FINISHED && {backgroundColor: '#D1FAE5'},
+                            ]}
                         >
-                            <Text style={styles.chapterTitle}>{chapter.title}</Text>
-                        </TouchableOpacity>
-                    )}
-                    <Text style={styles.metaText}>Páginas: {chapter.numberPages}</Text>
-                    <Text style={styles.metaText}>
-                        Progresso:{' '}
-                        {chapter.status === StatusType.FINISHED
-                            ? 'Leitura finalizada'
-                            : chapter.readingProgress === 0
-                                ? 'Leitura não iniciada'
-                                : `Pág: ${chapter.readingProgress}`}
-                    </Text>
-                </View>
-            ))}
-
-            <Modal visible={showDialog} transparent animationType="fade">
-                <View style={styles.modalBackdrop}>
-                    <View style={styles.modalCard}>
-                        <Text style={styles.modalTitle}>Deseja continuar de onde parou?</Text>
-                        <View style={styles.modalActions}>
                             <TouchableOpacity
-                                style={styles.buttonConfirm}
-                                onPress={() => {
-                                    setShowDialog(false);
-                                    if (selectedChapter) {
-                                        navigation.navigate('ChapterReading', {
-                                            id: selectedChapter.id,
-                                            title: manga.title,
-                                            progress: selectedChapter.readingProgress,
-                                        });
-                                    }
-                                }}
-                            >
-                                <Text style={styles.buttonText}>Sim</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={styles.buttonCancel}
-                                onPress={() => {
-                                    setShowDialog(false);
-                                    if (selectedChapter) {
-                                        navigation.navigate('ChapterReading', {
-                                            id: selectedChapter.id,
+                                onPress={() =>
+                                    chapter.readingProgress !== 0
+                                        ? askContinueReading(chapter)
+                                        : navigation.navigate('ChapterReading', {
+                                            id: chapter.id,
                                             title: manga.title,
                                             progress: 1,
-                                        });
-                                    }
-                                }}
+                                        })
+                                }
                             >
-                                <Text style={styles.buttonText}>Não</Text>
+                                <Text style={[
+                                    styles.chapterTitle,
+                                    chapter.status === StatusType.FINISHED && {color: '#black'}
+                                ]}>{chapter.title}</Text>
                             </TouchableOpacity>
+                            <Text style={[
+                                styles.metaText,
+                                chapter.status === StatusType.FINISHED && {color: '#black'}
+                            ]}>Páginas: {chapter.numberPages}</Text>
+                            <Text style={[
+                                styles.metaText,
+                                chapter.status === StatusType.FINISHED && {color: '#black'}
+                            ]}>
+                                Progresso:{' '}
+                                {chapter.status === StatusType.FINISHED
+                                    ? 'Leitura finalizada'
+                                    : chapter.readingProgress === 0
+                                        ? 'Leitura não iniciada'
+                                        : `Pág: ${chapter.readingProgress}`}
+                            </Text>
+                        </View>
+                    ))}
+                </ScrollView>
+                <Modal visible={showDialog} transparent animationType="fade">
+                    <View style={styles.modalBackdrop}>
+                        <View style={styles.modalCard}>
+                            <Text style={styles.modalTitle}>Deseja continuar de onde parou?</Text>
+                            <View style={styles.modalActions}>
+                                <TouchableOpacity
+                                    style={styles.buttonConfirm}
+                                    onPress={() => {
+                                        setShowDialog(false);
+                                        if (selectedChapter) {
+                                            navigation.navigate('ChapterReading', {
+                                                id: selectedChapter.id,
+                                                title: manga.title,
+                                                progress: selectedChapter.readingProgress,
+                                            });
+                                        }
+                                    }}
+                                >
+                                    <Text style={styles.buttonText}>Sim</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={styles.buttonCancel}
+                                    onPress={() => {
+                                        setShowDialog(false);
+                                        if (selectedChapter) {
+                                            navigation.navigate('ChapterReading', {
+                                                id: selectedChapter.id,
+                                                title: manga.title,
+                                                progress: 1,
+                                            });
+                                        }
+                                    }}
+                                >
+                                    <Text style={styles.buttonText}>Não</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
-                </View>
-            </Modal>
-        </ScrollView>
+                </Modal>
+            </Card>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#fff',
-        padding: 20,
+        backgroundColor: '#121212',
+        padding: 15,
         flex: 1,
+    },
+    card: {
+        backgroundColor: "#1E1E1E",
+        borderRadius: 10,
+        padding: 10,
+        elevation: 3,
+        height: Dimensions.get("screen").height * 0.93,
+        maxHeight: Dimensions.get("screen").height,
     },
     header: {
         flexDirection: 'row',
@@ -171,6 +192,7 @@ const styles = StyleSheet.create({
         fontSize: 22,
         fontWeight: 'bold',
         flexShrink: 1,
+        color: '#FFFFFF',
     },
     meta: {
         marginBottom: 24,
@@ -178,43 +200,47 @@ const styles = StyleSheet.create({
     metaText: {
         marginBottom: 6,
         fontSize: 16,
+        color: '#CCCCCC',
     },
     bold: {
         fontWeight: '600',
+        color: '#FFFFFF',
     },
     chapterHeader: {
         fontSize: 20,
         fontWeight: '600',
         borderBottomWidth: 1,
-        borderBottomColor: '#000',
+        borderBottomColor: '#FFFFFF',
         marginBottom: 16,
         paddingBottom: 6,
+        color: '#FFFFFF',
     },
     chapterCard: {
         padding: 16,
-        backgroundColor: '#fff',
+        backgroundColor: '#1E1E1E',
         borderRadius: 12,
         marginBottom: 12,
         shadowColor: '#000',
         shadowOpacity: 0.1,
         shadowRadius: 6,
         borderWidth: 1,
-        borderColor: '#ddd',
+        borderColor: '#333',
     },
     chapterTitle: {
         fontSize: 18,
         fontWeight: '600',
         marginBottom: 6,
+        color: '#FFFFFF',
     },
     modalBackdrop: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
+        backgroundColor: 'rgba(0,0,0,0.7)',
         justifyContent: 'center',
         alignItems: 'center',
     },
     modalCard: {
         width: '90%',
-        backgroundColor: '#fff',
+        backgroundColor: '#2A2A2A',
         borderRadius: 16,
         padding: 20,
         alignItems: 'center',
@@ -224,6 +250,7 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         marginBottom: 20,
         textAlign: 'center',
+        color: '#FFFFFF',
     },
     modalActions: {
         flexDirection: 'row',
@@ -242,7 +269,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
     },
     buttonText: {
-        color: '#fff',
+        color: '#FFFFFF',
         fontWeight: '600',
         fontSize: 16,
     },
