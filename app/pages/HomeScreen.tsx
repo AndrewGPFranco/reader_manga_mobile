@@ -150,6 +150,26 @@ const HomeScreen = () => {
                         >
                             Leitura
                         </Button>
+
+                        <Button
+                            mode="contained"
+                            style={styles.button}
+                            labelStyle={styles.buttonLabel}
+                            icon={({color}) => <Ionicons name="bookmark" size={18} color={color}/>}
+                            onPress={() => navigation.navigate("Favorites")}
+                        >
+                            Favoritos
+                        </Button>
+
+                        <Button
+                            mode="contained"
+                            style={styles.button}
+                            labelStyle={styles.buttonLabel}
+                            icon={({color}) => <Ionicons name="bookmark" size={18} color={color}/>}
+                            onPress={() => navigation.navigate("Library")}
+                        >
+                            Biblioteca
+                        </Button>
                     </View>
                 </View>
 
