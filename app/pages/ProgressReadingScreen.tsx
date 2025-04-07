@@ -7,6 +7,7 @@ import {
     Image,
     StyleSheet,
     Modal,
+    Alert,
 } from "react-native";
 import {Card, Button} from "react-native-paper";
 import useChapterStore from "@/app/stores/chapterStore";
@@ -39,6 +40,14 @@ const ProgressReadingScreen = () => {
         };
         fetchChapters();
     }, [page]);
+
+    const progressReset = async () => {
+        const result = await chapterStore.progressReset(selectedChapter.id);
+        setChapters([]);
+        Alert.alert(result);
+
+        setChapters(await chapterStore.getAllReadingProgress(page - 1));
+    }
 
     const askContinueReading = (chapter: iChapterData) => {
         setSelectedChapter(chapter);
@@ -122,6 +131,15 @@ const ProgressReadingScreen = () => {
                                     style={styles.cancelButton}
                                 >
                                     Não
+                                </Button>
+                                <Button
+                                    mode="contained"
+                                    onPress={async () => {
+                                        setIsShowDialog(false);
+                                        await progressReset();
+                                    }}
+                                >
+                                    Resetar progresso
                                 </Button>
                             </View>
                         </Card.Content>

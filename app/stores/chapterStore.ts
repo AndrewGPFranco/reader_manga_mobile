@@ -240,6 +240,23 @@ const useChapterStore = create<ChapterStore>((set, get) => ({
         } catch (error) {
             console.error(error);
         }
+    },
+
+    async progressReset(idChapter: number) {
+        try {
+            const response = await api.delete(
+                `/api/user/chapter/delete/${idChapter}`,
+                {
+                    headers: {
+                        Authorization: `${await get().getTokenUser()}`
+                    },
+                    baseURL: `http://192.168.15.17:8080`
+                }
+            )
+            return response.data
+        } catch (error) {
+            console.error(error)
+        }
     }
 
 }));

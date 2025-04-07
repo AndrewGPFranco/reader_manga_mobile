@@ -38,7 +38,7 @@ const SimpleProgressBar: React.FC<SimpleProgressBarProps> = ({
     return (
         <View style={{
             height,
-            width: typeof width === 'number' ? width : width,
+            width: width,
             backgroundColor,
             borderRadius: 5,
             overflow: 'hidden'
@@ -67,7 +67,6 @@ interface SelectedFileType {
 }
 
 const JobScreen = () => {
-    const navigation = useNavigation();
     const [jobs, setJobs] = useState<IJobType[]>([]);
     const [selectedJob, setSelectedJob] = useState<string>('');
     const [tipoJob, setTipoJob] = useState<string>('');
@@ -135,7 +134,7 @@ const JobScreen = () => {
                 copyToCacheDirectory: true,
             });
 
-            if (result.canceled === false && result.assets && result.assets.length > 0) {
+            if (!result.canceled && result.assets && result.assets.length > 0) {
                 const file = result.assets[0];
                 setSelectedFile({
                     uri: file.uri,
