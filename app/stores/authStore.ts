@@ -5,6 +5,7 @@ import { api } from "@/app/network/axiosInstance";
 import iDecodedToken from "@/app/_types/iDecodedToken";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AuthStore from "@/app/stores/_types/iAuthStore"
+import {UserSession} from "@/app/class/UserSession";
 
 const useAuthStore = create<AuthStore>((set, get) => ({
   user: new User("", "", "", ""),
@@ -24,7 +25,33 @@ const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   async removeToken(): Promise<void> {
+    await AsyncStorage.removeItem("id");
     await AsyncStorage.removeItem("token");
+  },
+
+  async getUser() {
+    if (this.usuarioLogado !== null) return this.usuarioLogado
+
+    const token: string | null = await AsyncStorage.getItem('token')
+    if (token != null) {
+      const tokenDecode: iDecodedToken = jwtDecode<iDecodedToken>(token)
+      const email: string = tokenDecode.sub
+      const result = await api.get(`/user?email=${email}`, {
+        headers: {
+          Authorization: `${token}`
+        }
+      })
+      const userData = result.data
+      this.usuarioLogado = new UserSession(
+          userData.firstName,
+          userData.fullName,
+          userData.username,
+          userData.email,
+          userData.dateBirth
+      )
+      return this.usuarioLogado
+    }
+    throw new Error('Falha ao encontrar usuário')
   },
 
   async efetuarLogin(email: string, password: string) {

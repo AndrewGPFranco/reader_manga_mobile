@@ -88,6 +88,11 @@ const LoginScreen = () => {
             await authStore.efetuarLogin(email, password);
             limparCampos();
             navigation.navigate("Home");
+
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'Home' }],
+            });
         } catch (error: any) {
             showMessage(
                 error.message.includes("Cannot read properties")

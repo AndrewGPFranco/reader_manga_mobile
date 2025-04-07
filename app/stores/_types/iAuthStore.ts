@@ -4,22 +4,23 @@ import { UserRegister } from "@/app/class/UserRegister";
 
 interface AuthStore {
     user: User;
-    usuarioLogado: UserSession | null;
-    setToken(token: string, id: string): Promise<void>;
     removeToken(): Promise<void>;
+    getUser(): Promise<UserSession>;
+    usuarioLogado: UserSession | null;
+    getRoleUser: () => Promise<string>;
+    efetuarLogout: () => Promise<void>;
     getToken(): Promise<string | null>;
     getUserId(): Promise<string | null>;
-    efetuarLogin: (email: string, password: string) => Promise<void>;
     getUserAutenticado: () => Promise<User>;
     isUserAutenticado: () => Promise<boolean>;
-    efetuarLogout: () => Promise<void>;
-    getRoleUser: () => Promise<string>;
-    register: (user: UserRegister) => Promise<string>;
     getIdUsuario: () => Promise<string | null>;
     changePassword: (
         oldPassword: string,
         newPassword: string
     ) => Promise<Map<boolean, string>>;
+    register: (user: UserRegister) => Promise<string>;
+    setToken(token: string, id: string): Promise<void>;
+    efetuarLogin: (email: string, password: string) => Promise<void>;
 }
 
 export default AuthStore;
