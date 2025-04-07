@@ -13,7 +13,6 @@ import {
     FlatList,
     ViewStyle
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
 import * as DocumentPicker from 'expo-document-picker';
 import {Feather} from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -84,8 +83,8 @@ const JobScreen = () => {
     const mangaStore = useMangaStore();
 
     useEffect(() => {
-        getJobsDisponiveis();
-        getNomeDosMangasDisponiveis();
+        getJobsDisponiveis().then(() => console.log(""));
+        getNomeDosMangasDisponiveis().then(() => console.log(""));
         return () => {
             fechaEventSource();
         };
@@ -108,7 +107,6 @@ const JobScreen = () => {
 
     const getNomeDosMangasDisponiveis = async () => {
         try {
-            const token = await AsyncStorage.getItem('token');
             const response = await mangaStore.getApenasNomeDosMangas();
             setMangasNomes(response);
         } catch (error: any) {

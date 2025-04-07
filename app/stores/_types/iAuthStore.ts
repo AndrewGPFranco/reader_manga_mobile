@@ -18,6 +18,7 @@ interface AuthStore {
         oldPassword: string,
         newPassword: string
     ) => Promise<Map<boolean, string>>;
+    validateToken(token: string): Promise<boolean>;
     register: (user: UserRegister) => Promise<string>;
     setToken(token: string, id: string): Promise<void>;
     efetuarLogin: (email: string, password: string) => Promise<void>;

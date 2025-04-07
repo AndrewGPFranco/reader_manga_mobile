@@ -1,7 +1,7 @@
-import { create } from "zustand";
-import { jwtDecode } from "jwt-decode";
-import { User } from "@/app/class/User";
-import { api } from "@/app/network/axiosInstance";
+import {create} from "zustand";
+import {jwtDecode} from "jwt-decode";
+import {User} from "@/app/class/User";
+import {api} from "@/app/network/axiosInstance";
 import iDecodedToken from "@/app/_types/iDecodedToken";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AuthStore from "@/app/stores/_types/iAuthStore"
@@ -47,8 +47,11 @@ const useAuthStore = create<AuthStore>((set, get) => ({
           userData.fullName,
           userData.username,
           userData.email,
-          userData.dateBirth
-      )
+          userData.dateBirth,
+          userData.mangas,
+          userData.completeReadings,
+          userData.inProgressReadings
+      );
       return this.usuarioLogado
     }
     throw new Error('Falha ao encontrar usuário')
@@ -146,6 +149,16 @@ const useAuthStore = create<AuthStore>((set, get) => ({
       ]);
     }
   },
+
+  async validateToken(token: string) {
+    const data = { token: token };
+    const result = await api.post("/user/token", data, {
+      headers: {Authorization: `${token}`},
+    });
+
+    return result.status !== 401;
+  }
+
 }));
 
 export default useAuthStore;

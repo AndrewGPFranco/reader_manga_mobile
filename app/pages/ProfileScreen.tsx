@@ -2,19 +2,17 @@ import {Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View} from
 import {useEffect, useState} from "react";
 import useAuthStore from "@/app/stores/authStore";
 import {useNavigation} from "@react-navigation/native";
+import {UserSession} from "@/app/class/UserSession";
 
 type NavigationProps = {
     navigate: (screen: string, params?: any) => void;
 };
 
 const ProfileScreen = () => {
-    const [nome, setNome] = useState<string>("");
-    const [email, setEmail] = useState<string>("");
-    const [dateBirth, setDateBirth] = useState<Date>();
-    const [username, setUsername] = useState<string>("");
+    const [user, setUser] = useState<UserSession>();
 
-    const navigation = useNavigation<NavigationProps>();
     const authStore = useAuthStore();
+    const navigation = useNavigation<NavigationProps>();
 
     useEffect(() => {
         getUserInfo().then(() => console.log("getUserInfo()"));
@@ -24,12 +22,9 @@ const ProfileScreen = () => {
         try {
             const user = await authStore.getUser();
 
-            if (user != null) {
-                setEmail(user.email);
-                setNome(user.firstName);
-                setUsername(user.username);
-                setDateBirth(new Date(user.dateBirth));
-            } else
+            if (user != null)
+                setUser(user);
+            else
                 Alert.alert("Ocorreu um problema ao buscar as informações do usuário.")
         } catch (error) {
             console.log(error);
@@ -64,38 +59,40 @@ const ProfileScreen = () => {
                         </View>
 
                         <View style={styles.nameContainer}>
-                            <Text style={styles.profileName}>{nome || "Otaku-san"}</Text>
-                            <Text style={styles.usernameBadge}>@{username || "username"}</Text>
+                            <Text style={styles.profileName}>{user?.firstName || "Otaku-san"}</Text>
+                            <Text style={styles.usernameBadge}>@{user?.username || "username"}</Text>
                         </View>
 
                         <View style={styles.infoContainer}>
                             <View style={styles.infoRow}>
                                 <Text style={styles.infoLabel}>EMAIL</Text>
-                                <Text style={styles.infoValue}>{email || "email@exemplo.com"}</Text>
+                                <Text style={styles.infoValue}>{user?.email || "email@exemplo.com"}</Text>
                             </View>
 
                             <View style={styles.infoRow}>
                                 <Text style={styles.infoLabel}>NASCIMENTO</Text>
                                 <Text style={styles.infoValue}>
-                                    {dateBirth ? new Intl.DateTimeFormat('pt-BR').format(dateBirth) : 'DD/MM/YYYY'}
+                                    {user?.dateBirth
+                                        ? new Intl.DateTimeFormat('pt-BR').format(new Date(user.dateBirth))
+                                        : 'DD/MM/YYYY'}
                                 </Text>
                             </View>
                         </View>
 
                         <View style={styles.statsContainer}>
                             <View style={styles.statItem}>
-                                <Text style={styles.statValue}>X</Text>
+                                <Text style={styles.statValue}>{user?.mangas ?? 0}</Text>
                                 <Text style={styles.statLabel}>Mangás</Text>
                             </View>
                             <View style={styles.statDivider}/>
                             <View style={styles.statItem}>
-                                <Text style={styles.statValue}>X</Text>
-                                <Text style={styles.statLabel}>Animes</Text>
+                                <Text style={styles.statValue}>{user?.inProgressReadings ?? 0}</Text>
+                                <Text style={styles.statLabel}>Em andamento</Text>
                             </View>
                             <View style={styles.statDivider}/>
                             <View style={styles.statItem}>
-                                <Text style={styles.statValue}>X</Text>
-                                <Text style={styles.statLabel}>Reviews</Text>
+                                <Text style={styles.statValue}>{user?.completeReadings ?? 0}</Text>
+                                <Text style={styles.statLabel}>Leituras finalizadas</Text>
                             </View>
                         </View>
                     </View>
@@ -104,6 +101,11 @@ const ProfileScreen = () => {
                         <TouchableOpacity style={styles.logoutButton} onPress={efetuarLogout}>
                             <Text style={styles.logoutButtonText}>LOGOUT</Text>
                         </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.mangaFooter}>
+                        <View style={styles.decorativeLine}/>
+                        <View style={styles.decorativeLine}/>
                     </View>
                 </View>
             </ScrollView>
@@ -139,6 +141,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 30,
+        paddingVertical: 5,
+    },
+    mangaFooter: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 30,
         paddingVertical: 5,
     },
     decorativeLine: {

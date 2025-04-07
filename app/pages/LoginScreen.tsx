@@ -34,8 +34,11 @@ const LoginScreen = () => {
         } else {
             const checkToken = async () => {
                 const token = await AsyncStorage.getItem("token");
-                if (token !== null)
-                    navigation.navigate("Home");
+                if (token !== null) {
+                    let tokenIsValid = await authStore.validateToken(token);
+                    if(tokenIsValid)
+                        navigation.navigate("Home");
+                }
             };
 
             checkToken().then(() => console.info("Checando token"));

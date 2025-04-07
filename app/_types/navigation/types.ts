@@ -4,7 +4,8 @@ type RootStackParamList = {
   Login: undefined;
   Profile: undefined;
   RegisterUser: undefined;
-  MangaDetails: undefined;
+  AllMangasList: undefined;
   ChapterReading: undefined;
+  MangaDetails: {title: string};
   ProgressReading: { mangaId: number };
 };

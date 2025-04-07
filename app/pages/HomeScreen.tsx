@@ -6,7 +6,7 @@ import {
     ScrollView,
     TouchableOpacity,
     StyleSheet,
-    ActivityIndicator, Alert,
+    ActivityIndicator, Alert, BackHandler,
 } from "react-native";
 import {Button, Card} from "react-native-paper";
 import {Ionicons} from "@expo/vector-icons";
@@ -15,6 +15,7 @@ import Navbar from "@/components/home/Navbar";
 import {api} from "@/app/network/axiosInstance";
 import iMangaData from "@/app/_types/iManga";
 import useAuthStore from "../stores/authStore";
+import {useFocusEffect} from "expo-router";
 
 type NavigationProps = {
     navigate: (screen: string, params?: any) => void;
@@ -46,6 +47,18 @@ const HomeScreen = () => {
             setLoading(false);
         }
     };
+
+    useFocusEffect(
+        React.useCallback(() => {
+            const onBackPress = () => {
+                return true;
+            };
+
+            BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+            return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+        }, [])
+    );
 
     useEffect(() => {
         getMangas().then(() => console.log(""));
@@ -113,6 +126,14 @@ const HomeScreen = () => {
                             }
                         >
                             Jobs
+                        </Button>
+                        <Button
+                            mode="contained"
+                            onPress={() =>
+                                navigation.navigate("AllMangasList")
+                            }
+                        >
+                            Mangás
                         </Button>
                     </View>
                 </View>
