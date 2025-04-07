@@ -97,7 +97,7 @@ const ProgressReadingScreen = () => {
             >
                 <View style={styles.modalBackground}>
                     <Card style={styles.modalCard}>
-                        <Card.Title title="Deseja continuar de onde parou?"/>
+                        <Card.Title title="Continuar de onde parou?"/>
                         <Card.Content>
                             {selectedChapter && (
                                 <View>
@@ -208,7 +208,9 @@ const styles = StyleSheet.create({
     },
     modalButtons: {
         flexDirection: "row",
-        justifyContent: "space-around",
+        flexWrap: "wrap",
+        justifyContent: "center",
+        gap: 10,
         marginTop: 20,
     },
     confirmButton: {
