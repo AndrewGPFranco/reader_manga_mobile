@@ -4,10 +4,6 @@ const Navbar = () => {
   return (
     <View style={styles.navbar}>
       <Image
-        source={require("@/assets/images/logo.webp")}
-        style={styles.logo}
-      />
-      <Image
         source={{ uri: "https://github.com/andrewgpfranco.png" }}
         style={styles.avatar}
       />
@@ -19,7 +15,7 @@ const styles = StyleSheet.create({
   navbar: {
     display: "flex",
     padding: 25,
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     flexDirection: "row",
     alignItems: "center"
   },

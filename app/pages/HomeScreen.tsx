@@ -146,6 +146,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   buttonContainer: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 10,
     marginTop: 12,
     alignSelf: "flex-start",
   },
