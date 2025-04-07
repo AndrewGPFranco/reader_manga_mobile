@@ -81,7 +81,7 @@ const HomeScreen = () => {
                         key={item.id}
                         style={styles.mangaCard}
                         onPress={() =>
-                            navigation.navigate("ProgressReading", {mangaId: item.id})
+                            navigation.navigate("MangaDetails", {title: item.title})
                         }
                     >
                         <Image source={{uri: item.image}} style={styles.mangaImage}/>
@@ -107,39 +107,50 @@ const HomeScreen = () => {
             <Navbar/>
             <Card style={styles.card}>
                 <View style={styles.header}>
-                    <Text style={styles.title}>Descubra Novos Mangás</Text>
                     <View style={styles.buttonContainer}>
                         <Button
                             mode="contained"
+                            style={styles.button}
+                            labelStyle={styles.buttonLabel}
                             onPress={async () => {
                                 await getMangas();
-                                Alert.alert("Lista de mangás atualizada.")
+                                Alert.alert("Lista de mangás atualizada.");
                             }}
-                            icon={() => <Ionicons name="refresh" size={16} color="white"/>}
+                            icon={({color}) => <Ionicons name="refresh" size={18} color={color}/>}
                         >
                             Atualizar
                         </Button>
+
                         <Button
                             mode="contained"
-                            onPress={() =>
-                                navigation.navigate("Job")
-                            }
+                            style={styles.button}
+                            labelStyle={styles.buttonLabel}
+                            icon={({color}) => <Ionicons name="briefcase" size={18} color={color}/>}
+                            onPress={() => navigation.navigate("Job")}
                         >
                             Jobs
                         </Button>
+
                         <Button
                             mode="contained"
-                            onPress={() =>
-                                navigation.navigate("AllMangasList")
-                            }
+                            style={styles.button}
+                            labelStyle={styles.buttonLabel}
+                            icon={({color}) => <Ionicons name="book" size={18} color={color}/>}
+                            onPress={() => navigation.navigate("AllMangasList")}
                         >
                             Mangás
                         </Button>
-                    </View>
-                </View>
 
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Categorias Populares</Text>
+                        <Button
+                            mode="contained"
+                            style={styles.button}
+                            labelStyle={styles.buttonLabel}
+                            icon={({color}) => <Ionicons name="bookmark" size={18} color={color}/>}
+                            onPress={() => navigation.navigate("ProgressReading")}
+                        >
+                            Leitura
+                        </Button>
+                    </View>
                 </View>
 
                 <View style={styles.section}>
@@ -156,6 +167,7 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
     container: {flex: 1, backgroundColor: "#121212"},
     card: {
+        marginTop: -25,
         backgroundColor: "#121212",
         padding: 16,
         borderRadius: 8,
@@ -170,12 +182,24 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     buttonContainer: {
-        display: "flex",
         flexDirection: "row",
         justifyContent: "space-between",
-        gap: 10,
-        marginTop: 12,
-        alignSelf: "flex-start",
+        flexWrap: "wrap",
+        gap: 12,
+        marginTop: 16,
+        marginHorizontal: 4,
+    },
+    button: {
+        flex: 1,
+        minWidth: 150,
+        borderRadius: 8,
+        elevation: 3,
+        marginBottom: 8,
+    },
+    buttonLabel: {
+        fontSize: 14,
+        fontWeight: '600',
+        paddingVertical: 2,
     },
     title: {fontSize: 22, fontWeight: "bold", color: "#BB86FC"},
     section: {marginBottom: 20},
