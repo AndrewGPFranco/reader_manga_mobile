@@ -41,7 +41,7 @@ const MangaScreen = () => {
     const [id, setId] = useState<string | undefined>(route.params?.id);
     const [progress, setProgress] = useState<number>(1);
     const [isCarregandoProxima, setIsCarregandoProxima] = useState(false);
-    const [paginaAtual, setPaginaAtual] = useState<number>(0);
+    const [paginaAtual, setPaginaAtual] = useState<number>(1);
     const [isCarregando, setIsCarregando] = useState(true);
     const [erro, setErro] = useState<string | null>(null);
     const [capituloAtual, setCapituloAtual] = useState<iChapterData>(
@@ -65,7 +65,7 @@ const MangaScreen = () => {
             try {
                 const imagePath = await chapterStore.getPaginaDoCapitulo(
                     chapterId,
-                    pageNumber
+                    pageNumber - 1
                 );
                 setImagem(imagePath);
             } catch (error) {
@@ -76,7 +76,7 @@ const MangaScreen = () => {
         [chapterStore, id]);
 
     const proximaPagina = useCallback(() => {
-        if (paginaAtual < totalPages - 1) {
+        if (paginaAtual <= totalPages - 1) {
             const nextIndex = paginaAtual + 1;
             setPaginaAtual(nextIndex);
             setIsCarregandoProxima(true);
@@ -216,10 +216,10 @@ const MangaScreen = () => {
                             <TouchableOpacity
                                 style={[
                                     styles.navButton,
-                                    paginaAtual <= 0 && styles.disabledButton,
+                                    paginaAtual === 1 && styles.disabledButton,
                                 ]}
                                 onPress={paginaAnterior}
-                                disabled={paginaAtual <= 0}
+                                disabled={paginaAtual === 1}
                             >
                                 <Ionicons name="chevron-back" size={24} color="#fff"/>
                             </TouchableOpacity>
@@ -229,10 +229,10 @@ const MangaScreen = () => {
                             <TouchableOpacity
                                 style={[
                                     styles.navButton,
-                                    paginaAtual >= totalPages - 1 && styles.disabledButton,
+                                    paginaAtual >= totalPages && styles.disabledButton,
                                 ]}
                                 onPress={proximaPagina}
-                                disabled={paginaAtual >= totalPages - 1}
+                                disabled={paginaAtual >= totalPages}
                             >
                                 <Ionicons name="chevron-forward" size={24} color="#fff"/>
                             </TouchableOpacity>
