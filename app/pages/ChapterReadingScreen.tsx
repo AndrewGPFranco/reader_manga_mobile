@@ -142,9 +142,10 @@ const MangaScreen = () => {
         (async () => {
             if (route.params?.id && route.params?.progress) {
                 setId(route.params.id);
-                setProgress(route.params.progress);
+                const progressoInicial = route.params.progress;
+                setProgress(progressoInicial);
                 try {
-                    await lidaMudancaCapitulo(route.params.id, route.params.progress);
+                    await lidaMudancaCapitulo(route.params.id, progressoInicial);
                 } catch (error) {
                     console.error("Erro ao carregar o capítulo inicial:", error);
                     setErro("Erro ao carregar o capítulo inicial.");
@@ -223,7 +224,7 @@ const MangaScreen = () => {
                                 <Ionicons name="chevron-back" size={24} color="#fff"/>
                             </TouchableOpacity>
                             <Text style={styles.pageIndicator}>
-                                {paginaAtual + 1} / {totalPages}
+                                {paginaAtual} / {totalPages}
                             </Text>
                             <TouchableOpacity
                                 style={[

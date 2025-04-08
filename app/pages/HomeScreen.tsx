@@ -146,16 +146,6 @@ const HomeScreen = () => {
                             style={styles.button}
                             labelStyle={styles.buttonLabel}
                             icon={({color}) => <Ionicons name="bookmark" size={18} color={color}/>}
-                            onPress={() => navigation.navigate("ProgressReading")}
-                        >
-                            Leitura
-                        </Button>
-
-                        <Button
-                            mode="contained"
-                            style={styles.button}
-                            labelStyle={styles.buttonLabel}
-                            icon={({color}) => <Ionicons name="bookmark" size={18} color={color}/>}
                             onPress={() => navigation.navigate("Favorites")}
                         >
                             Favoritos
@@ -165,10 +155,20 @@ const HomeScreen = () => {
                             mode="contained"
                             style={styles.button}
                             labelStyle={styles.buttonLabel}
-                            icon={({color}) => <Ionicons name="bookmark" size={18} color={color}/>}
+                            icon={({color}) => <Ionicons name="book-outline" size={18} color={color}/>}
                             onPress={() => navigation.navigate("Library")}
                         >
                             Biblioteca
+                        </Button>
+
+                        <Button
+                            mode="contained"
+                            style={styles.button}
+                            labelStyle={styles.buttonLabel}
+                            icon={({color}) => <Ionicons name="hourglass-outline" size={18} color={color}/>}
+                            onPress={() => navigation.navigate("ProgressReading")}
+                        >
+                            Leitura
                         </Button>
                     </View>
                 </View>

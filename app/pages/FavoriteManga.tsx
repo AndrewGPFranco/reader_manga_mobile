@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     headerUnderline: {
         width: 60,
         height: 3,
-        backgroundColor: '#FF5252',
+        backgroundColor: '#10b981',
         borderRadius: 3,
     },
     loadingContainer: {
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     },
     accessButton: {
         width: '100%',
-        backgroundColor: '#FF5252',
+        backgroundColor: '#10b981',
         paddingVertical: 8,
         borderRadius: 8,
         alignItems: 'center',
