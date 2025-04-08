@@ -4,7 +4,6 @@ import {
     Alert,
     Dimensions,
     Image,
-    KeyboardAvoidingView,
     Modal,
     StyleSheet,
     Text,
@@ -89,14 +88,20 @@ const MangaScreen = () => {
 
     const paginaAnterior = useCallback(() => {
         if (paginaAtual > 0) {
-            setPaginaAtual((prev) => prev - 1);
+            const nextIndex = paginaAtual - 1;
+            setPaginaAtual(nextIndex);
+            setIsCarregandoProxima(true);
+            carregaPaginaUnica(id, nextIndex).finally(() =>
+                setIsCarregandoProxima(false)
+            );
         }
-    }, [paginaAtual]);
+    }, [paginaAtual, id, carregaPaginaUnica]);
 
     const lidaErroImagem = useCallback(() => {
         const errorMsg = 'Falha ao carregar a imagem.';
         setErro(errorMsg);
         Alert.alert('Erro', errorMsg);
+        navigation.navigate("Home");
     }, []);
 
     const navegaParaTelaDetalhes = useCallback(() => {
@@ -117,14 +122,12 @@ const MangaScreen = () => {
             try {
                 const chapter = await chapterStore.getReadingProgress(chapterId);
                 setCapituloAtual(chapter);
+                setTotalPages(chapter.numberPages);
 
-                const total = await chapterStore.getQuantidadePaginasDoCapitulo(
-                    chapterId
-                );
-                setTotalPages(total);
+                const validProgress = Math.min(Math.max(0, progress), chapter.numberPages - 1);
+                setPaginaAtual(validProgress);
                 setImagem('');
-                await carregaPaginaUnica(chapterId, progress);
-                setPaginaAtual(progress);
+                await carregaPaginaUnica(chapterId, validProgress);
             } catch (e) {
                 console.error('Erro ao carregar capítulo:', e);
                 setErro('Erro ao carregar o capítulo.');
@@ -212,23 +215,23 @@ const MangaScreen = () => {
                             <TouchableOpacity
                                 style={[
                                     styles.navButton,
-                                    paginaAtual === 0 && styles.disabledButton,
+                                    paginaAtual <= 0 && styles.disabledButton,
                                 ]}
                                 onPress={paginaAnterior}
-                                disabled={paginaAtual === 0}
+                                disabled={paginaAtual <= 0}
                             >
                                 <Ionicons name="chevron-back" size={24} color="#fff"/>
                             </TouchableOpacity>
                             <Text style={styles.pageIndicator}>
-                                {paginaAtual} / {totalPages}
+                                {paginaAtual + 1} / {totalPages}
                             </Text>
                             <TouchableOpacity
                                 style={[
                                     styles.navButton,
-                                    paginaAtual === totalPages - 1 && styles.disabledButton,
+                                    paginaAtual >= totalPages - 1 && styles.disabledButton,
                                 ]}
                                 onPress={proximaPagina}
-                                disabled={paginaAtual === totalPages - 1}
+                                disabled={paginaAtual >= totalPages - 1}
                             >
                                 <Ionicons name="chevron-forward" size={24} color="#fff"/>
                             </TouchableOpacity>
