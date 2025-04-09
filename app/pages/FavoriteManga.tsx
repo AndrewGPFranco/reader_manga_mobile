@@ -106,7 +106,7 @@ const FavoriteMangasScreen = () => {
                         </Text>
                         <TouchableOpacity
                             style={styles.exploreButton}
-                            onPress={() => navigation.navigate('MangaExplore')}
+                            onPress={() => navigation.navigate('AllMangasList')}
                         >
                             <Text style={styles.exploreButtonText}>Explorar Mangás</Text>
                         </TouchableOpacity>
