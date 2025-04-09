@@ -2,22 +2,21 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {
     ActivityIndicator,
     Alert,
-    Dimensions,
     Image,
-    Modal,
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
 } from 'react-native';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import useChapterStore from '@/app/stores/chapterStore';
 import iChapterData from '../_types/iChapter';
+import {Button} from "react-native-paper";
 
 type NavigationProps = {
     navigate: (screen: string, params?: any) => void;
     addListener: any;
+    dispatch: (action: any) => void;
 };
 
 type MangaViewerRouteParams = {
@@ -31,8 +30,6 @@ type MangaScreenRouteProp = RouteProp<
     string
 >;
 
-const {width, height} = Dimensions.get('screen');
-
 const MangaScreen = () => {
     const route = useRoute<MangaScreenRouteProp>();
     const navigation = useNavigation<NavigationProps>();
@@ -44,11 +41,10 @@ const MangaScreen = () => {
     const [paginaAtual, setPaginaAtual] = useState<number>(1);
     const [isCarregando, setIsCarregando] = useState(true);
     const [erro, setErro] = useState<string | null>(null);
-    const [capituloAtual, setCapituloAtual] = useState<iChapterData>(
-        {} as iChapterData
-    );
+    const [capituloAtual, setCapituloAtual] = useState<iChapterData>({} as iChapterData);
     const [imagem, setImagem] = useState<string>('');
     const [totalPages, setTotalPages] = useState(0);
+    const [imagemCarregada, setImagemCarregada] = useState(false);
 
     const atualizaProgresso = useCallback(async () => {
         if (capituloAtual?.status !== 'FINISHED' && id) {
@@ -63,20 +59,25 @@ const MangaScreen = () => {
                 return;
             }
             try {
+                setImagemCarregada(false);
                 const imagePath = await chapterStore.getPaginaDoCapitulo(
                     chapterId,
-                    pageNumber - 1
+                    pageNumber
                 );
                 setImagem(imagePath);
+                setImagemCarregada(true);
+
+                if (totalPages > 0)
+                    chapterStore.precarregarPaginas(chapterId, pageNumber, totalPages);
             } catch (error) {
                 console.error(`Erro ao carregar página ${pageNumber}:`, error);
                 setErro('Erro ao carregar a página.');
             }
         },
-        [chapterStore, id]);
+        [chapterStore, totalPages]);
 
     const proximaPagina = useCallback(() => {
-        if (paginaAtual <= totalPages - 1) {
+        if (paginaAtual < totalPages) {
             const nextIndex = paginaAtual + 1;
             setPaginaAtual(nextIndex);
             setIsCarregandoProxima(true);
@@ -87,7 +88,7 @@ const MangaScreen = () => {
     }, [paginaAtual, totalPages, id, carregaPaginaUnica]);
 
     const paginaAnterior = useCallback(() => {
-        if (paginaAtual > 0) {
+        if (paginaAtual > 1) {
             const nextIndex = paginaAtual - 1;
             setPaginaAtual(nextIndex);
             setIsCarregandoProxima(true);
@@ -102,7 +103,7 @@ const MangaScreen = () => {
         setErro(errorMsg);
         Alert.alert('Erro', errorMsg);
         navigation.navigate("Home");
-    }, []);
+    }, [navigation]);
 
     const navegaParaTelaDetalhes = useCallback(() => {
         navigation.navigate('Home');
@@ -124,7 +125,7 @@ const MangaScreen = () => {
                 setCapituloAtual(chapter);
                 setTotalPages(chapter.numberPages);
 
-                const validProgress = Math.min(Math.max(0, progress), chapter.numberPages - 1);
+                const validProgress = Math.max(1, Math.min(progress, chapter.numberPages));
                 setPaginaAtual(validProgress);
                 setImagem('');
                 await carregaPaginaUnica(chapterId, validProgress);
@@ -162,8 +163,10 @@ const MangaScreen = () => {
                 e.preventDefault();
                 try {
                     await atualizaProgresso();
+                    navigation.dispatch(e.data.action);
                 } catch (error) {
                     console.error("Erro ao atualizar o progresso antes de sair:", error);
+                    navigation.dispatch(e.data.action);
                 }
             }
         );
@@ -173,12 +176,10 @@ const MangaScreen = () => {
         };
     }, [navigation, atualizaProgresso]);
 
-    const renderizaConteudo = () => {
+    const renderContent = () => {
         if (isCarregando) {
             return (
-                <View style={styles.loaderContainer}>
-                    <ActivityIndicator size="large" color="#BB86FC"/>
-                </View>
+                <ActivityIndicator size="large" color="#0000ff"/>
             );
         }
 
@@ -186,72 +187,51 @@ const MangaScreen = () => {
             return (
                 <View style={styles.errorContainer}>
                     <Text style={styles.errorText}>{erro}</Text>
+                    <Button onPress={navegaParaTelaDetalhes}>Voltar</Button>
                 </View>
             );
         }
 
         return (
-            <View style={styles.contentContainer}>
-                <TouchableOpacity
-                    style={styles.btnBack}
-                    onPress={async () => {
-                        await atualizaProgresso();
-                        navegaParaTelaDetalhes();
-                    }}
-                >
-                    <View style={styles.backIconWrapper}>
-                        <Ionicons name="arrow-back" size={32} color="#fff"/>
-                    </View>
-                </TouchableOpacity>
-
-                {imagem.length > 0 && (
-                    <View style={styles.imageWrapper}>
+            <>
+                <View style={styles.imageContainer}>
+                    {!imagemCarregada && <ActivityIndicator size="large" color="#0000ff"/>}
+                    {imagem ? (
                         <Image
                             source={{uri: imagem}}
-                            style={styles.fullscreenImage}
-                            resizeMode="contain"
+                            style={[styles.image, !imagemCarregada && styles.hiddenImage]}
+                            onLoad={() => setImagemCarregada(true)}
                             onError={lidaErroImagem}
-                        />
-                        <View style={styles.navigationButtons}>
-                            <TouchableOpacity
-                                style={[
-                                    styles.navButton,
-                                    paginaAtual === 1 && styles.disabledButton,
-                                ]}
-                                onPress={paginaAnterior}
-                                disabled={paginaAtual === 1}
-                            >
-                                <Ionicons name="chevron-back" size={24} color="#fff"/>
-                            </TouchableOpacity>
-                            <Text style={styles.pageIndicator}>
-                                {paginaAtual} / {totalPages}
-                            </Text>
-                            <TouchableOpacity
-                                style={[
-                                    styles.navButton,
-                                    paginaAtual >= totalPages && styles.disabledButton,
-                                ]}
-                                onPress={proximaPagina}
-                                disabled={paginaAtual >= totalPages}
-                            >
-                                <Ionicons name="chevron-forward" size={24} color="#fff"/>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                )}
+                            resizeMode="contain"/>
+                    ) : null}
+                </View><View style={styles.controls}>
+                <TouchableOpacity
+                    onPress={paginaAnterior}
+                    disabled={paginaAtual <= 1 || isCarregandoProxima}
+                    style={[styles.navButton, (paginaAtual <= 1 || isCarregandoProxima) && styles.disabledButton]}
+                >
+                    <Text>Anterior</Text>
+                </TouchableOpacity>
+
+                <Text style={styles.pageInfo}>
+                    {paginaAtual} / {totalPages}
+                </Text>
+
+                <TouchableOpacity
+                    onPress={proximaPagina}
+                    disabled={paginaAtual >= totalPages || isCarregandoProxima}
+                    style={[styles.navButton, (paginaAtual >= totalPages || isCarregandoProxima) && styles.disabledButton]}
+                >
+                    <Text>Próxima</Text>
+                </TouchableOpacity>
             </View>
+            </>
         );
-    };
+    }
 
     return (
         <View style={styles.container}>
-            <Modal visible={false} transparent={true} animationType="fade">
-                <View style={styles.modalContainer}>
-                    <Text>Finalizado!</Text>
-                </View>
-            </Modal>
-
-            {renderizaConteudo()}
+            {renderContent()}
         </View>
     );
 };
@@ -259,100 +239,49 @@ const MangaScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#121212',
-        width: '100%',
-        height: '100%',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        backgroundColor: '#000',
     },
-    loaderContainer: {
+    imageContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    image: {
         width: '100%',
         height: '100%',
+    },
+    hiddenImage: {
+        opacity: 0,
+    },
+    controls: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 10,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    navButton: {
+        padding: 10,
+        backgroundColor: '#444',
+        borderRadius: 5,
+    },
+    disabledButton: {
+        opacity: 0.5,
+    },
+    pageInfo: {
+        color: '#fff',
+        fontSize: 16,
     },
     errorContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 16,
-        backgroundColor: 'rgba(255, 0, 0, 0.1)',
-        width: '100%',
-        height: '100%',
+        padding: 20,
     },
     errorText: {
-        color: '#CF6679',
-        textAlign: 'center',
-    },
-    contentContainer: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-    },
-    modalContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        width: '100%',
-        height: '100%',
-    },
-    fullscreenImage: {
-        width: width,
-        height: height * 1.1,
-        backgroundColor: '#000',
-    },
-    btnBack: {
-        position: 'absolute',
-        top: 60,
-        left: 20,
-        zIndex: 10,
-    },
-    backIconWrapper: {
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
-        borderRadius: 25,
-        padding: 8,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    imageWrapper: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: width,
-        height: height,
-        overflow: 'hidden',
-    },
-    navigationButtons: {
-        position: 'absolute',
-        bottom: 40,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        width: width * 0.9,
-        zIndex: 10,
-    },
-    navButton: {
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
-        padding: 10,
-        borderRadius: 25,
-    },
-    disabledButton: {
-        opacity: 0.5,
-    },
-    pageIndicator: {
-        color: '#fff',
+        color: 'red',
         fontSize: 16,
-        backgroundColor: 'rgba(0, 0, 0, 0.6)',
-        padding: 5,
-        borderRadius: 10,
+        marginBottom: 20,
     },
 });
 
