@@ -1,11 +1,11 @@
-import { create } from "zustand";
+import {create} from "zustand";
 import MangaStore from "./_types/iMangaStore";
 import iMangaData from "../_types/iManga";
-import { api } from "../network/axiosInstance";
+import {api} from "../network/axiosInstance";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
 import iDecodedToken from "../_types/iDecodedToken";
-import { UserData } from "../class/UserData";
+import {UserData} from "../class/UserData";
 
 const useMangaStore = create<MangaStore>((set, get) => ({
     manga: [] as Array<iMangaData>,
@@ -145,7 +145,7 @@ const useMangaStore = create<MangaStore>((set, get) => ({
                     }
                 }
             )
-            return { statusCode: response.status, message: response.data }
+            return {statusCode: response.status, message: response.data}
         } catch (error: any) {
             console.error(error)
             return {
@@ -242,6 +242,19 @@ const useMangaStore = create<MangaStore>((set, get) => ({
                 }
             });
         return result.data;
+    },
+
+    async adicionaNotaAoManga(idManga: number, nota: number) {
+        const data = {
+            idManga: idManga,
+            nota: nota
+        }
+
+        await api.post(`/manga/avaliacao`, data, {
+            headers: {
+                Authorization: `${await get().getTokenUser()}`
+            }
+        });
     }
 }));
 

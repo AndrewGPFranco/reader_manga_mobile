@@ -6,7 +6,15 @@ class MangaService {
         this.useManga = useManga;
     }
 
+    avaliaManga(idManga: number, nota: string): void {
+        let notaConvertida = parseInt(nota);
 
+        try {
+            this.useManga.adicionaNotaAoManga(idManga, notaConvertida);
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 export default MangaService;

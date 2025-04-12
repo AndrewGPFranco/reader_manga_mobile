@@ -11,18 +11,18 @@ type NavigationProps = {
 };
 
 const FavoriteMangasScreen = () => {
-    const [favoriteManga, setFavoriteManga] = useState<Array<iMangaData>>([]);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-
     const mangaStore = useMangaStore();
     const navigation = useNavigation<NavigationProps>();
+
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [mangasFavoritos, setMangasFavoritos] = useState<Array<iMangaData>>([]);
 
     useEffect(() => {
         const loadFavorites = async () => {
             setIsLoading(true);
             try {
                 const favorites = await mangaStore.getAllFavorites();
-                setFavoriteManga(favorites);
+                setMangasFavoritos(favorites);
             } catch (error) {
                 console.error("Erro ao carregar favoritos:", error);
             } finally {
@@ -50,7 +50,7 @@ const FavoriteMangasScreen = () => {
                 />
                 <View style={styles.ratingContainer}>
                     <Ionicons name="star" size={14} color="#FFD700"/>
-                    <Text style={styles.ratingText}>{`${item.nota}.0`}</Text>
+                    <Text style={styles.ratingText}>{item.nota != null ? `${item.nota}.0` : "N/I"}</Text>
                 </View>
             </View>
             <View style={styles.cardContent}>
@@ -88,9 +88,9 @@ const FavoriteMangasScreen = () => {
             {renderHeader()}
 
             <View style={styles.containerCard}>
-                {favoriteManga.length > 0 ? (
+                {mangasFavoritos.length > 0 ? (
                     <FlatList
-                        data={favoriteManga}
+                        data={mangasFavoritos}
                         renderItem={renderMangaItem}
                         keyExtractor={item => item.id.toString()}
                         contentContainerStyle={styles.cardContainer}
