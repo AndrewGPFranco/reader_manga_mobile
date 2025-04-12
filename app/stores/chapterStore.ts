@@ -1,14 +1,18 @@
-import { create } from "zustand";
+import {create} from "zustand";
 import iChapterData from "../_types/iChapter";
-import { api } from "../network/axiosInstance";
+import {api} from "../network/axiosInstance";
 import ChapterStore from "./_types/iChapterStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from 'expo-file-system';
 
 const useChapterStore = create<ChapterStore>((set, get) => ({
+    paginaCache: {},
+    tamanhoCache: 10,
+    buscaAtual: new Set(),
+    filaPreBusca: new Set(),
+    sizePaginaCapitulo: null,
     chapter: {} as Array<iChapterData>,
     allChapter: [] as Array<iChapterData>,
-    sizePaginaCapitulo: null,
 
     async getTokenUser() {
         try {
@@ -153,28 +157,108 @@ const useChapterStore = create<ChapterStore>((set, get) => ({
     },
 
     async getPaginaDoCapitulo(idCapitulo: string, pageNumber: number) {
-        const response = await api.get(`/chapter/image/${idCapitulo}/${pageNumber}`, {
-            responseType: 'blob',
-            headers: {
-                Authorization: `${await get().getTokenUser()}`,
-            },
-        });
+        const cacheKey = `${idCapitulo}-${pageNumber}`;
 
-        const reader = new FileReader();
-        const base64 = await new Promise<string>((resolve, reject) => {
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(response.data);
-        });
+        if (this.paginaCache[cacheKey]) {
+            this.paginaCache[cacheKey].lastAccessed = Date.now();
+            return this.paginaCache[cacheKey].path;
+        }
 
-        const base64Data = base64.split(',')[1];
-        const path = `${FileSystem.cacheDirectory}page-${idCapitulo}-${pageNumber}.jpg`;
+        if (this.buscaAtual.has(cacheKey)) {
+            return new Promise<string>((resolve) => {
+                const checkCache = setInterval(() => {
+                    if (this.paginaCache[cacheKey]) {
+                        clearInterval(checkCache);
+                        resolve(this.paginaCache[cacheKey].path);
+                    }
+                }, 100);
+            });
+        }
 
-        await FileSystem.writeAsStringAsync(path, base64Data, {
-            encoding: FileSystem.EncodingType.Base64,
-        });
+        this.buscaAtual.add(cacheKey);
 
-        return path;
+        try {
+            const response = await api.get(`/chapter/image/${idCapitulo}/${pageNumber}`, {
+                responseType: 'blob',
+                headers: {
+                    Authorization: `${await this.getTokenUser()}`,
+                },
+            });
+
+            const reader = new FileReader();
+            const base64 = await new Promise<string>((resolve, reject) => {
+                reader.onloadend = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(response.data);
+            });
+
+            const base64Data = base64.split(',')[1];
+            const path = `${FileSystem.cacheDirectory}page-${idCapitulo}-${pageNumber}.jpg`;
+
+            await FileSystem.writeAsStringAsync(path, base64Data, {
+                encoding: FileSystem.EncodingType.Base64,
+            });
+
+            this.paginaCache[cacheKey] = {path, lastAccessed: Date.now()};
+
+            this.cleanCache();
+
+            this.buscaAtual.delete(cacheKey);
+            return path;
+        } catch (error) {
+            this.buscaAtual.delete(cacheKey);
+            throw error;
+        }
+    },
+
+    cleanCache() {
+        const cache = Object.entries(this.paginaCache);
+        if (cache.length <= this.tamanhoCache) return;
+
+        const dadosOrdenados = cache
+            .sort((a: any, b: any) => a[1].lastAccessed - b[1].lastAccessed);
+
+        const dadosParaRemover = dadosOrdenados.slice(0, cache.length - this.tamanhoCache);
+
+        // @ts-ignore
+        for (const [key, {path}] of dadosParaRemover) {
+            delete this.paginaCache[key];
+            FileSystem.deleteAsync(path).catch(console.error);
+        }
+    },
+
+    async precarregarPaginas(idCapitulo: string, paginaAtual: number, totalPaginas: number) {
+        this.filaPreBusca.clear();
+
+        const paginas = [];
+
+        if (paginaAtual < totalPaginas - 1)
+            paginas.push(paginaAtual + 1);
+
+        if (paginaAtual > 0)
+            paginas.push(paginaAtual - 1);
+
+        if (paginaAtual < totalPaginas - 2)
+            paginas.push(paginaAtual + 2);
+
+        for (const numeroPag of paginas) {
+            const cacheKey = `${idCapitulo}-${numeroPag}`;
+            if (!this.paginaCache[cacheKey] && !this.buscaAtual.has(cacheKey)) {
+                this.filaPreBusca.add(cacheKey);
+                this.processPreloadQueue(idCapitulo);
+            }
+        }
+    },
+
+    async processPreloadQueue(idCapitulo: string) {
+        if (this.filaPreBusca.size === 0) return;
+
+        const [primeiraKey] = this.filaPreBusca;
+        this.filaPreBusca.delete(primeiraKey);
+
+        const numeroPagina = parseInt(primeiraKey.split('-')[1]);
+
+        this.getPaginaDoCapitulo(idCapitulo, numeroPagina).catch(console.error);
     },
 
     async getQuantidadePaginasDoCapitulo(idCapitulo: string) {

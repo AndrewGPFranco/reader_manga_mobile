@@ -50,7 +50,7 @@ const FavoriteMangasScreen = () => {
                 />
                 <View style={styles.ratingContainer}>
                     <Ionicons name="star" size={14} color="#FFD700"/>
-                    <Text style={styles.ratingText}>5.0</Text>
+                    <Text style={styles.ratingText}>{`${item.nota}.0`}</Text>
                 </View>
             </View>
             <View style={styles.cardContent}>

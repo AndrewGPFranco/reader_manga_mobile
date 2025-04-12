@@ -4,6 +4,10 @@ interface ChapterStore {
     chapter: Array<iChapterData>;
     allChapter: Array<iChapterData>;
     sizePaginaCapitulo: null;
+    paginaCache: any,
+    tamanhoCache: number,
+    filaPreBusca: any,
+    buscaAtual: any,
     getTokenUser(): Promise<string | null | undefined>;
     getChapterByID(id: string): Promise<Array<iChapterData>>;
     getAllChapter(pageNumber: number, size: number): Promise<any>;
@@ -25,7 +29,10 @@ interface ChapterStore {
     ): Promise<void>;
     getReadingProgress(idChapter: string): Promise<iChapterData>;
     getAllReadingProgress(pageNumber: number): Promise<Array<iChapterData>>;
-    progressReset(idChapter: number): Promise<string>
+    progressReset(idChapter: number): Promise<string>;
+    processPreloadQueue(idCapitulo: string): any;
+    precarregarPaginas(idCapitulo: string, paginaAtual: number, totalPaginas: number): any;
+    cleanCache(): void;
 }
 
 export default ChapterStore;

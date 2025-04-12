@@ -3,15 +3,16 @@ import type iChapterData from "../_types/iChapter";
 
 export default interface iMangaData {
   id: number;
-  title: string;
-  description: string;
+  nota: number;
   size: number;
-  creationDate: Date;
+  title: string;
+  image: string;
   endDate: Date;
-  status: StatusType;
   author: string;
   gender: string;
-  image: string;
-  chapters: iChapterData[];
   favorite: boolean;
+  creationDate: Date;
+  status: StatusType;
+  description: string;
+  chapters: iChapterData[];
 }

@@ -1,4 +1,3 @@
-import React, {useCallback, useEffect, useState} from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -8,10 +7,11 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
-import useChapterStore from '@/app/stores/chapterStore';
-import iChapterData from '../_types/iChapter';
 import {Button} from "react-native-paper";
+import iChapterData from '../_types/iChapter';
+import useChapterStore from '@/app/stores/chapterStore';
+import React, {useCallback, useEffect, useState} from 'react';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 
 type NavigationProps = {
     navigate: (screen: string, params?: any) => void;
@@ -36,7 +36,6 @@ const MangaScreen = () => {
     const chapterStore = useChapterStore();
 
     const [id, setId] = useState<string | undefined>(route.params?.id);
-    const [progress, setProgress] = useState<number>(1);
     const [isCarregandoProxima, setIsCarregandoProxima] = useState(false);
     const [paginaAtual, setPaginaAtual] = useState<number>(1);
     const [isCarregando, setIsCarregando] = useState(true);
@@ -45,6 +44,7 @@ const MangaScreen = () => {
     const [imagem, setImagem] = useState<string>('');
     const [totalPages, setTotalPages] = useState(0);
     const [imagemCarregada, setImagemCarregada] = useState(false);
+    const [inicializacaoConcluida, setInicializacaoConcluida] = useState(false);
 
     const atualizaProgresso = useCallback(async () => {
         if (capituloAtual?.status !== 'FINISHED' && id) {
@@ -58,11 +58,12 @@ const MangaScreen = () => {
                 console.error('Chapter ID is undefined');
                 return;
             }
+
             try {
                 setImagemCarregada(false);
                 const imagePath = await chapterStore.getPaginaDoCapitulo(
                     chapterId,
-                    pageNumber
+                    pageNumber - 1
                 );
                 setImagem(imagePath);
                 setImagemCarregada(true);
@@ -110,7 +111,7 @@ const MangaScreen = () => {
     }, [navigation]);
 
     const lidaMudancaCapitulo = useCallback(
-        async (chapterId: string | undefined, progress: number) => {
+        async (chapterId: string | undefined, initialPage: number) => {
             if (!chapterId) {
                 setErro('ID do capítulo inválido.');
                 setIsCarregando(false);
@@ -125,10 +126,12 @@ const MangaScreen = () => {
                 setCapituloAtual(chapter);
                 setTotalPages(chapter.numberPages);
 
-                const validProgress = Math.max(1, Math.min(progress, chapter.numberPages));
-                setPaginaAtual(validProgress);
+                const validPage = Math.max(1, Math.min(initialPage, chapter.numberPages));
+                setPaginaAtual(validPage);
+
                 setImagem('');
-                await carregaPaginaUnica(chapterId, validProgress);
+
+                await carregaPaginaUnica(chapterId, validPage);
             } catch (e) {
                 console.error('Erro ao carregar capítulo:', e);
                 setErro('Erro ao carregar o capítulo.');
@@ -140,21 +143,25 @@ const MangaScreen = () => {
     );
 
     useEffect(() => {
-        (async () => {
-            if (route.params?.id && route.params?.progress) {
+        const inicializarTela = async () => {
+            if (route.params?.id) {
                 setId(route.params.id);
-                const progressoInicial = route.params.progress;
-                setProgress(progressoInicial);
+
+                const paginaInicial = route.params.progress ?? 1;
+
                 try {
-                    await lidaMudancaCapitulo(route.params.id, progressoInicial);
+                    await lidaMudancaCapitulo(route.params.id, paginaInicial);
+                    setInicializacaoConcluida(true);
                 } catch (error) {
                     console.error("Erro ao carregar o capítulo inicial:", error);
                     setErro("Erro ao carregar o capítulo inicial.");
                     setIsCarregando(false);
                 }
             }
-        })();
-    }, [route.params, lidaMudancaCapitulo]);
+        };
+
+        inicializarTela().then(() => console.log("Tela iniciada"));
+    }, [route.params]);
 
     useEffect(() => {
         const unsubscribeBeforeRemove = navigation.addListener(
@@ -163,10 +170,10 @@ const MangaScreen = () => {
                 e.preventDefault();
                 try {
                     await atualizaProgresso();
-                    navigation.dispatch(e.data.action);
+                    navigation.navigate("Home");
                 } catch (error) {
                     console.error("Erro ao atualizar o progresso antes de sair:", error);
-                    navigation.dispatch(e.data.action);
+                    navigation.navigate("Home");
                 }
             }
         );
@@ -204,27 +211,28 @@ const MangaScreen = () => {
                             onError={lidaErroImagem}
                             resizeMode="contain"/>
                     ) : null}
-                </View><View style={styles.controls}>
-                <TouchableOpacity
-                    onPress={paginaAnterior}
-                    disabled={paginaAtual <= 1 || isCarregandoProxima}
-                    style={[styles.navButton, (paginaAtual <= 1 || isCarregandoProxima) && styles.disabledButton]}
-                >
-                    <Text>Anterior</Text>
-                </TouchableOpacity>
+                </View>
+                <View style={styles.controls}>
+                    <TouchableOpacity
+                        onPress={paginaAnterior}
+                        disabled={paginaAtual <= 1 || isCarregandoProxima}
+                        style={[styles.navButton, (paginaAtual <= 1 || isCarregandoProxima) && styles.disabledButton]}
+                    >
+                        <Text>Anterior</Text>
+                    </TouchableOpacity>
 
-                <Text style={styles.pageInfo}>
-                    {paginaAtual} / {totalPages}
-                </Text>
+                    <Text style={styles.pageInfo}>
+                        {paginaAtual} / {totalPages}
+                    </Text>
 
-                <TouchableOpacity
-                    onPress={proximaPagina}
-                    disabled={paginaAtual >= totalPages || isCarregandoProxima}
-                    style={[styles.navButton, (paginaAtual >= totalPages || isCarregandoProxima) && styles.disabledButton]}
-                >
-                    <Text>Próxima</Text>
-                </TouchableOpacity>
-            </View>
+                    <TouchableOpacity
+                        onPress={proximaPagina}
+                        disabled={paginaAtual >= totalPages || isCarregandoProxima}
+                        style={[styles.navButton, (paginaAtual >= totalPages || isCarregandoProxima) && styles.disabledButton]}
+                    >
+                        <Text>Próxima</Text>
+                    </TouchableOpacity>
+                </View>
             </>
         );
     }
