@@ -6,14 +6,14 @@ import {
     Image,
     TouchableOpacity,
     Modal,
-    StyleSheet, Dimensions,
+    StyleSheet,
+    Dimensions,
 } from 'react-native';
 import {useRoute, useNavigation} from '@react-navigation/native';
-
 import {formatDate} from '@/app/utils/utils';
 import {StatusType} from '@/app/enums/StatusType';
 import useMangaStore from '@/app/stores/mangaStore';
-import {Card} from "react-native-paper";
+import {Card} from 'react-native-paper';
 
 export default function MangaDetails() {
     const route = useRoute<any>();
@@ -22,6 +22,7 @@ export default function MangaDetails() {
     const [manga, setManga] = useState<any>({});
     const [chapters, setChapters] = useState<any[]>([]);
     const [showDialog, setShowDialog] = useState(false);
+    const [isFormNota, setIsFormNota] = useState<boolean>(false);
     const [selectedChapter, setSelectedChapter] = useState<any>(null);
 
     const mangaStore = useMangaStore();
@@ -58,7 +59,15 @@ export default function MangaDetails() {
                 <ScrollView showsVerticalScrollIndicator={false}>
                     <View style={styles.header}>
                         <Image source={{uri: manga.image}} style={styles.image}/>
-                        <Text style={styles.title}>{manga.title}</Text>
+                        <View>
+                            <Text style={styles.title}>{manga.title}</Text>
+                            <TouchableOpacity
+                                style={styles.accessButton}
+                                onPress={() => setIsFormNota(true)}
+                            >
+                                <Text style={styles.buttonText}>Avaliar</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
 
                     <View style={styles.meta}>
@@ -98,16 +107,16 @@ export default function MangaDetails() {
                             >
                                 <Text style={[
                                     styles.chapterTitle,
-                                    chapter.status === StatusType.FINISHED && {color: '#black'}
+                                    chapter.status === StatusType.FINISHED && {color: '#000'}
                                 ]}>{chapter.title}</Text>
                             </TouchableOpacity>
                             <Text style={[
                                 styles.metaText,
-                                chapter.status === StatusType.FINISHED && {color: '#black'}
+                                chapter.status === StatusType.FINISHED && {color: '#000'}
                             ]}>Páginas: {chapter.numberPages}</Text>
                             <Text style={[
                                 styles.metaText,
-                                chapter.status === StatusType.FINISHED && {color: '#black'}
+                                chapter.status === StatusType.FINISHED && {color: '#000'}
                             ]}>
                                 Progresso:{' '}
                                 {chapter.status === StatusType.FINISHED
@@ -119,6 +128,7 @@ export default function MangaDetails() {
                         </View>
                     ))}
                 </ScrollView>
+
                 <Modal visible={showDialog} transparent animationType="fade">
                     <View style={styles.modalBackdrop}>
                         <View style={styles.modalCard}>
@@ -155,6 +165,23 @@ export default function MangaDetails() {
                                     <Text style={styles.buttonText}>Não</Text>
                                 </TouchableOpacity>
                             </View>
+                        </View>
+                    </View>
+                </Modal>
+
+                <Modal
+                    visible={isFormNota}
+                    transparent={true}
+                    animationType="fade"
+                    onRequestClose={() => setIsFormNota(false)}
+                >
+                    <View style={styles.modalBackdrop}>
+                        <View style={styles.modalCard}>
+                            <Text style={styles.modalTitle}>Formulário de Avaliação</Text>
+                            <TouchableOpacity onPress={() => setIsFormNota(false)} style={styles.buttonCancel}>
+                                // TODO: implementar
+                                <Text style={styles.buttonText}>Fechar</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </Modal>
@@ -267,10 +294,19 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 24,
         borderRadius: 10,
+        marginTop: 10,
     },
     buttonText: {
         color: '#FFFFFF',
         fontWeight: '600',
         fontSize: 16,
+    },
+    accessButton: {
+        marginTop: 15,
+        width: '100%',
+        backgroundColor: '#10b981',
+        paddingVertical: 3,
+        borderRadius: 8,
+        alignItems: 'center',
     },
 });
