@@ -61,7 +61,7 @@ const HomeScreen = () => {
     );
 
     useEffect(() => {
-        getMangas().then(() => console.log(""));
+        getMangas();
     }, []);
 
     const renderContent = () => {

@@ -6,8 +6,11 @@ class MangaService {
         this.useManga = useManga;
     }
 
-    avaliaManga(idManga: number, nota: string): void {
-        let notaConvertida = parseInt(nota);
+    avaliaManga(idManga: number, nota: string | null): void {
+        let notaConvertida: number | null = null;
+
+        if(nota != null)
+            notaConvertida = parseInt(nota)
 
         try {
             this.useManga.adicionaNotaAoManga(idManga, notaConvertida);

@@ -244,7 +244,7 @@ const useMangaStore = create<MangaStore>((set, get) => ({
         return result.data;
     },
 
-    async adicionaNotaAoManga(idManga: number, nota: number) {
+    async adicionaNotaAoManga(idManga: number, nota: number | null) {
         const data = {
             idManga: idManga,
             nota: nota

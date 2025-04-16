@@ -83,8 +83,8 @@ const JobScreen = () => {
     const mangaStore = useMangaStore();
 
     useEffect(() => {
-        getJobsDisponiveis().then(() => console.log(""));
-        getNomeDosMangasDisponiveis().then(() => console.log(""));
+        getJobsDisponiveis();
+        getNomeDosMangasDisponiveis();
         return () => {
             fechaEventSource();
         };

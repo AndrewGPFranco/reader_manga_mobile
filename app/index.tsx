@@ -7,8 +7,8 @@ import ProgressReadingScreen from "./pages/ProgressReadingScreen";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import MangaDetails from "./pages/MangaDetailsScreen";
 import ProfileScreen from "@/app/pages/ProfileScreen";
-import AllMangasList from "@/app/pages/AllMangasList";
-import FavoriteManga from "@/app/pages/FavoriteManga";
+import AllMangasList from "@/app/pages/AllMangasListScreen";
+import FavoriteManga from "@/app/pages/FavoriteMangaScreen";
 import MangaLibraryScreen from "@/app/pages/MangaLibraryScreen";
 
 const Stack = createNativeStackNavigator();

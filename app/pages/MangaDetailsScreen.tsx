@@ -37,25 +37,25 @@ export default function MangaDetails() {
   const mangaService = new MangaService(mangaStore);
 
   useEffect(() => {
-    const fetchManga = async () => {
-      const title = Array.isArray(route.params.title)
-        ? route.params.title[0]
-        : route.params.title;
-
-      const data: iMangaData = await mangaStore.getInfoManga(title);
-      setManga(data);
-
-      if (data.chapters) {
-        setChapters(
-          [...data.chapters].sort((a: iChapterData, b: iChapterData) =>
-            a.title.localeCompare(b.title)
-          )
-        );
-      }
-    };
-
     fetchManga();
   }, [route.params.title]);
+
+  const fetchManga = async () => {
+    const title = Array.isArray(route.params.title)
+      ? route.params.title[0]
+      : route.params.title;
+
+    const data: iMangaData = await mangaStore.getInfoManga(title);
+    setManga(data);
+
+    if (data.chapters) {
+      setChapters(
+        [...data.chapters].sort((a: iChapterData, b: iChapterData) =>
+          a.title.localeCompare(b.title)
+        )
+      );
+    }
+  };
 
   const verifyEndDate = (manga: any): string => {
     return manga.endDate ? formatDate(manga.endDate) : "Still on display.";
@@ -64,6 +64,25 @@ export default function MangaDetails() {
   const askContinueReading = (chapter: any) => {
     setSelectedChapter(chapter);
     setShowDialog(true);
+  };
+
+  const renderButtonNoteDelete = (manga: iMangaData) => {
+    if (manga.nota != null) {
+      return (
+        <TouchableOpacity
+          onPress={() => {
+            setIsFormNota(false);
+            mangaService.avaliaManga(manga.id, null);
+            setManga({} as iMangaData);
+            Alert.alert("Nota removida com sucesso!")
+            fetchManga();
+          }}
+          style={styles.buttonReset}
+        >
+          <Text style={styles.buttonText}>Remover nota</Text>
+        </TouchableOpacity>
+      );
+    }
   };
 
   return (
@@ -241,17 +260,18 @@ export default function MangaDetails() {
 
               <TouchableOpacity
                 onPress={() => {
-                    mangaService.avaliaManga(manga.id, nota), 
-                    setIsFormNota(false)
-                    Alert.alert("Avaliação enviada!")
-                    navigation.navigate("Home")
+                  mangaService.avaliaManga(manga.id, nota);
+                  setIsFormNota(false);
+                  Alert.alert("Avaliação enviada!");
+                  setManga({} as iMangaData)
+                  fetchManga()
                 }}
                 style={styles.buttonAvaliar}
               >
-                <Text style={styles.buttonText}>
-                    Avaliar
-                </Text>
+                <Text style={styles.buttonText}>Avaliar</Text>
               </TouchableOpacity>
+
+              {renderButtonNoteDelete(manga)}
 
               <TouchableOpacity
                 onPress={() => setIsFormNota(false)}
@@ -412,9 +432,15 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 8,
   },
+  buttonReset: {
+    backgroundColor: "#008555",
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
   buttonText: {
     color: "#fff",
     fontWeight: "bold",
     textAlign: "center",
-  },
+  }
 });
