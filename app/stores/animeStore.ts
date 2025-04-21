@@ -37,3 +37,5 @@ const useAnimeStore = create<AnimeStore>((set, get) => ({
         return response.data;
     }
 }));
+
+export default useAnimeStore;
