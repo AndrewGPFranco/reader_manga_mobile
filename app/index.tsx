@@ -10,6 +10,7 @@ import ProfileScreen from "@/app/pages/ProfileScreen";
 import AllMangasList from "@/app/pages/AllMangasListScreen";
 import FavoriteManga from "@/app/pages/FavoriteMangaScreen";
 import MangaLibraryScreen from "@/app/pages/MangaLibraryScreen";
+import AnimesListScreen from "@/app/pages/AnimesListScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +26,7 @@ export default function App() {
       <Stack.Screen name="Library" options={{ headerShown: false }} component={MangaLibraryScreen} />
       <Stack.Screen name="AllMangasList" options={{ headerShown: false }} component={AllMangasList} />
       <Stack.Screen name="RegisterUser" options={{ headerShown: false }} component={RegisterScreen} />
+      <Stack.Screen name="AllAnimesList" options={{ headerShown: false }} component={AnimesListScreen} />
       <Stack.Screen name="ChapterReading" options={{ headerShown: false }} component={ChapterReadingScreen} />
       <Stack.Screen name="ProgressReading" options={{ headerShown: false }} component={ProgressReadingScreen} />
     </Stack.Navigator>

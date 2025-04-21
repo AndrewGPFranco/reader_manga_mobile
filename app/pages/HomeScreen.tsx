@@ -170,6 +170,16 @@ const HomeScreen = () => {
                         >
                             Leitura
                         </Button>
+
+                        <Button
+                            mode="contained"
+                            style={styles.button}
+                            labelStyle={styles.buttonLabel}
+                            icon={({color}) => <Ionicons name="hourglass-outline" size={18} color={color}/>}
+                            onPress={() => navigation.navigate("AllAnimesList")}
+                        >
+                            Animes
+                        </Button>
                     </View>
                 </View>
 
