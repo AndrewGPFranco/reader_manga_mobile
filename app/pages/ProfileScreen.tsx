@@ -3,10 +3,7 @@ import {useEffect, useState} from "react";
 import useAuthStore from "@/app/stores/authStore";
 import {useNavigation} from "@react-navigation/native";
 import {UserSession} from "@/app/class/UserSession";
-
-type NavigationProps = {
-    navigate: (screen: string, params?: any) => void;
-};
+import {NavigationProps} from "@/app/_types/navigation/NavigationProps";
 
 const ProfileScreen = () => {
     const [user, setUser] = useState<UserSession>();

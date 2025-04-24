@@ -5,10 +5,7 @@ import {Ionicons} from '@expo/vector-icons';
 import useMangaStore from "@/app/stores/mangaStore";
 import iMangaData from "@/app/_types/iManga";
 import {useNavigation} from "@react-navigation/native";
-
-type NavigationProps = {
-    navigate: (screen: string, params?: any) => void;
-};
+import {NavigationProps} from "@/app/_types/navigation/NavigationProps";
 
 const FavoriteMangasScreen = () => {
     const mangaStore = useMangaStore();

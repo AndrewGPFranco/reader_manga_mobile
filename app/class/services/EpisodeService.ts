@@ -1,13 +1,13 @@
 import useEpisodeStore from "@/app/stores/episodeStore";
-import {iEpisode} from "@/app/_types/iEpisode";
 import useAnimeStore from "@/app/stores/animeStore";
+import {AnimeListingVO} from "@/app/_types/screens/listing-animes/AnimeListingVO";
 
 class EpisodeService {
 
     private animeStore = useAnimeStore.getState();
     private episodeStore = useEpisodeStore.getState();
 
-    async getAllEpisodesByAnime(idAnime: string): Promise<Array<iEpisode>> {
+    async getAllEpisodesByAnime(idAnime: string): Promise<AnimeListingVO> {
         return await this.episodeStore.getAllEpisodesByAnime(idAnime);
     }
 

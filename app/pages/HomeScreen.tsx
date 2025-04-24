@@ -16,10 +16,7 @@ import {api} from "@/app/network/axiosInstance";
 import iMangaData from "@/app/_types/iManga";
 import useAuthStore from "../stores/authStore";
 import {useFocusEffect} from "expo-router";
-
-type NavigationProps = {
-    navigate: (screen: string, params?: any) => void;
-};
+import {NavigationProps} from "@/app/_types/navigation/NavigationProps";
 
 const HomeScreen = () => {
     const [mangas, setMangas] = useState<iMangaData[]>([]);

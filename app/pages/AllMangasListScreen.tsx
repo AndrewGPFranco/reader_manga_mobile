@@ -13,10 +13,7 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import iMangaData from "@/app/_types/iManga";
 import useMangaStore from "@/app/stores/mangaStore";
-
-type NavigationProps = {
-    navigate: (screen: string, params?: any) => void;
-};
+import {NavigationProps} from "@/app/_types/navigation/NavigationProps";
 
 const Pagination = ({
                         currentPage,

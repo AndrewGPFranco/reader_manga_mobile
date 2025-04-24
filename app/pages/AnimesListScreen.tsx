@@ -3,10 +3,7 @@ import React, {useEffect, useState} from "react";
 import {useNavigation} from '@react-navigation/native';
 import AnimeService from "@/app/class/services/AnimeService";
 import {FlatList, Image, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View} from "react-native";
-
-type NavigationProps = {
-    navigate: (screen: string, params?: any) => void;
-};
+import {NavigationProps} from "@/app/_types/navigation/NavigationProps";
 
 const AnimesListScreen = () => {
     const service = new AnimeService();

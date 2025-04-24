@@ -11,10 +11,7 @@ import {
 import useChapterStore from "@/app/stores/chapterStore";
 import iChapterData from "../_types/iChapter";
 import {useNavigation} from "expo-router";
-
-type NavigationProps = {
-    navigate: (screen: string, params?: any) => void;
-};
+import {NavigationProps} from "@/app/_types/navigation/NavigationProps";
 
 const ProgressReadingScreen = () => {
     const navigation = useNavigation<NavigationProps>();

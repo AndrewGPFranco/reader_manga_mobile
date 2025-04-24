@@ -15,10 +15,7 @@ import iMangaData from "@/app/_types/iManga";
 import useMangaStore from "@/app/stores/mangaStore";
 import useAuthStore from "@/app/stores/authStore";
 import iResponseListManga from "@/app/_types/iResponseListManga";
-
-type NavigationProps = {
-    navigate: (screen: string, params?: any) => void;
-};
+import {NavigationProps} from "@/app/_types/navigation/NavigationProps";
 
 const MangaLibraryScreen = () => {
     const [mangasArray, setMangasArray] = useState<Array<iMangaData>>([]);

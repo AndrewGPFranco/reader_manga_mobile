@@ -1,4 +1,3 @@
-import {iEpisode} from "@/app/_types/iEpisode";
 import React, {useEffect, useState} from "react";
 import EpisodeService from "@/app/class/services/EpisodeService";
 import {useRoute} from "@react-navigation/native";
@@ -15,20 +14,17 @@ import {
 } from "react-native";
 import {Ionicons} from "@expo/vector-icons";
 import {useNavigation} from '@react-navigation/native';
-
-type NavigationProps = {
-    navigate: (screen: string, params?: any) => void;
-};
+import {AnimeListingVO} from "@/app/_types/screens/listing-animes/AnimeListingVO";
+import {EpisodeToAnimesVO} from "@/app/_types/screens/listing-animes/EpisodeToAnimesVO";
+import {NavigationProps} from "@/app/_types/navigation/NavigationProps";
 
 const EpisodeListScreen = () => {
     const route = useRoute<any>();
     const service = new EpisodeService();
     const [title, setTitle] = useState<string>("");
-    const [idAnime, setIdAnime] = useState<string>("");
     const navigation = useNavigation<NavigationProps>();
-    const [uriImage, setUriImage] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(true);
-    const [episodes, setEpisodes] = useState<Array<iEpisode>>([]);
+    const [infoAnime, setinfoAnime] = useState<AnimeListingVO>();
 
     useEffect(() => {
         const title = Array.isArray(route.params.title)
@@ -40,39 +36,37 @@ const EpisodeListScreen = () => {
             : route.params.id;
 
         setTitle(title);
-        setIdAnime(idAnime);
 
-        const fetchEpisodes = async () => {
+        (async () => {
             try {
-                const uriImage = await service.getImageAnime(idAnime);
                 const episodesData = await service.getAllEpisodesByAnime(idAnime);
-                setEpisodes(episodesData);
-                setUriImage(uriImage);
+                setinfoAnime(episodesData);
             } catch (error) {
                 console.error("Erro ao buscar episódios:", error);
             } finally {
                 setLoading(false);
             }
-        };
-
-        fetchEpisodes();
+        })();
     }, []);
 
-    const renderEpisodeCard = ({item}: { item: iEpisode }) => (
-        <TouchableOpacity style={styles.card}>
+    const renderEpisodeCard = (item: EpisodeToAnimesVO, index: any) => (
+        <TouchableOpacity
+            key={item.id ?? index}
+            style={styles.card}
+            onPress={() => navigation.navigate('EpisodeDisplay', {
+                id: item.id,
+                title: item.titleEpisode
+            })}
+        >
             <View style={styles.episodeNumberContainer}>
                 <Text style={styles.episodeNumber}>{item.numberEpisode}</Text>
             </View>
+
             <View style={styles.cardInfo}>
-                <TouchableOpacity style={styles.backButton}>
-                    <Text style={styles.cardTitle} numberOfLines={2}
-                          onPress={() => navigation.navigate('EpisodeDisplay', {
-                              id: item.id,
-                              title: title
-                          })}>
-                        {item.title}
-                    </Text>
-                </TouchableOpacity>
+                <Text style={styles.cardTitle} numberOfLines={2}>
+                    {item.titleEpisode}
+                </Text>
+
                 <View style={styles.cardFooter}>
                     <Ionicons name="play-circle" size={18} color="#ff6b6b"/>
                     <Text style={styles.watchText}>Assistir</Text>
@@ -90,58 +84,54 @@ const EpisodeListScreen = () => {
                     <TouchableOpacity style={styles.backButton}>
                         <Ionicons name="arrow-back" size={24} color="#fff" onPress={() => navigation.navigate('Home')}/>
                     </TouchableOpacity>
-                    <Text style={styles.headerTitle}>{title || "Detalhes do Anime"}</Text>
+                    <Text style={styles.headerTitle}>{infoAnime?.titleAnime}</Text>
                 </View>
                 <TouchableOpacity style={styles.favoriteButton}>
-                    <Ionicons name="heart-outline" size={24} color="#ff6b6b"/>
+                    {
+                        infoAnime?.isFavorite ?
+                            <Ionicons name="heart" size={24} color="#ff6b6b"/> :
+                            <Ionicons name="heart-outline" size={24} color="#ff6b6b"/>
+                    }
                 </TouchableOpacity>
             </View>
 
             <View style={styles.bannerContainer}>
                 <Image
-                    source={{uri: uriImage}}
+                    source={{uri: infoAnime?.uriImage}}
                     style={styles.bannerImage}
                 />
                 <View style={styles.bannerGradient}/>
                 <View style={styles.bannerContent}>
                     <Text style={styles.animeTitle}>{title}</Text>
                     <View style={styles.badgeContainer}>
-                        <View style={styles.badge}>
-                            <Text style={styles.badgeText}>TV</Text>
-                        </View>
-                        <View style={styles.badge}>
-                            <Text style={styles.badgeText}>HD</Text>
-                        </View>
-                        <View style={[styles.badge, {backgroundColor: '#ff6b6b'}]}>
-                            <Text style={styles.badgeText}>NOVO</Text>
-                        </View>
+                        {infoAnime?.tags.map((tag) => (
+                            <View style={styles.badge}>
+                                <Text style={styles.badgeText}>{tag}</Text>
+                            </View>
+                        ))}
                     </View>
                 </View>
             </View>
 
             <View style={styles.statsContainer}>
                 <View style={styles.statItem}>
-                    <Text style={styles.statValue}>{episodes.length}</Text>
+                    <Text style={styles.statValue}>{infoAnime?.episodes.length}</Text>
                     <Text style={styles.statLabel}>Episódios</Text>
                 </View>
                 <View style={styles.statDivider}/>
                 <View style={styles.statItem}>
-                    <Text style={styles.statValue}>X</Text>
+                    <Text style={styles.statValue}>{infoAnime?.note}</Text>
                     <Text style={styles.statLabel}>Nota</Text>
                 </View>
                 <View style={styles.statDivider}/>
                 <View style={styles.statItem}>
-                    <Text style={styles.statValue}>X</Text>
+                    <Text style={styles.statValue}>{infoAnime?.launchYear}</Text>
                     <Text style={styles.statLabel}>Ano</Text>
                 </View>
             </View>
 
             <View style={styles.listHeader}>
                 <Text style={styles.listTitle}>Lista de Episódios</Text>
-                <View style={styles.sortButton}>
-                    <Ionicons name="filter" size={18} color="#fff"/>
-                    <Text style={styles.sortText}>Ordenar</Text>
-                </View>
             </View>
 
             {loading ? (
@@ -149,10 +139,10 @@ const EpisodeListScreen = () => {
                     <ActivityIndicator size="large" color="#aa66ff"/>
                     <Text style={styles.loadingText}>Carregando episódios...</Text>
                 </View>
-            ) : episodes && episodes.length > 0 ? (
+            ) : infoAnime && infoAnime?.episodes.length > 0 ? (
                 <FlatList
-                    data={episodes}
-                    renderItem={renderEpisodeCard}
+                    data={infoAnime.episodes}
+                    renderItem={({item, index}) => renderEpisodeCard(item, index)}
                     keyExtractor={(item) => item.id.toString()}
                     contentContainerStyle={styles.cardContainer}
                     showsVerticalScrollIndicator={false}
