@@ -11,6 +11,8 @@ import AllMangasList from "@/app/pages/AllMangasListScreen";
 import FavoriteManga from "@/app/pages/FavoriteMangaScreen";
 import MangaLibraryScreen from "@/app/pages/MangaLibraryScreen";
 import AnimesListScreen from "@/app/pages/AnimesListScreen";
+import EpisodeListScreen from "@/app/pages/EpisodeListScreen";
+import EpisodeDisplayScreen from "@/app/pages/EpisodeDisplayScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -26,7 +28,9 @@ export default function App() {
       <Stack.Screen name="Library" options={{ headerShown: false }} component={MangaLibraryScreen} />
       <Stack.Screen name="AllMangasList" options={{ headerShown: false }} component={AllMangasList} />
       <Stack.Screen name="RegisterUser" options={{ headerShown: false }} component={RegisterScreen} />
+      <Stack.Screen name="EpisodeList" options={{ headerShown: false }} component={EpisodeListScreen} />
       <Stack.Screen name="AllAnimesList" options={{ headerShown: false }} component={AnimesListScreen} />
+      <Stack.Screen name="EpisodeDisplay" options={{ headerShown: false }} component={EpisodeDisplayScreen} />
       <Stack.Screen name="ChapterReading" options={{ headerShown: false }} component={ChapterReadingScreen} />
       <Stack.Screen name="ProgressReading" options={{ headerShown: false }} component={ProgressReadingScreen} />
     </Stack.Navigator>

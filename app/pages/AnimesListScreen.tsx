@@ -28,7 +28,8 @@ const AnimesListScreen = () => {
             </View>
 
             <View style={styles.cardContent}>
-                <TouchableOpacity onPress={() => navigation.navigate('MangaDetails', {title: item.title})}>
+                <TouchableOpacity
+                    onPress={() => navigation.navigate('EpisodeList', {title: item.title, id: item.id})}>
                     <Text style={styles.cardTitle}>{item?.title}</Text>
                 </TouchableOpacity>
             </View>

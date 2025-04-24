@@ -26,9 +26,8 @@ const useEpisodeStore = create<EpisodeStore>((set, get) => ({
         }
     },
 
-    async getEpisode(title: string, id: string) {
-        const response = await api.get(`/episode/${id}/${title}`, {
-            responseType: "blob",
+    async getEpisode(id: string) {
+        const response = await api.get(`/episode/${id}`, {
             headers: {
                 Authorization: `${await get().getTokenUser()}`
             }
@@ -47,3 +46,5 @@ const useEpisodeStore = create<EpisodeStore>((set, get) => ({
         return response.data;
     }
 }));
+
+export default useEpisodeStore;

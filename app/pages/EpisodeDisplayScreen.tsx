@@ -1,0 +1,435 @@
+import {Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import {ResizeMode, Video, VideoFullscreenUpdateEvent} from 'expo-av';
+import React, {useEffect, useState} from 'react';
+import {useRoute} from "@react-navigation/native";
+import {Ionicons} from '@expo/vector-icons';
+import useEpisodeStore from "@/app/stores/episodeStore";
+import * as ScreenOrientation from 'expo-screen-orientation';
+
+const EpisodeDisplayScreen = () => {
+    const route = useRoute<any>();
+    const episodeStore = useEpisodeStore();
+    const [uri, setUri] = useState<string>("");
+    const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+    const [episode, setEpisode] = useState<any>({
+        title: "Carregando...",
+        description: "",
+        episodeNumber: 0,
+        animeName: "Carregando...",
+    });
+    const [comment, setComment] = useState<string>("");
+    const [comments, setComments] = useState<Array<any>>([]);
+    const [isLiked, setIsLiked] = useState<boolean>(false);
+    const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
+    const video = React.useRef(null);
+
+    useEffect(() => {
+        const idAnime = route.params.id;
+        const title = route.params.title;
+
+        episodeStore.getEpisode(idAnime).then(response => {
+            setUri(`http://192.168.15.17:8080${response}`);
+
+            setEpisode({
+                title: title,
+                description: "Nosso herói parte em uma jornada épica para descobrir os segredos do mundo e enfrentar inimigos poderosos.",
+                episodeNumber: idAnime,
+                animeName: title,
+            });
+        });
+
+        return () => {
+            ScreenOrientation
+                .lockAsync(ScreenOrientation.OrientationLock.DEFAULT)
+                .catch((e) => console.warn('Erro ao resetar orientação:', e));
+        };
+    }, []);
+
+    const handleFullscreenUpdate = async ({ fullscreenUpdate }: VideoFullscreenUpdateEvent) => {
+        const PLAYER_WILL_PRESENT = 0;
+        const PLAYER_WILL_DISMISS = 2;
+
+        switch (fullscreenUpdate) {
+            case PLAYER_WILL_PRESENT:
+                setIsFullscreen(true);
+                await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+                break;
+            case PLAYER_WILL_DISMISS:
+                setIsFullscreen(false);
+                await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.DEFAULT);
+                break;
+        }
+    };
+
+    const handleComment = () => {
+        if (comment.trim() === "") return;
+
+        const newComment = {
+            id: comments.length + 1,
+            user: "Você",
+            avatar: "https://randomuser.me/api/portraits/men/4.jpg",
+            text: comment,
+            likes: 0,
+            time: "Agora mesmo"
+        };
+
+        setComments([newComment, ...comments]);
+        setComment("");
+    };
+
+    return (
+        <ScrollView style={styles.container}>
+            <View style={styles.videoContainer}>
+                <Video
+                    ref={video}
+                    source={{uri: uri}}
+                    useNativeControls
+                    resizeMode={ResizeMode.CONTAIN}
+                    style={styles.video}
+                    onFullscreenUpdate={handleFullscreenUpdate}
+                />
+            </View>
+
+            <View style={styles.infoContainer}>
+                <Text style={styles.title}>
+                    {episode.animeName} - Episódio {episode.episodeNumber}: {episode.title}
+                </Text>
+
+                <View style={styles.statsRow}>
+                    <Text style={styles.stats}>250K visualizações • Lançado há 2 dias</Text>
+                </View>
+
+                <View style={styles.actionsRow}>
+                    <TouchableOpacity
+                        style={styles.actionButton}
+                        onPress={() => setIsLiked(!isLiked)}
+                    >
+                        <Ionicons
+                            name={isLiked ? "heart" : "heart-outline"}
+                            size={22}
+                            color={isLiked ? "#FF6B6B" : "#AAAAAA"}
+                        />
+                        <Text style={[styles.actionText, isLiked && styles.actionTextActive]}>
+                            Curtir
+                        </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.actionButton}>
+                        <Ionicons name="chatbubble-outline" size={22} color="#AAAAAA"/>
+                        <Text style={styles.actionText}>Comentar</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.actionButton}>
+                        <Ionicons name="share-outline" size={22} color="#AAAAAA"/>
+                        <Text style={styles.actionText}>Compartilhar</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.actionButton}>
+                        <Ionicons name="download-outline" size={22} color="#AAAAAA"/>
+                        <Text style={styles.actionText}>Download</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+
+            {/* Descrição */}
+            <View style={styles.descriptionContainer}>
+                <View style={styles.studioContainer}>
+                    <Image
+                        source={{uri: "https://via.placeholder.com/50"}}
+                        style={styles.studioAvatar}
+                    />
+                    <View style={styles.studioInfo}>
+                        <Text style={styles.studioName}>Animes e Mangás</Text>
+                        <Text style={styles.subscriberCount}>2.4M seguidores</Text>
+                    </View>
+                    <TouchableOpacity
+                        style={[
+                            styles.subscribeButton,
+                            isSubscribed && styles.subscribedButton
+                        ]}
+                        onPress={() => setIsSubscribed(!isSubscribed)}
+                    >
+                        <Text style={[
+                            styles.subscribeText,
+                            isSubscribed && styles.subscribedText
+                        ]}>
+                            {isSubscribed ? "Inscrito" : "Inscrever-se"}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+
+                <Text style={styles.description}>
+                    {episode.description}
+                </Text>
+                <Text style={styles.showMore}>Mostrar mais</Text>
+            </View>
+
+            {/* Comentários */}
+            <View style={styles.commentsContainer}>
+                <View style={styles.commentsHeader}>
+                    <Text style={styles.commentsCount}>{comments.length} comentários</Text>
+                    <TouchableOpacity style={styles.sortButton}>
+                        <Ionicons name="filter-outline" size={18} color="#AAAAAA"/>
+                        <Text style={styles.sortText}>Ordenar por</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <View style={styles.addCommentContainer}>
+                    <Image
+                        source={{uri: "https://github.com/AndrewGPFranco.png"}}
+                        style={styles.commentAvatar}
+                    />
+                    <TextInput
+                        style={styles.commentInput}
+                        placeholder="Adicione um comentário..."
+                        placeholderTextColor="#777"
+                        value={comment}
+                        onChangeText={setComment}
+                    />
+                    <TouchableOpacity
+                        style={styles.sendButton}
+                        onPress={handleComment}
+                    >
+                        <Ionicons name="send" size={20} color="#6200EE"/>
+                    </TouchableOpacity>
+                </View>
+
+                {comments.map((item) => (
+                    <View key={item.id} style={styles.commentItem}>
+                        <Image
+                            source={{uri: item.avatar}}
+                            style={styles.commentAvatar}
+                        />
+                        <View style={styles.commentContent}>
+                            <View style={styles.commentHeader}>
+                                <Text style={styles.commentUser}>{item.user}</Text>
+                                <Text style={styles.commentTime}>{item.time}</Text>
+                            </View>
+                            <Text style={styles.commentText}>{item.text}</Text>
+                            <View style={styles.commentActions}>
+                                <TouchableOpacity style={styles.commentAction}>
+                                    <Ionicons name="heart-outline" size={16} color="#AAAAAA"/>
+                                    <Text style={styles.commentActionText}>{item.likes}</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.commentAction}>
+                                    <Ionicons name="chatbubble-outline" size={16} color="#AAAAAA"/>
+                                    <Text style={styles.commentActionText}>Responder</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                ))}
+
+                <TouchableOpacity style={styles.moreCommentsButton}>
+                    <Text style={styles.moreCommentsText}>Mostrar mais comentários</Text>
+                </TouchableOpacity>
+            </View>
+        </ScrollView>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#121212',
+    },
+    videoContainer: {
+        width: '100%',
+        aspectRatio: 16 / 9,
+        backgroundColor: '#000000',
+    },
+    video: {
+        width: '100%',
+        height: '100%',
+    },
+    infoContainer: {
+        padding: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#222222',
+    },
+    title: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#FFFFFF',
+        marginBottom: 8,
+    },
+    statsRow: {
+        flexDirection: 'row',
+        marginBottom: 15,
+    },
+    stats: {
+        fontSize: 14,
+        color: '#888888',
+    },
+    actionsRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingVertical: 8,
+    },
+    actionButton: {
+        flexDirection: 'column',
+        alignItems: 'center',
+    },
+    actionText: {
+        fontSize: 12,
+        color: '#AAAAAA',
+        marginTop: 4,
+    },
+    actionTextActive: {
+        color: '#FF6B6B',
+    },
+    descriptionContainer: {
+        padding: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#222222',
+    },
+    studioContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 15,
+    },
+    studioAvatar: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+    },
+    studioInfo: {
+        flex: 1,
+        marginLeft: 10,
+    },
+    studioName: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#FFFFFF',
+    },
+    subscriberCount: {
+        fontSize: 14,
+        color: '#888888',
+    },
+    subscribeButton: {
+        backgroundColor: '#FF6B6B',
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 20,
+    },
+    subscribedButton: {
+        backgroundColor: '#333333',
+    },
+    subscribeText: {
+        color: '#FFFFFF',
+        fontWeight: 'bold',
+        fontSize: 14,
+    },
+    subscribedText: {
+        color: '#AAAAAA',
+    },
+    description: {
+        fontSize: 14,
+        color: '#DDDDDD',
+        lineHeight: 20,
+    },
+    showMore: {
+        color: '#888888',
+        marginTop: 10,
+        fontSize: 14,
+    },
+    commentsContainer: {
+        padding: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#222222',
+    },
+    commentsHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 15,
+        alignItems: 'center',
+    },
+    commentsCount: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#FFFFFF',
+    },
+    sortButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    sortText: {
+        color: '#AAAAAA',
+        marginLeft: 5,
+        fontSize: 14,
+    },
+    addCommentContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    commentAvatar: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+    },
+    commentInput: {
+        flex: 1,
+        height: 40,
+        borderBottomWidth: 1,
+        borderBottomColor: '#333333',
+        marginLeft: 10,
+        color: '#FFFFFF',
+        paddingHorizontal: 10,
+    },
+    sendButton: {
+        padding: 8,
+    },
+    commentItem: {
+        flexDirection: 'row',
+        marginBottom: 20,
+    },
+    commentContent: {
+        flex: 1,
+        marginLeft: 10,
+    },
+    commentHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    commentUser: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#FFFFFF',
+    },
+    commentTime: {
+        fontSize: 12,
+        color: '#777777',
+        marginLeft: 8,
+    },
+    commentText: {
+        fontSize: 14,
+        color: '#DDDDDD',
+        marginTop: 4,
+        lineHeight: 20,
+    },
+    commentActions: {
+        flexDirection: 'row',
+        marginTop: 8,
+    },
+    commentAction: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 15,
+    },
+    commentActionText: {
+        fontSize: 12,
+        color: '#AAAAAA',
+        marginLeft: 4,
+    },
+    moreCommentsButton: {
+        alignItems: 'center',
+        paddingVertical: 10,
+    },
+    moreCommentsText: {
+        color: '#6200EE',
+        fontSize: 14,
+    }
+});
+
+export default EpisodeDisplayScreen;

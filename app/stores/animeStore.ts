@@ -35,6 +35,15 @@ const useAnimeStore = create<AnimeStore>((set, get) => ({
             }
         })
         return response.data;
+    },
+
+    async findImageByAnime(id: string) {
+        const response = await api.get(`/anime/${id}/get-image`, {
+            headers: {
+                Authorization: `${await get().getTokenUser()}`
+            }
+        })
+        return response.data;
     }
 }));
 
