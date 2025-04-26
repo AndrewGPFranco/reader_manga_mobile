@@ -9,24 +9,35 @@ import {
     Text,
     TouchableOpacity,
     View,
+    Modal,
     Image,
     ActivityIndicator,
+    TextInput,
+    Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { AnimeListingVO } from "@/app/_types/screens/listing-animes/AnimeListingVO";
 import { EpisodeToAnimesVO } from "@/app/_types/screens/listing-animes/EpisodeToAnimesVO";
 import { NavigationProps } from "@/app/_types/navigation/NavigationProps";
 import { formatDate } from "../utils/utils";
+import AnimeService from "../class/services/AnimeService";
 
 const EpisodeListScreen = () => {
     const route = useRoute<any>();
     const service = new EpisodeService();
+    const animeService = new AnimeService();
+    const [nota, setNota] = useState<number>(0);
     const [title, setTitle] = useState<string>("");
     const navigation = useNavigation<NavigationProps>();
     const [loading, setLoading] = useState<boolean>(true);
+    const [isFormNota, setIsFormNota] = useState<boolean>(false);
     const [infoAnime, setinfoAnime] = useState<AnimeListingVO>();
 
     useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
         const title = Array.isArray(route.params.title)
             ? route.params.title[0]
             : route.params.title;
@@ -37,19 +48,20 @@ const EpisodeListScreen = () => {
 
         setTitle(title);
 
-        (async () => {
-            try {
-                const episodesData = await service.getAllEpisodesByAnime(idAnime);
-                const releaseDateFormated = new Date(episodesData.launchYear);
-                episodesData.launchYear = formatDate(releaseDateFormated);
-                setinfoAnime(episodesData);
-            } catch (error) {
-                console.error("Erro ao buscar episódios:", error);
-            } finally {
-                setLoading(false);
-            }
-        })();
-    }, []);
+        try {
+            const episodesData = await service.getAllEpisodesByAnime(idAnime);
+
+            const releaseDateFormated = new Date(episodesData.launchYear);
+            episodesData.launchYear = formatDate(releaseDateFormated);
+            episodesData.note = episodesData.note ?? "N/I";
+
+            setinfoAnime(episodesData);
+        } catch (error) {
+            console.error("Erro ao buscar episódios:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const renderEpisodeCard = (item: EpisodeToAnimesVO, index: any) => (
         <TouchableOpacity
@@ -89,7 +101,7 @@ const EpisodeListScreen = () => {
             )
         }
 
-        if (infoAnime?.episodes.length) {
+        if (infoAnime?.episodes?.length) {
             return (
                 <FlatList
                     data={infoAnime.episodes}
@@ -111,74 +123,143 @@ const EpisodeListScreen = () => {
         )
     }
 
-return (
-    <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="light-content" backgroundColor="#121212" />
+    const renderizaIconeFavoritoAndAvaliacao = () => {
+        return (
+            <View style={styles.containerAvaliacao}>
+                <Text
+                    style={styles.avaliacaoText}
+                    onPress={abrirModalAvaliacao}
+                >
+                    Avaliar anime
+                </Text>
 
-        <View style={styles.header}>
-            <View style={styles.headerLeft}>
-                <TouchableOpacity style={styles.backButton}>
+                <TouchableOpacity
+                    style={styles.favoriteButton}
+                    activeOpacity={0.6}>
                     <Ionicons
-                        name="arrow-back"
-                        size={24}
-                        color="#fff"
-                        onPress={() => navigation.navigate("Home")}
+                        onPress={() => {
+                            animeService.mudancaAvaliacao(infoAnime?.idAnime)
+                            Alert.alert("Mudança realizada com sucesso!");
+                            navigation.navigate("Home")
+                        }}
+                        name={infoAnime?.isFavorite ? "heart" : "heart-outline"}
+                        size={28}
+                        color="#ff6b6b"
                     />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>{infoAnime?.titleAnime}</Text>
             </View>
-            <TouchableOpacity style={styles.favoriteButton}>
-                {infoAnime?.isFavorite ? (
-                    <Ionicons name="heart" size={24} color="#ff6b6b" />
-                ) : (
-                    <Ionicons name="heart-outline" size={24} color="#ff6b6b" />
-                )}
-            </TouchableOpacity>
-        </View>
+        );
+    };
 
-        <View style={styles.bannerContainer}>
-            <Image
-                source={{ uri: infoAnime?.uriImage }}
-                style={styles.bannerImage}
-            />
-            <View style={styles.bannerGradient} />
-            <View style={styles.bannerContent}>
-                <Text style={styles.animeTitle}>{title}</Text>
-                <View style={styles.badgeContainer}>
-                    {infoAnime?.tags.map((tag, key) => (
-                        <View key={key} style={styles.badge}>
-                            <Text style={styles.badgeText}>{tag}</Text>
-                        </View>
-                    ))}
+    const abrirModalAvaliacao = () => setIsFormNota(true);
+
+    return (
+        <SafeAreaView style={styles.container}>
+            <StatusBar barStyle="light-content" backgroundColor="#121212" />
+
+            <View style={styles.header}>
+                <View style={styles.headerLeft}>
+                    <TouchableOpacity style={styles.backButton}>
+                        <Ionicons
+                            name="arrow-back"
+                            size={24}
+                            color="#fff"
+                            onPress={() => navigation.navigate("Home")}
+                        />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>{infoAnime?.titleAnime}</Text>
+                </View>
+                <TouchableOpacity style={styles.favoriteButton}>
+                    {renderizaIconeFavoritoAndAvaliacao()}
+                </TouchableOpacity>
+            </View>
+
+            <View style={styles.bannerContainer}>
+                <Image
+                    source={{ uri: infoAnime?.uriImage }}
+                    style={styles.bannerImage}
+                />
+                <View style={styles.bannerGradient} />
+                <View style={styles.bannerContent}>
+                    <Text style={styles.animeTitle}>{title}</Text>
+                    <View style={styles.badgeContainer}>
+                        {infoAnime?.tags?.map((tag, key) => (
+                            <View key={key} style={styles.badge}>
+                                <Text style={styles.badgeText}>{tag}</Text>
+                            </View>
+                        ))}
+                    </View>
                 </View>
             </View>
-        </View>
 
-        <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
-                <Text style={styles.statValue}>{infoAnime?.episodes.length}</Text>
-                <Text style={styles.statLabel}>Episódios</Text>
+            <View style={styles.statsContainer}>
+                <View style={styles.statItem}>
+                    <Text style={styles.statValue}>{infoAnime?.episodes?.length}</Text>
+                    <Text style={styles.statLabel}>Episódios</Text>
+                </View>
+                <View style={styles.statDivider} />
+                <View style={styles.statItem}>
+                    <Text style={styles.statValue}>{infoAnime?.note}</Text>
+                    <Text style={styles.statLabel}>Nota</Text>
+                </View>
+                <View style={styles.statDivider} />
+                <View style={styles.statItem}>
+                    <Text style={styles.statValue}>{infoAnime?.launchYear}</Text>
+                    <Text style={styles.statLabel}>Ano</Text>
+                </View>
             </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-                <Text style={styles.statValue}>{infoAnime?.note}</Text>
-                <Text style={styles.statLabel}>Nota</Text>
+
+            <View style={styles.listHeader}>
+                <Text style={styles.listTitle}>Lista de Episódios</Text>
             </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-                <Text style={styles.statValue}>{infoAnime?.launchYear}</Text>
-                <Text style={styles.statLabel}>Ano</Text>
-            </View>
-        </View>
 
-        <View style={styles.listHeader}>
-            <Text style={styles.listTitle}>Lista de Episódios</Text>
-        </View>
+            {renderEpisodeList()}
 
-        {renderEpisodeList()}
+            <Modal
+                visible={isFormNota}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setIsFormNota(false)}
+            >
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.6)' }}>
+                    <View style={{ backgroundColor: '#fff', padding: 20, borderRadius: 10, width: '80%' }}>
+                        <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 10 }}>Você está avaliando: {title}</Text>
 
-    </SafeAreaView>
-);
+                        <TextInput
+                            placeholder="Digite uma nota de 0 a 10"
+                            value={nota.toString()}
+                            onChangeText={(text) => {
+                                const num = parseInt(text) || 0;
+                                if (num >= 0 && num <= 10) {
+                                    setNota(num);
+                                }
+                            }}
+                            keyboardType="numeric"
+                            maxLength={2}
+                            style={{ borderWidth: 1, borderColor: '#ccc', padding: 8, borderRadius: 6, marginBottom: 12 }}
+                        />
+
+                        <TouchableOpacity
+                            style={{ backgroundColor: '#ff6b6b', padding: 10, borderRadius: 6, marginBottom: 10 }}
+                            onPress={() => {
+                                animeService.avaliaAnime(infoAnime?.idAnime, nota);
+                                Alert.alert("Avaliação enviada!");
+                                setIsFormNota(false);
+                                navigation.navigate("Home")
+                            }}
+                        >
+                            <Text style={{ color: '#fff', textAlign: 'center' }}>Avaliar</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity onPress={() => setIsFormNota(false)}>
+                            <Text style={{ color: '#333', textAlign: 'center' }}>Fechar</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
+        </SafeAreaView>
+    );
 };
 
 const styles = StyleSheet.create({
@@ -205,8 +286,27 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         color: "#fff",
     },
+    containerAvaliacao: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    avaliacaoButton: {
+        paddingVertical: 10,
+        paddingHorizontal: 8,
+        borderRadius: 8,
+    },
+    avaliacaoText: {
+        color: '#ffffff',
+        fontWeight: '600',
+        fontSize: 14,
+        marginLeft: 10
+    },
     favoriteButton: {
-        padding: 4,
+        padding: 5,
+        borderRadius: 30,
+        backgroundColor: 'rgba(255, 107, 107, 0.1)',
+        marginLeft: 16,
     },
     bannerContainer: {
         position: "relative",
