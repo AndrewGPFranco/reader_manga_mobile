@@ -40,8 +40,11 @@ const EpisodeListScreen = () => {
         (async () => {
             try {
                 const episodesData = await service.getAllEpisodesByAnime(idAnime);
+
                 const releaseDateFormated = new Date(episodesData.launchYear);
                 episodesData.launchYear = formatDate(releaseDateFormated);
+                episodesData.note = episodesData.note ?? "N/I";
+
                 setinfoAnime(episodesData);
             } catch (error) {
                 console.error("Erro ao buscar episódios:", error);
