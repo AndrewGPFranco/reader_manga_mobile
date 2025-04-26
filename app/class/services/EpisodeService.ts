@@ -4,8 +4,8 @@ import {AnimeListingVO} from "@/app/_types/screens/listing-animes/AnimeListingVO
 
 class EpisodeService {
 
-    private animeStore = useAnimeStore.getState();
-    private episodeStore = useEpisodeStore.getState();
+    private readonly animeStore = useAnimeStore.getState();
+    private readonly episodeStore = useEpisodeStore.getState();
 
     async getAllEpisodesByAnime(idAnime: string): Promise<AnimeListingVO> {
         return await this.episodeStore.getAllEpisodesByAnime(idAnime);

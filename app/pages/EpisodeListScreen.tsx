@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AnimeListingVO } from "@/app/_types/screens/listing-animes/AnimeListingVO";
 import { EpisodeToAnimesVO } from "@/app/_types/screens/listing-animes/EpisodeToAnimesVO";
 import { NavigationProps } from "@/app/_types/navigation/NavigationProps";
+import { formatDate } from "../utils/utils";
 
 const EpisodeListScreen = () => {
     const route = useRoute<any>();
@@ -39,6 +40,8 @@ const EpisodeListScreen = () => {
         (async () => {
             try {
                 const episodesData = await service.getAllEpisodesByAnime(idAnime);
+                const releaseDateFormated = new Date(episodesData.launchYear);
+                episodesData.launchYear = formatDate(releaseDateFormated);
                 setinfoAnime(episodesData);
             } catch (error) {
                 console.error("Erro ao buscar episódios:", error);
