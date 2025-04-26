@@ -137,6 +137,11 @@ const EpisodeListScreen = () => {
                     style={styles.favoriteButton}
                     activeOpacity={0.6}>
                     <Ionicons
+                        onPress={() => {
+                            animeService.mudancaAvaliacao(infoAnime?.idAnime)
+                            Alert.alert("Mudança realizada com sucesso!");
+                            navigation.navigate("Home")
+                        }}
                         name={infoAnime?.isFavorite ? "heart" : "heart-outline"}
                         size={28}
                         color="#ff6b6b"
@@ -295,6 +300,7 @@ const styles = StyleSheet.create({
         color: '#ffffff',
         fontWeight: '600',
         fontSize: 14,
+        marginLeft: 10
     },
     favoriteButton: {
         padding: 5,

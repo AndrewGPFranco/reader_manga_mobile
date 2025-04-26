@@ -55,6 +55,15 @@ const useAnimeStore = create<AnimeStore>((set, get) => ({
         })
         return new ResponseAPI(response.data.message, response.data.statusCode);
     },
+
+    async mudancaFavorito(idAnime: number) {
+        const data = { idAnime: idAnime };
+        await api.post(`anime/user/add-favorito/${idAnime}`, data, {
+            headers: {
+                Authorization: `${await get().getTokenUser()}`
+            }
+        })
+    }
 }));
 
 export default useAnimeStore;

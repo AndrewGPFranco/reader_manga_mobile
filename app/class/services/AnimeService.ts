@@ -15,6 +15,12 @@ class AnimeService {
         }
     }
 
+    async mudancaAvaliacao(idAnime: number | undefined): Promise<void> {
+        if(idAnime !== undefined) {
+            await this.animeStore.mudancaFavorito(idAnime);
+        }
+    }
+
 }
 
 export default AnimeService;

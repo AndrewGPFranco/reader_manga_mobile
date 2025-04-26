@@ -6,6 +6,7 @@ interface IAnimeStore {
     findImageByAnime(id: string): Promise<string>;
     getTokenUser(): Promise<string | null | undefined>;
     avaliaAnime(idAnime: number, nota: number): Promise<ResponseAPI>;
+    mudancaFavorito(idAnime: number): Promise<void>;
     registraAnime(title: string, uriImage: string): Promise<ResponseAPI>;
 }
 
