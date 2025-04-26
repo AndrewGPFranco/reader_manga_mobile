@@ -3,10 +3,16 @@ import {iAnime} from "@/app/_types/iAnime";
 
 class AnimeService {
 
-    private animeStore = useAnimeStore.getState();
+    private readonly animeStore = useAnimeStore.getState();
 
     async getAllAnimes(): Promise<Array<iAnime>> {
         return await this.animeStore.findAll();
+    }
+
+    async avaliaAnime(idAnime: number | undefined, nota: number): Promise<void> {
+        if(idAnime !== undefined) {
+            await this.animeStore.avaliaAnime(idAnime, nota);
+        }
     }
 
 }
