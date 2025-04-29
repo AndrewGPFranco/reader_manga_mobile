@@ -30,8 +30,9 @@ const EpisodeListScreen = () => {
     const [title, setTitle] = useState<string>("");
     const navigation = useNavigation<NavigationProps>();
     const [loading, setLoading] = useState<boolean>(true);
-    const [isFormNota, setIsFormNota] = useState<boolean>(false);
+    const [nameFormated, setNameFormated] = useState<string>("");
     const [infoAnime, setinfoAnime] = useState<AnimeListingVO>();
+    const [isFormNota, setIsFormNota] = useState<boolean>(false);
 
     useEffect(() => {
         fetchData();
@@ -55,6 +56,8 @@ const EpisodeListScreen = () => {
             episodesData.launchYear = formatDate(releaseDateFormated);
             episodesData.note = episodesData.note ?? "N/I";
 
+            setNameFormated(getNameFormated(episodesData.titleAnime));
+
             setinfoAnime(episodesData);
         } catch (error) {
             console.error("Erro ao buscar episódios:", error);
@@ -62,6 +65,14 @@ const EpisodeListScreen = () => {
             setLoading(false);
         }
     };
+
+    const getNameFormated = (name: string): string => {
+        if(name.length > 10) {
+            return `${name.substring(0, 18)}...`;
+        }
+
+        return name;
+    }
 
     const renderEpisodeCard = (item: EpisodeToAnimesVO, index: any) => (
         <TouchableOpacity
@@ -167,7 +178,7 @@ const EpisodeListScreen = () => {
                             onPress={() => navigation.navigate("Home")}
                         />
                     </TouchableOpacity>
-                    <Text style={styles.headerTitle}>{infoAnime?.titleAnime}</Text>
+                    <Text style={styles.headerTitle}>{nameFormated}</Text>
                 </View>
                 <TouchableOpacity style={styles.favoriteButton}>
                     {renderizaIconeFavoritoAndAvaliacao()}
