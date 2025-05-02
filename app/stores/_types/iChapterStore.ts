@@ -33,6 +33,7 @@ interface ChapterStore {
     processPreloadQueue(idCapitulo: string): any;
     precarregarPaginas(idCapitulo: string, paginaAtual: number, totalPaginas: number): any;
     cleanCache(): void;
+    getPage(idChapter: string, indexAtual: number): Promise<string>;
 }
 
 export default ChapterStore;

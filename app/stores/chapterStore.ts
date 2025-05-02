@@ -341,6 +341,17 @@ const useChapterStore = create<ChapterStore>((set, get) => ({
         } catch (error) {
             console.error(error)
         }
+    },
+
+    async getPage(idChapter: string, indexAtual: number) {
+        const response = await api.get(`/chapter/page/${idChapter}/${indexAtual}`,
+            {
+                headers: {
+                    Authorization: `${await get().getTokenUser()}`
+                },
+            }
+        )
+        return response.data;
     }
 
 }));

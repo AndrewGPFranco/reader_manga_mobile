@@ -44,7 +44,6 @@ const MangaScreen = () => {
     const [imagem, setImagem] = useState<string>('');
     const [totalPages, setTotalPages] = useState(0);
     const [imagemCarregada, setImagemCarregada] = useState(false);
-    const [inicializacaoConcluida, setInicializacaoConcluida] = useState(false);
 
     const atualizaProgresso = useCallback(async () => {
         if (capituloAtual?.status !== 'FINISHED' && id) {
@@ -61,15 +60,9 @@ const MangaScreen = () => {
 
             try {
                 setImagemCarregada(false);
-                const imagePath = await chapterStore.getPaginaDoCapitulo(
-                    chapterId,
-                    pageNumber - 1
-                );
-                setImagem(imagePath);
+                const imagePath = await chapterStore.getPage(chapterId, pageNumber);
+                setImagem(`http://192.168.15.17:8080${imagePath}`);
                 setImagemCarregada(true);
-
-                if (totalPages > 0)
-                    chapterStore.precarregarPaginas(chapterId, pageNumber, totalPages);
             } catch (error) {
                 console.error(`Erro ao carregar página ${pageNumber}:`, error);
                 setErro('Erro ao carregar a página.');
@@ -151,7 +144,6 @@ const MangaScreen = () => {
 
                 try {
                     await lidaMudancaCapitulo(route.params.id, paginaInicial);
-                    setInicializacaoConcluida(true);
                 } catch (error) {
                     console.error("Erro ao carregar o capítulo inicial:", error);
                     setErro("Erro ao carregar o capítulo inicial.");
