@@ -16,15 +16,26 @@ const useAuthStore = create<AuthStore>((set, get) => ({
     await AsyncStorage.setItem("token", token);
   },
 
-  async getToken(): Promise<string | null> {
+  async setIsAdmin(isAdmin: string) {
+    await AsyncStorage.setItem("isAdmin", isAdmin)
+  },
+
+  async isAdmin() {
+    const isAdmin = await AsyncStorage.getItem("isAdmin");
+
+    if(isAdmin != null) return true;
+    return false;
+  },
+
+  async getToken() {
     return await AsyncStorage.getItem("token");
   },
 
-  async getUserId(): Promise<string | null> {
+  async getUserId() {
     return await AsyncStorage.getItem("id");
   },
 
-  async removeToken(): Promise<void> {
+  async removeToken() {
     await AsyncStorage.removeItem("id");
     await AsyncStorage.removeItem("token");
   },
@@ -67,6 +78,8 @@ const useAuthStore = create<AuthStore>((set, get) => ({
 
       user.setToken(data.token);
       user.setId(userId);
+
+      this.setIsAdmin(String(decodedToken.isAdmin));
 
       set({ user });
       await get().setToken(data.token, userId);
@@ -114,7 +127,7 @@ const useAuthStore = create<AuthStore>((set, get) => ({
       if (result.status === 200) return "Usuário cadastrado com sucesso!";
       throw new Error("Falha ao cadastrar usuário");
     } catch (error: any) {
-      throw new Error(error.response?.data || "Erro ao cadastrar usuário");
+      throw new Error(error.response?.data ?? "Erro ao cadastrar usuário");
     }
   },
 
@@ -145,7 +158,7 @@ const useAuthStore = create<AuthStore>((set, get) => ({
       return new Map([[true, response]]);
     } catch (error: any) {
       return new Map([
-        [false, error.response?.data || "Erro ao alterar senha"],
+        [false, error.response?.data ?? "Erro ao alterar senha"],
       ]);
     }
   },

@@ -4,6 +4,7 @@ import { UserRegister } from "@/app/class/UserRegister";
 
 interface AuthStore {
     user: User;
+    isAdmin(): Promise<boolean>;
     removeToken(): Promise<void>;
     getUser(): Promise<UserSession>;
     usuarioLogado: UserSession | null;
@@ -18,6 +19,7 @@ interface AuthStore {
         oldPassword: string,
         newPassword: string
     ) => Promise<Map<boolean, string>>;
+    setIsAdmin(isAdmin: string): Promise<void>;
     validateToken(token: string): Promise<boolean>;
     register: (user: UserRegister) => Promise<string>;
     setToken(token: string, id: string): Promise<void>;

@@ -12,7 +12,7 @@ const ProfileScreen = () => {
     const navigation = useNavigation<NavigationProps>();
 
     useEffect(() => {
-        getUserInfo().then(() => console.log("getUserInfo()"));
+        getUserInfo();
     }, []);
 
     const getUserInfo = async () => {
@@ -56,14 +56,14 @@ const ProfileScreen = () => {
                         </View>
 
                         <View style={styles.nameContainer}>
-                            <Text style={styles.profileName}>{user?.firstName || "Otaku-san"}</Text>
-                            <Text style={styles.usernameBadge}>@{user?.username || "username"}</Text>
+                            <Text style={styles.profileName}>{user?.firstName ?? "Otaku-san"}</Text>
+                            <Text style={styles.usernameBadge}>@{user?.username ?? "username"}</Text>
                         </View>
 
                         <View style={styles.infoContainer}>
                             <View style={styles.infoRow}>
                                 <Text style={styles.infoLabel}>EMAIL</Text>
-                                <Text style={styles.infoValue}>{user?.email || "email@exemplo.com"}</Text>
+                                <Text style={styles.infoValue}>{user?.email ?? "email@exemplo.com"}</Text>
                             </View>
 
                             <View style={styles.infoRow}>

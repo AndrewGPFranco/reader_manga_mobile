@@ -160,7 +160,7 @@ const MangaScreen = () => {
             }
         };
 
-        inicializarTela().then(() => console.log("Tela iniciada"));
+        inicializarTela();
     }, [route.params]);
 
     useEffect(() => {
