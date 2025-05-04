@@ -7,11 +7,11 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import {Button} from "react-native-paper";
+import { Button } from "react-native-paper";
 import iChapterData from '../_types/iChapter';
 import useChapterStore from '@/app/stores/chapterStore';
-import React, {useCallback, useEffect, useState} from 'react';
-import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 
 type NavigationProps = {
     navigate: (screen: string, params?: any) => void;
@@ -45,30 +45,23 @@ const MangaScreen = () => {
     const [totalPages, setTotalPages] = useState(0);
     const [imagemCarregada, setImagemCarregada] = useState(false);
 
+    const carregaPaginaUnica = useCallback(async (chapterId: string | undefined, index: number) => {
+        if (!chapterId) {
+            console.error('Chapter ID is undefined');
+            return;
+        }
+
+        setImagemCarregada(false);
+        const imagePath = await chapterStore.getPage(chapterId, index);
+        setImagem(`http://192.168.15.17:8080${imagePath}`);
+        setImagemCarregada(true);
+    }, [chapterStore]);
+
     const atualizaProgresso = useCallback(async () => {
         if (capituloAtual?.status !== 'FINISHED' && id) {
             await chapterStore.updateReadingProgress(id, paginaAtual);
         }
     }, [capituloAtual, paginaAtual, id, chapterStore]);
-
-    const carregaPaginaUnica = useCallback(
-        async (chapterId: string | undefined, pageNumber: number) => {
-            if (!chapterId) {
-                console.error('Chapter ID is undefined');
-                return;
-            }
-
-            try {
-                setImagemCarregada(false);
-                const imagePath = await chapterStore.getPage(chapterId, pageNumber);
-                setImagem(`http://192.168.15.17:8080${imagePath}`);
-                setImagemCarregada(true);
-            } catch (error) {
-                console.error(`Erro ao carregar página ${pageNumber}:`, error);
-                setErro('Erro ao carregar a página.');
-            }
-        },
-        [chapterStore, totalPages]);
 
     const proximaPagina = useCallback(() => {
         if (paginaAtual < totalPages) {
@@ -103,57 +96,31 @@ const MangaScreen = () => {
         navigation.navigate('Home');
     }, [navigation]);
 
-    const lidaMudancaCapitulo = useCallback(
-        async (chapterId: string | undefined, initialPage: number) => {
-            if (!chapterId) {
-                setErro('ID do capítulo inválido.');
-                setIsCarregando(false);
-                return;
-            }
-
-            setIsCarregando(true);
-            setErro(null);
-
-            try {
-                const chapter = await chapterStore.getReadingProgress(chapterId);
-                setCapituloAtual(chapter);
-                setTotalPages(chapter.numberPages);
-
-                const validPage = Math.max(1, Math.min(initialPage, chapter.numberPages));
-                setPaginaAtual(validPage);
-
-                setImagem('');
-
-                await carregaPaginaUnica(chapterId, validPage);
-            } catch (e) {
-                console.error('Erro ao carregar capítulo:', e);
-                setErro('Erro ao carregar o capítulo.');
-            } finally {
-                setIsCarregando(false);
-            }
-        },
-        [chapterStore, carregaPaginaUnica]
-    );
-
     useEffect(() => {
         const inicializarTela = async () => {
-            if (route.params?.id) {
-                setId(route.params.id);
+            try {
+                if (route.params?.id) {
+                    setId(route.params.id);
 
-                const paginaInicial = route.params.progress ?? 1;
+                    const paginaInicial = route.params.progress ?? 1;
+                    setPaginaAtual(paginaInicial);
 
-                try {
-                    await lidaMudancaCapitulo(route.params.id, paginaInicial);
-                } catch (error) {
-                    console.error("Erro ao carregar o capítulo inicial:", error);
-                    setErro("Erro ao carregar o capítulo inicial.");
+                    const capituloInfo = await chapterStore.getReadingProgress(route.params.id);
+                    setCapituloAtual(capituloInfo);
+                    setTotalPages(capituloInfo.numberPages || 0);
+
+                    await carregaPaginaUnica(route.params.id, paginaInicial);
                     setIsCarregando(false);
                 }
+            } catch (error) {
+                console.error("Erro ao carregar o capítulo inicial:", error);
+                setErro("Erro ao carregar o capítulo inicial.");
+                setIsCarregando(false);
             }
-        };
+        }
 
         inicializarTela();
-    }, [route.params]);
+    }, [route.params, carregaPaginaUnica, chapterStore]);
 
     useEffect(() => {
         const unsubscribeBeforeRemove = navigation.addListener(
@@ -162,10 +129,10 @@ const MangaScreen = () => {
                 e.preventDefault();
                 try {
                     await atualizaProgresso();
-                    navigation.navigate("Home");
+                    navigation.dispatch(e.data.action);
                 } catch (error) {
                     console.error("Erro ao atualizar o progresso antes de sair:", error);
-                    navigation.navigate("Home");
+                    navigation.dispatch(e.data.action);
                 }
             }
         );
@@ -178,7 +145,7 @@ const MangaScreen = () => {
     const renderContent = () => {
         if (isCarregando) {
             return (
-                <ActivityIndicator size="large" color="#0000ff"/>
+                <ActivityIndicator size="large" color="#0000ff" />
             );
         }
 
@@ -194,14 +161,14 @@ const MangaScreen = () => {
         return (
             <>
                 <View style={styles.imageContainer}>
-                    {!imagemCarregada && <ActivityIndicator size="large" color="#0000ff"/>}
+                    {!imagemCarregada && <ActivityIndicator size="large" color="#0000ff" />}
                     {imagem ? (
                         <Image
-                            source={{uri: imagem}}
+                            source={{ uri: imagem }}
                             style={[styles.image, !imagemCarregada && styles.hiddenImage]}
                             onLoad={() => setImagemCarregada(true)}
                             onError={lidaErroImagem}
-                            resizeMode="contain"/>
+                            resizeMode="contain" />
                     ) : null}
                 </View>
                 <View style={styles.controls}>
