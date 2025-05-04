@@ -105,9 +105,9 @@ const HomeScreen = () => {
 
     const mainMenuItems = [
         {
-            label: "Jobs",
-            icon: "briefcase",
-            onPress: () => navigation.navigate("Job"),
+            label: "Leitura",
+            icon: "hourglass-outline",
+            onPress: () => navigation.navigate("ProgressReading"),
         },
         {
             label: "Mangás",
@@ -128,9 +128,9 @@ const HomeScreen = () => {
 
     const extraMenuItems = [
         {
-            label: "Leitura",
-            icon: "hourglass-outline",
-            onPress: () => navigation.navigate("ProgressReading"),
+            label: "Jobs",
+            icon: "briefcase",
+            onPress: () => navigation.navigate("Job"),
         },
         {
             label: "Biblioteca",
