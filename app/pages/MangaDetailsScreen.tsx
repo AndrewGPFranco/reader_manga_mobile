@@ -12,13 +12,13 @@ import {
   Alert,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import { formatDate } from "@/app/utils/utils";
-import { StatusType } from "@/app/enums/StatusType";
-import useMangaStore from "@/app/stores/mangaStore";
+import { formatDate } from "@/utils/utils";
+import { StatusType } from "@/enums/StatusType";
+import useMangaStore from "@/stores/mangaStore";
 import { Card } from "react-native-paper";
-import iMangaData from "@/app/_types/iManga";
-import iChapterData from "@/app/_types/iChapter";
-import MangaService from "@/app/class/services/MangaService";
+import iMangaData from "@/_types/iManga";
+import iChapterData from "@/_types/iChapter";
+import MangaService from "@/class/services/MangaService";
 
 export default function MangaDetails() {
   const route = useRoute<any>();

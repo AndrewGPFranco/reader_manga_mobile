@@ -1,5 +1,5 @@
-import type iPageData from "../_types/iPagee";
-import { StatusType } from "@/app/enums/StatusType";
+import type iPageData from "./iPagee";
+import { StatusType } from "@/enums/StatusType";
 
 export default interface iChapterData {
   id: number;

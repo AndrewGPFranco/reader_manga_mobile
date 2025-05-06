@@ -1,4 +1,4 @@
-import iChapterData from "../../_types/iChapter";
+import iChapterData from "@/_types/iChapter";
 
 interface ChapterStore {
     chapter: Array<iChapterData>;

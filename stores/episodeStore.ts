@@ -1,6 +1,6 @@
 import {create} from "zustand";
-import {api} from "@/app/network/axiosInstance";
-import EpisodeStore from "@/app/stores/_types/iEpisodeStore";
+import {api} from "@/network/axiosInstance";
+import EpisodeStore from "@/stores/_types/iEpisodeStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const useEpisodeStore = create<EpisodeStore>((set, get) => ({

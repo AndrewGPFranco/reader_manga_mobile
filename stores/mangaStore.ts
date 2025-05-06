@@ -1,11 +1,11 @@
 import {create} from "zustand";
 import MangaStore from "./_types/iMangaStore";
-import iMangaData from "../_types/iManga";
-import {api} from "../network/axiosInstance";
+import iMangaData from "@/_types/iManga";
+import {api} from "@/network/axiosInstance";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {jwtDecode} from "jwt-decode";
-import iDecodedToken from "../_types/iDecodedToken";
-import {UserData} from "../class/UserData";
+import iDecodedToken from "@/_types/iDecodedToken";
+import {UserData} from "@/class/UserData";
 
 const useMangaStore = create<MangaStore>((set, get) => ({
     manga: [] as Array<iMangaData>,

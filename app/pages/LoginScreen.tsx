@@ -13,8 +13,8 @@ import {
 import {Svg, Path} from "react-native-svg";
 import {useNavigation} from "@react-navigation/native";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
-import {validationFieldsLogin} from "@/app/utils/validation";
-import useAuthStore from "@/app/stores/authStore";
+import {validationFieldsLogin} from "@/utils/validation";
+import useAuthStore from "@/stores/authStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "Login">;

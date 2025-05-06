@@ -1,9 +1,9 @@
 import {Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import {useEffect, useState} from "react";
-import useAuthStore from "@/app/stores/authStore";
+import useAuthStore from "@/stores/authStore";
 import {useNavigation} from "@react-navigation/native";
-import {UserSession} from "@/app/class/UserSession";
-import {NavigationProps} from "@/app/_types/navigation/NavigationProps";
+import {UserSession} from "@/class/UserSession";
+import {NavigationProps} from "@/_types/navigation/NavigationProps";
 
 const ProfileScreen = () => {
     const [user, setUser] = useState<UserSession>();

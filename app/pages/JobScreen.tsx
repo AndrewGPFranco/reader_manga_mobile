@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     View,
     Text,
@@ -14,10 +14,10 @@ import {
     ViewStyle
 } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
-import {Feather} from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {api} from '../network/axiosInstance';
-import useMangaStore from '../stores/mangaStore';
+import { api } from '@/network/axiosInstance';
+import useMangaStore from '@/stores/mangaStore';
 
 interface SimpleProgressBarProps {
     progress: number;
@@ -28,12 +28,12 @@ interface SimpleProgressBarProps {
 }
 
 const SimpleProgressBar: React.FC<SimpleProgressBarProps> = ({
-                                                                 progress,
-                                                                 width = '100%',
-                                                                 height = 10,
-                                                                 color = '#50fa7b',
-                                                                 backgroundColor = '#282a36'
-                                                             }) => {
+    progress,
+    width = '100%',
+    height = 10,
+    color = '#50fa7b',
+    backgroundColor = '#282a36'
+}) => {
     return (
         <View style={{
             height,
@@ -128,7 +128,7 @@ const JobScreen = () => {
     const pickDocument = async () => {
         try {
             const result = await DocumentPicker.getDocumentAsync({
-                type: 'application/pdf',
+                type: ['application/pdf', 'application/zip'],
                 copyToCacheDirectory: true,
             });
 
@@ -137,7 +137,7 @@ const JobScreen = () => {
                 setSelectedFile({
                     uri: file.uri,
                     name: file.name || 'chapter.pdf',
-                    type: 'application/pdf'
+                    type: file.mimeType || 'application/octet-stream',
                 });
             }
         } catch (err) {
@@ -264,7 +264,7 @@ const JobScreen = () => {
         </TouchableOpacity>
     );
 
-    const renderMangaItem = ({item}: { item: string }) => (
+    const renderMangaItem = ({ item }: { item: string }) => (
         <TouchableOpacity
             style={styles.mangaItem}
             onPress={() => selectManga(item)}
@@ -328,7 +328,7 @@ const JobScreen = () => {
                                             <Text style={styles.pickerButtonText}>
                                                 {titleManga || "Escolha o nome do mangá"}
                                             </Text>
-                                            <Feather name="chevron-down" size={20} color="#bd93f9"/>
+                                            <Feather name="chevron-down" size={20} color="#bd93f9" />
                                         </TouchableOpacity>
                                     </View>
 
@@ -360,7 +360,7 @@ const JobScreen = () => {
                                     <View style={styles.formGroup}>
                                         <Text style={styles.label}>PDF do capítulo</Text>
                                         <TouchableOpacity style={styles.uploadButton} onPress={pickDocument}>
-                                            <Feather name="upload" size={24} color="#000000"/>
+                                            <Feather name="upload" size={24} color="#000000" />
                                             <Text style={styles.uploadButtonText}>
                                                 {selectedFile ? 'Arquivo selecionado' : 'Selecionar arquivo'}
                                             </Text>
@@ -377,7 +377,7 @@ const JobScreen = () => {
                             {isExibirProgresso && (
                                 <View style={styles.progressContainer}>
                                     <Text style={styles.progressTitle}>Progresso do Job:</Text>
-                                    <SimpleProgressBar progress={progress}/>
+                                    <SimpleProgressBar progress={progress} />
                                     <Text style={styles.progressText}>{Math.round(progress)}%</Text>
                                 </View>
                             )}
@@ -388,7 +388,7 @@ const JobScreen = () => {
                                 disabled={isLoading}
                             >
                                 {isLoading ? (
-                                    <ActivityIndicator color="#f8f8f2" size="small"/>
+                                    <ActivityIndicator color="#f8f8f2" size="small" />
                                 ) : (
                                     <Text style={styles.executeButtonText}>Executar Job</Text>
                                 )}
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#1E1E1E',
         borderRadius: 10,
         shadowColor: '#000',
-        shadowOffset: {width: 0, height: 2},
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 4,
         elevation: 5,

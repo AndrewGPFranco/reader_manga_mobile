@@ -1,4 +1,4 @@
-import {AnimeListingVO} from "@/app/_types/screens/listing-animes/AnimeListingVO";
+import {AnimeListingVO} from "@/_types/screens/listing-animes/AnimeListingVO";
 
 interface IEpisodeStore {
     uploadEpisode(data: FormData): Promise<string>;

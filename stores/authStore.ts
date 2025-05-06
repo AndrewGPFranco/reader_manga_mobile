@@ -1,11 +1,11 @@
 import {create} from "zustand";
 import {jwtDecode} from "jwt-decode";
-import {User} from "@/app/class/User";
-import {api} from "@/app/network/axiosInstance";
-import iDecodedToken from "@/app/_types/iDecodedToken";
+import {User} from "@/class/User";
+import {api} from "@/network/axiosInstance";
+import iDecodedToken from "@/_types/iDecodedToken";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import AuthStore from "@/app/stores/_types/iAuthStore"
-import {UserSession} from "@/app/class/UserSession";
+import AuthStore from "@/stores/_types/iAuthStore"
+import {UserSession} from "@/class/UserSession";
 
 const useAuthStore = create<AuthStore>((set, get) => ({
   user: new User("", "", "", ""),

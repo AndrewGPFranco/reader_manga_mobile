@@ -14,11 +14,11 @@ import { Button, Card } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import Navbar from "@/components/home/Navbar";
-import { api } from "@/app/network/axiosInstance";
-import iMangaData from "@/app/_types/iManga";
-import useAuthStore from "../stores/authStore";
+import { api } from "@/network/axiosInstance";
+import iMangaData from "@/_types/iManga";
+import useAuthStore from "@/stores/authStore";
 import { useFocusEffect } from "expo-router";
-import { NavigationProps } from "@/app/_types/navigation/NavigationProps";
+import { NavigationProps } from "@/_types/navigation/NavigationProps";
 
 const HomeScreen = () => {
     const [mangas, setMangas] = useState<iMangaData[]>([]);

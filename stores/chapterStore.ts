@@ -1,6 +1,6 @@
 import {create} from "zustand";
-import iChapterData from "../_types/iChapter";
-import {api} from "../network/axiosInstance";
+import iChapterData from "@/_types/iChapter";
+import {api} from "@/network/axiosInstance";
 import ChapterStore from "./_types/iChapterStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from 'expo-file-system';

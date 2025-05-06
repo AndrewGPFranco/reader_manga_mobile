@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import { api } from "@/app/network/axiosInstance";
-import ResponseAPI from "@/app/class/ResponseAPI";
-import AnimeStore from "@/app/stores/_types/iAnimeStore";
+import { api } from "@/network/axiosInstance";
+import ResponseAPI from "@/class/ResponseAPI";
+import AnimeStore from "@/stores/_types/iAnimeStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const useAnimeStore = create<AnimeStore>((set, get) => ({

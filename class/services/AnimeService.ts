@@ -1,5 +1,5 @@
-import useAnimeStore from "@/app/stores/animeStore";
-import {iAnime} from "@/app/_types/iAnime";
+import useAnimeStore from "@/stores/animeStore";
+import {iAnime} from "@/_types/iAnime";
 
 class AnimeService {
 

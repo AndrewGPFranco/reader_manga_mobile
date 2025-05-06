@@ -8,10 +8,10 @@ import {
     StyleSheet,
     Modal, Alert,
 } from "react-native";
-import useChapterStore from "@/app/stores/chapterStore";
-import iChapterData from "../_types/iChapter";
+import useChapterStore from "@/stores/chapterStore";
+import iChapterData from "@/_types/iChapter";
 import {useNavigation} from "expo-router";
-import {NavigationProps} from "@/app/_types/navigation/NavigationProps";
+import {NavigationProps} from "@/_types/navigation/NavigationProps";
 
 const ProgressReadingScreen = () => {
     const navigation = useNavigation<NavigationProps>();

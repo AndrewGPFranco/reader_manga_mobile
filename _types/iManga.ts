@@ -1,5 +1,5 @@
-import { StatusType } from "@/app/enums/StatusType";
-import type iChapterData from "../_types/iChapter";
+import { StatusType } from "@/enums/StatusType";
+import type iChapterData from "./iChapter";
 
 export default interface iMangaData {
   id: number;

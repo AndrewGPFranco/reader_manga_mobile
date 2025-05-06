@@ -1,4 +1,4 @@
-import {EpisodeToAnimesVO} from "@/app/_types/screens/listing-animes/EpisodeToAnimesVO";
+import {EpisodeToAnimesVO} from "@/_types/screens/listing-animes/EpisodeToAnimesVO";
 
 export interface AnimeListingVO {
     note: number;

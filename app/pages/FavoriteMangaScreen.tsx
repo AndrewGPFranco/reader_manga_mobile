@@ -2,10 +2,10 @@ import React, {useEffect, useState} from 'react';
 import {View, Text, FlatList, Image, TouchableOpacity, StyleSheet, StatusBar} from 'react-native';
 import {LinearGradient} from 'expo-linear-gradient';
 import {Ionicons} from '@expo/vector-icons';
-import useMangaStore from "@/app/stores/mangaStore";
-import iMangaData from "@/app/_types/iManga";
+import useMangaStore from "@/stores/mangaStore";
+import iMangaData from "@/_types/iManga";
 import {useNavigation} from "@react-navigation/native";
-import {NavigationProps} from "@/app/_types/navigation/NavigationProps";
+import {NavigationProps} from "@/_types/navigation/NavigationProps";
 
 const FavoriteMangasScreen = () => {
     const mangaStore = useMangaStore();

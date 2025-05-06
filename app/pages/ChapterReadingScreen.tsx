@@ -8,8 +8,8 @@ import {
     View,
 } from 'react-native';
 import { Button } from "react-native-paper";
-import iChapterData from '../_types/iChapter';
-import useChapterStore from '@/app/stores/chapterStore';
+import iChapterData from '@/_types/iChapter';
+import useChapterStore from '@/stores/chapterStore';
 import React, { useCallback, useEffect, useState } from 'react';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 

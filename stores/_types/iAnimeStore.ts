@@ -1,5 +1,5 @@
-import {iAnime} from "@/app/_types/iAnime";
-import ResponseAPI from "@/app/class/ResponseAPI";
+import {iAnime} from "@/_types/iAnime";
+import ResponseAPI from "@/class/ResponseAPI";
 
 interface IAnimeStore {
     findAll(): Promise<Array<iAnime>>;

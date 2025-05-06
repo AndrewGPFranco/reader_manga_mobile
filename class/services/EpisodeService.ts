@@ -1,6 +1,6 @@
-import useEpisodeStore from "@/app/stores/episodeStore";
-import useAnimeStore from "@/app/stores/animeStore";
-import {AnimeListingVO} from "@/app/_types/screens/listing-animes/AnimeListingVO";
+import useEpisodeStore from "@/stores/episodeStore";
+import useAnimeStore from "@/stores/animeStore";
+import {AnimeListingVO} from "@/_types/screens/listing-animes/AnimeListingVO";
 
 class EpisodeService {
 

@@ -1,6 +1,6 @@
-import { User } from "@/app/class/User";
-import { UserSession } from "@/app/class/UserSession";
-import { UserRegister } from "@/app/class/UserRegister";
+import { User } from "@/class/User";
+import { UserSession } from "@/class/UserSession";
+import { UserRegister } from "@/class/UserRegister";
 
 interface AuthStore {
     user: User;

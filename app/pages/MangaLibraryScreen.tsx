@@ -11,11 +11,11 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import iMangaData from "@/app/_types/iManga";
-import useMangaStore from "@/app/stores/mangaStore";
-import useAuthStore from "@/app/stores/authStore";
-import iResponseListManga from "@/app/_types/iResponseListManga";
-import {NavigationProps} from "@/app/_types/navigation/NavigationProps";
+import iMangaData from "@/_types/iManga";
+import useMangaStore from "@/stores/mangaStore";
+import useAuthStore from "@/stores/authStore";
+import iResponseListManga from "@/_types/iResponseListManga";
+import {NavigationProps} from "@/_types/navigation/NavigationProps";
 
 const MangaLibraryScreen = () => {
     const [mangasArray, setMangasArray] = useState<Array<iMangaData>>([]);

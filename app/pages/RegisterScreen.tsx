@@ -14,8 +14,8 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from '@expo/vector-icons';
-import useAuthStore from '../stores/authStore';
-import { UserRegister } from '../class/UserRegister';
+import useAuthStore from '@/stores/authStore';
+import { UserRegister } from '@/class/UserRegister';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, "RegisterUser">;
 

@@ -1,7 +1,7 @@
-import iMangaData from "@/app/_types/iManga";
-import iResponseRequest from "@/app/_types/iResponseRequest";
-import iResponseListManga from "@/app/_types/iResponseListManga";
-import iCoversManga from "@/app/_types/iCoversManga";
+import iMangaData from "@/_types/iManga";
+import iResponseRequest from "@/_types/iResponseRequest";
+import iResponseListManga from "@/_types/iResponseListManga";
+import iCoversManga from "@/_types/iCoversManga";
 
 interface MangaStore {
     manga: Array<iMangaData>;

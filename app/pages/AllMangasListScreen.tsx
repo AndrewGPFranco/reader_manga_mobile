@@ -11,9 +11,9 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import iMangaData from "@/app/_types/iManga";
-import useMangaStore from "@/app/stores/mangaStore";
-import {NavigationProps} from "@/app/_types/navigation/NavigationProps";
+import iMangaData from "@/_types/iManga";
+import useMangaStore from "@/stores/mangaStore";
+import {NavigationProps} from "@/_types/navigation/NavigationProps";
 
 const Pagination = ({
                         currentPage,

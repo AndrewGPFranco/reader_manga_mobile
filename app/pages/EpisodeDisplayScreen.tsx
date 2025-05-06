@@ -3,7 +3,7 @@ import {ResizeMode, Video, VideoFullscreenUpdateEvent} from 'expo-av';
 import React, {useEffect, useState} from 'react';
 import {useRoute} from "@react-navigation/native";
 import {Ionicons} from '@expo/vector-icons';
-import useEpisodeStore from "@/app/stores/episodeStore";
+import useEpisodeStore from "@/stores/episodeStore";
 import * as ScreenOrientation from 'expo-screen-orientation';
 
 const EpisodeDisplayScreen = () => {

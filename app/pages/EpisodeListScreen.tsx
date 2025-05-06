@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import EpisodeService from "@/app/class/services/EpisodeService";
+import EpisodeService from "@/class/services/EpisodeService";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import {
     FlatList,
@@ -16,11 +16,11 @@ import {
     Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { AnimeListingVO } from "@/app/_types/screens/listing-animes/AnimeListingVO";
-import { EpisodeToAnimesVO } from "@/app/_types/screens/listing-animes/EpisodeToAnimesVO";
-import { NavigationProps } from "@/app/_types/navigation/NavigationProps";
-import { formatDate } from "../utils/utils";
-import AnimeService from "../class/services/AnimeService";
+import { AnimeListingVO } from "@/_types/screens/listing-animes/AnimeListingVO";
+import { EpisodeToAnimesVO } from "@/_types/screens/listing-animes/EpisodeToAnimesVO";
+import { NavigationProps } from "@/_types/navigation/NavigationProps";
+import { formatDate } from "@/utils/utils";
+import AnimeService from "@/class/services/AnimeService";
 
 const EpisodeListScreen = () => {
     const route = useRoute<any>();
