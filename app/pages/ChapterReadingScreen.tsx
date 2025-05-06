@@ -53,7 +53,7 @@ const MangaScreen = () => {
 
         setImagemCarregada(false);
         const imagePath = await chapterStore.getPage(chapterId, index);
-        setImagem(`http://192.168.15.17:8080${imagePath}`);
+        setImagem(`http://192.168.15.17:8080${imagePath}?t=${Date.now()}`);
         setImagemCarregada(true);
     }, [chapterStore]);
 
@@ -125,18 +125,18 @@ const MangaScreen = () => {
     useEffect(() => {
         const unsubscribeBeforeRemove = navigation.addListener(
             'beforeRemove',
-            async (e: { preventDefault: () => void; data: { action: any; }; }) => {
+            async (e: { preventDefault: () => void; }) => {
                 e.preventDefault();
                 try {
                     await atualizaProgresso();
-                    navigation.dispatch(e.data.action);
+                    navigation.navigate('Home');
                 } catch (error) {
                     console.error("Erro ao atualizar o progresso antes de sair:", error);
-                    navigation.dispatch(e.data.action);
+                    navigation.navigate('Home');
                 }
             }
         );
-
+    
         return () => {
             unsubscribeBeforeRemove();
         };
