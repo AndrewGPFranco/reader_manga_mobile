@@ -145,10 +145,10 @@ export default function MangaDetails() {
                   chapter.readingProgress !== 0
                     ? askContinueReading(chapter)
                     : navigation.navigate("ChapterReading", {
-                        id: chapter.id,
-                        title: manga.title,
-                        progress: 1,
-                      })
+                      id: chapter.id,
+                      title: manga.title,
+                      progress: 1,
+                    })
                 }
               >
                 <Text
@@ -178,49 +178,77 @@ export default function MangaDetails() {
                 {chapter.status === StatusType.FINISHED
                   ? "Leitura finalizada"
                   : chapter.readingProgress === 0
-                  ? "Leitura não iniciada"
-                  : `Pág: ${chapter.readingProgress}`}
+                    ? "Leitura não iniciada"
+                    : `Pág: ${chapter.readingProgress}`}
               </Text>
             </View>
           ))}
         </ScrollView>
 
-        <Modal visible={showDialog} transparent animationType="fade">
-          <View style={styles.modalBackdrop}>
+        <Modal
+          visible={showDialog}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowDialog(false)}
+        >
+          <View style={styles.modalBackground}>
             <View style={styles.modalCard}>
-              <Text style={styles.modalTitle}>
-                Deseja continuar de onde parou?
-              </Text>
-              <View style={styles.modalActions}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Continuar Leitura</Text>
+              </View>
+
+              {selectedChapter && (
+                <View style={styles.modalContent}>
+                  <Image
+                    source={{ uri: manga.image }}
+                    style={styles.modalImage}
+                  />
+                  <View style={styles.modalInfo}>
+                    <Text style={styles.modalMangaTitle}
+                      numberOfLines={2}>{selectedChapter.title}</Text>
+                    <Text
+                      style={styles.modalProgressText}>Página {selectedChapter.readingProgress} de {selectedChapter.numberPages}</Text>
+                    <View style={styles.modalProgressBar}>
+                      <View
+                        style={[
+                          styles.modalProgressFill,
+                          { width: `${parseInt(String(selectedChapter.readingProgress)) / parseInt(String(selectedChapter.numberPages)) * 100}%` }
+                        ]}
+                      />
+                    </View>
+                  </View>
+                </View>
+              )}
+
+              <View style={styles.modalButtons}>
                 <TouchableOpacity
-                  style={styles.buttonConfirm}
+                  style={styles.continueButton}
                   onPress={() => {
                     setShowDialog(false);
                     if (selectedChapter) {
                       navigation.navigate("ChapterReading", {
                         id: selectedChapter.id,
-                        title: manga.title,
-                        progress: selectedChapter.readingProgress,
+                        progress: selectedChapter.readingProgress
                       });
                     }
                   }}
                 >
-                  <Text style={styles.buttonText}>Sim</Text>
+                  <Text style={styles.continueButtonText}>Continuar leitura</Text>
                 </TouchableOpacity>
+
                 <TouchableOpacity
-                  style={styles.buttonCancel}
+                  style={styles.restartButton}
                   onPress={() => {
                     setShowDialog(false);
                     if (selectedChapter) {
                       navigation.navigate("ChapterReading", {
                         id: selectedChapter.id,
-                        title: manga.title,
-                        progress: 1,
+                        progress: 1
                       });
                     }
                   }}
                 >
-                  <Text style={styles.buttonText}>Não</Text>
+                  <Text style={styles.restartButtonText}>Começar do início</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -401,7 +429,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 22,
     fontWeight: "bold",
-    color: "#e63946",
+    color: 'white',
     marginBottom: 12,
     textAlign: "center",
   },
@@ -442,5 +470,90 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     textAlign: "center",
+  },
+  modalBackground: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.75)",
+  },
+  modalHeader: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#333333",
+  },
+  modalContent: {
+    flexDirection: 'row',
+    padding: 16,
+  },
+  modalImage: {
+    width: 80,
+    height: 120,
+    borderRadius: 8,
+  },
+  modalInfo: {
+    flex: 1,
+    marginLeft: 16,
+    justifyContent: 'center',
+  },
+  modalMangaTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#ffffff",
+    marginBottom: 8,
+  },
+  modalProgressText: {
+    fontSize: 14,
+    color: "#cccccc",
+    marginBottom: 8,
+  },
+  modalProgressBar: {
+    height: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  modalProgressFill: {
+    height: '100%',
+    backgroundColor: '#FF4D94',
+    borderRadius: 3,
+  },
+  modalButtons: {
+    padding: 16,
+  },
+  continueButton: {
+    backgroundColor: "#FF4D94",
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  continueButtonText: {
+    color: "#ffffff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  restartButton: {
+    backgroundColor: "#333333",
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: 'center'
+  },
+  restartButtonText: {
+    color: "#ffffff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  resetButton: {
+    backgroundColor: "transparent",
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: "#666666",
+  },
+  resetButtonText: {
+    color: "#cccccc",
+    fontSize: 16,
   }
 });
