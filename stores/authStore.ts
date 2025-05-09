@@ -23,8 +23,7 @@ const useAuthStore = create<AuthStore>((set, get) => ({
   async isAdmin() {
     const isAdmin = await AsyncStorage.getItem("isAdmin");
 
-    if(isAdmin != null) return true;
-    return false;
+    return isAdmin === "true";
   },
 
   async getToken() {
@@ -79,7 +78,7 @@ const useAuthStore = create<AuthStore>((set, get) => ({
       user.setToken(data.token);
       user.setId(userId);
 
-      this.setIsAdmin(String(decodedToken.isAdmin));
+      await this.setIsAdmin(String(decodedToken.isAdmin));
 
       set({ user });
       await get().setToken(data.token, userId);

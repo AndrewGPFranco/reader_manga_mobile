@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import {
     View,
     Text,
@@ -6,24 +6,25 @@ import {
     ScrollView,
     TouchableOpacity,
     StyleSheet,
-    ActivityIndicator, 
+    ActivityIndicator,
     Alert,
     BackHandler,
 } from "react-native";
-import { Button, Card } from "react-native-paper";
-import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import {Button, Card} from "react-native-paper";
+import {Ionicons} from "@expo/vector-icons";
+import {useNavigation} from "@react-navigation/native";
 import Navbar from "@/components/home/Navbar";
-import { api } from "@/network/axiosInstance";
+import {api} from "@/network/axiosInstance";
 import iMangaData from "@/_types/iManga";
 import useAuthStore from "@/stores/authStore";
-import { useFocusEffect } from "expo-router";
-import { NavigationProps } from "@/_types/navigation/NavigationProps";
+import {useFocusEffect} from "expo-router";
+import {NavigationProps} from "@/_types/navigation/NavigationProps";
 
 const HomeScreen = () => {
+    const [error, setError] = useState("");
     const [mangas, setMangas] = useState<iMangaData[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+    const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
     const authStore = useAuthStore();
     const navigation = useNavigation<NavigationProps>();
@@ -39,6 +40,7 @@ const HomeScreen = () => {
                 }
             );
             setMangas(response.data);
+            setIsAdmin(await authStore.isAdmin())
         } catch (err) {
             console.log(err);
             setError("Erro ao carregar os mangás");
@@ -66,7 +68,7 @@ const HomeScreen = () => {
     const renderContent = () => {
         if (loading) {
             return (
-                <ActivityIndicator size="large" color="#BB86FC" style={styles.loader} />
+                <ActivityIndicator size="large" color="#BB86FC" style={styles.loader}/>
             );
         }
 
@@ -80,16 +82,16 @@ const HomeScreen = () => {
                         key={item.id}
                         style={styles.mangaCard}
                         onPress={() =>
-                            navigation.navigate("MangaDetails", { title: item.title })
+                            navigation.navigate("MangaDetails", {title: item.title})
                         }
                     >
-                        <Image source={{ uri: item.image }} style={styles.mangaImage} />
+                        <Image source={{uri: item.image}} style={styles.mangaImage}/>
                         <View style={styles.overlay}>
                             <Text style={styles.mangaTitle}>{item.title}</Text>
                             <Button
                                 mode="contained"
                                 onPress={() =>
-                                    navigation.navigate("MangaDetails", { title: item.title })
+                                    navigation.navigate("MangaDetails", {title: item.title})
                                 }
                             >
                                 Ler agora
@@ -127,11 +129,13 @@ const HomeScreen = () => {
     ];
 
     const extraMenuItems = [
-        {
-            label: "Jobs",
-            icon: "briefcase",
-            onPress: () => navigation.navigate("Job"),
-        },
+        ...(isAdmin ? [
+            {
+                label: "Jobs",
+                icon: "briefcase",
+                onPress: () => navigation.navigate("Job"),
+            }
+        ] : []),
         {
             label: "Biblioteca",
             icon: "book-outline",
@@ -148,22 +152,22 @@ const HomeScreen = () => {
     ];
 
     return (
-        <View style={{ flex: 1, backgroundColor: "#121212" }}>
+        <View style={{flex: 1, backgroundColor: "#121212"}}>
             <ScrollView style={styles.container}>
-                <Navbar />
+                <Navbar/>
                 <Card style={styles.card}>
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Mangás Populares</Text>
                     </View>
                     {renderContent()}
                 </Card>
-                <View style={styles.bottomSpacing} />
+                <View style={styles.bottomSpacing}/>
             </ScrollView>
 
             <View style={styles.bottomMenu}>
                 {mainMenuItems.map((item, index) => (
                     <TouchableOpacity key={index} style={styles.menuButton} onPress={item.onPress}>
-                        <Ionicons name={item.icon as any} size={20} color="#fff" />
+                        <Ionicons name={item.icon as any} size={20} color="#fff"/>
                         <Text style={styles.menuLabel}>{item.label}</Text>
                     </TouchableOpacity>
                 ))}
@@ -172,7 +176,7 @@ const HomeScreen = () => {
                     style={styles.menuButton}
                     onPress={() => setShowMoreOptions(true)}
                 >
-                    <Ionicons name="ellipsis-horizontal" size={20} color="#fff" />
+                    <Ionicons name="ellipsis-horizontal" size={20} color="#fff"/>
                     <Text style={styles.menuLabel}>Mais</Text>
                 </TouchableOpacity>
             </View>
@@ -189,14 +193,14 @@ const HomeScreen = () => {
                                     setShowMoreOptions(false);
                                 }}
                             >
-                                <Ionicons name={item.icon as any} size={20} color="#fff" />
+                                <Ionicons name={item.icon as any} size={20} color="#fff"/>
                                 <Text style={styles.menuLabel}>{item.label}</Text>
                             </TouchableOpacity>
                         ))}
                         <Button
                             onPress={() => setShowMoreOptions(false)}
                             mode="contained"
-                            style={{ marginTop: 12, backgroundColor: "#BB86FC" }}
+                            style={{marginTop: 12, backgroundColor: "#BB86FC"}}
                         >
                             Fechar
                         </Button>
@@ -208,7 +212,7 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#121212" },
+    container: {flex: 1, backgroundColor: "#121212"},
     card: {
         marginTop: -25,
         backgroundColor: "#121212",
@@ -244,16 +248,16 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         paddingVertical: 2,
     },
-    title: { fontSize: 22, fontWeight: "bold", color: "#BB86FC" },
-    section: { marginBottom: 20 },
+    title: {fontSize: 22, fontWeight: "bold", color: "#BB86FC"},
+    section: {marginBottom: 20},
     sectionTitle: {
         fontSize: 18,
         fontWeight: "bold",
         color: "white",
         marginBottom: 8,
     },
-    loader: { marginVertical: 20 },
-    errorText: { color: "#CF6679", textAlign: "center", marginVertical: 10 },
+    loader: {marginVertical: 20},
+    errorText: {color: "#CF6679", textAlign: "center", marginVertical: 10},
     mangaGrid: {
         flexDirection: "row",
         flexWrap: "wrap",
@@ -269,7 +273,7 @@ const styles = StyleSheet.create({
         elevation: 3,
         backgroundColor: "#1E1E1E",
     },
-    mangaImage: { width: "100%", height: "100%", resizeMode: "cover" },
+    mangaImage: {width: "100%", height: "100%", resizeMode: "cover"},
     overlay: {
         position: "absolute",
         bottom: 0,
@@ -284,7 +288,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         marginBottom: 4,
     },
-    bottomSpacing: { height: 20 },
+    bottomSpacing: {height: 20},
     bottomMenu: {
         flexDirection: "row",
         justifyContent: "space-around",
