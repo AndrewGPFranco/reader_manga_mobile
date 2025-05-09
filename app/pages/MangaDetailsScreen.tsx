@@ -85,6 +85,31 @@ export default function MangaDetails() {
     }
   };
 
+  const mostraOpcaoDeAvaliar = () => {
+    if (manga.isInUserLibrary) {
+      return (
+        <TouchableOpacity
+          style={styles.accessButton}
+          onPress={() => setIsFormNota(true)}
+        >
+          <Text style={styles.buttonText}>Avaliar</Text>
+        </TouchableOpacity>
+      )
+    }
+  };
+
+  const verificaProgressoLeitura = (chapter: iChapterData) => {
+    if (chapter.status === StatusType.FINISHED) {
+      return "Leitura finalizada";
+    } else {
+      if (chapter.readingProgress === 0) {
+        return "Leitura não iniciada";
+      } else {
+        return `Pág: ${chapter.readingProgress}`
+      };
+    }
+  }
+
   return (
     <View style={styles.container}>
       <Card style={styles.card}>
@@ -93,12 +118,7 @@ export default function MangaDetails() {
             <Image source={{ uri: manga.image }} style={styles.image} />
             <View>
               <Text style={styles.title}>{manga.title}</Text>
-              <TouchableOpacity
-                style={styles.accessButton}
-                onPress={() => setIsFormNota(true)}
-              >
-                <Text style={styles.buttonText}>Avaliar</Text>
-              </TouchableOpacity>
+              {mostraOpcaoDeAvaliar()}
             </View>
           </View>
 
@@ -175,11 +195,7 @@ export default function MangaDetails() {
                 ]}
               >
                 Progresso:{" "}
-                {chapter.status === StatusType.FINISHED
-                  ? "Leitura finalizada"
-                  : chapter.readingProgress === 0
-                    ? "Leitura não iniciada"
-                    : `Pág: ${chapter.readingProgress}`}
+                {verificaProgressoLeitura(chapter)}
               </Text>
             </View>
           ))}

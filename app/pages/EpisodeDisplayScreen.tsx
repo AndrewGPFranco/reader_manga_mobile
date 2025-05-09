@@ -92,7 +92,7 @@ const EpisodeDisplayScreen = () => {
 
             <View style={styles.infoContainer}>
                 <Text style={styles.title}>
-                    {episode.animeName} - Episódio {episode.episodeNumber}: {episode.title}
+                    Episódio {episode.episodeNumber}: {episode.title}
                 </Text>
 
                 <View style={styles.statsRow}>

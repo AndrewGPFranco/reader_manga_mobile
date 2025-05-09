@@ -15,4 +15,5 @@ export default interface iMangaData {
   status: StatusType;
   description: string;
   chapters: iChapterData[];
+  isInUserLibrary: boolean;
 }

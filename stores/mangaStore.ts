@@ -195,7 +195,7 @@ const useMangaStore = create<MangaStore>((set, get) => ({
             )
             return response.data
         } catch (error: any) {
-            throw new Error(error.response?.data || 'Erro ao adicionar manga')
+            throw new Error(error.response?.data ?? 'Erro ao adicionar manga')
         }
     },
 
@@ -213,7 +213,7 @@ const useMangaStore = create<MangaStore>((set, get) => ({
             )
             return response.data
         } catch (error: any) {
-            throw new Error(error.response?.data || 'Erro ao remover manga')
+            throw new Error(error.response?.data ?? 'Erro ao remover manga')
         }
     },
 

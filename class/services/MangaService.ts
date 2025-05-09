@@ -1,6 +1,6 @@
 class MangaService {
 
-    private useManga: any;
+    private readonly useManga: any;
 
     constructor(useManga: any) {
         this.useManga = useManga;
