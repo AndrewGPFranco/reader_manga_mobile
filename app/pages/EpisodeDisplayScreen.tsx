@@ -1,41 +1,36 @@
-import {Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native';
-import {ResizeMode, Video, VideoFullscreenUpdateEvent} from 'expo-av';
-import React, {useEffect, useState} from 'react';
-import {useRoute} from "@react-navigation/native";
-import {Ionicons} from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
+import { iEpisodeVO } from '@/_types/iEpisodeVO';
+import React, { useEffect, useState } from 'react';
 import useEpisodeStore from "@/stores/episodeStore";
+import { useRoute } from "@react-navigation/native";
 import * as ScreenOrientation from 'expo-screen-orientation';
+import { FeedbackEpisodeType } from '@/enums/FeedbackEpisodeType';
+import { ResizeMode, Video, VideoFullscreenUpdateEvent } from 'expo-av';
+import { EpisodeCommentsVO } from '@/_types/screens/listing-animes/EpisodeCommentsVO';
+import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const EpisodeDisplayScreen = () => {
     const route = useRoute<any>();
+    const video = React.useRef(null);
     const episodeStore = useEpisodeStore();
     const [uri, setUri] = useState<string>("");
-    const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-    const [episode, setEpisode] = useState<any>({
-        title: "Carregando...",
-        description: "",
-        episodeNumber: 0,
-        animeName: "Carregando...",
-    });
     const [comment, setComment] = useState<string>("");
-    const [comments, setComments] = useState<Array<any>>([]);
     const [isLiked, setIsLiked] = useState<boolean>(false);
-    const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
-    const video = React.useRef(null);
+    const [daysLaunched, setDaysLaunched] = useState<string>("");
+    const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+    const [comments, setComments] = useState<Array<EpisodeCommentsVO>>([] as Array<EpisodeCommentsVO>);
+    const [episodeInfo, setEpisodeInfo] = useState<iEpisodeVO>({} as iEpisodeVO);
 
     useEffect(() => {
-        const idAnime = route.params.id;
-        const title = route.params.title;
+        const idEpisode = route.params.id;
 
-        episodeStore.getEpisode(idAnime).then(response => {
-            setUri(`http://192.168.15.17:8080${response}`);
-
-            setEpisode({
-                title: title,
-                description: "Nosso herói parte em uma jornada épica para descobrir os segredos do mundo e enfrentar inimigos poderosos.",
-                episodeNumber: idAnime,
-                animeName: title,
-            });
+        episodeStore.getEpisode(idEpisode, 0, 10).then(response => {
+            episodeInfo.feedback = parseToEnumTypeFeedback(episodeInfo.feedback);
+            setIsLiked(episodeInfo.feedback === FeedbackEpisodeType.LIKE);
+            setDaysLaunched("X dias")
+            setEpisodeInfo(response);
+            setComments(episodeInfo.commentsList || []);
+            setUri(`http://192.168.15.17:8080${response.uriEpisode}`);
         });
 
         return () => {
@@ -61,28 +56,29 @@ const EpisodeDisplayScreen = () => {
         }
     };
 
+    const parseToEnumTypeFeedback = (feedback: string): FeedbackEpisodeType => {
+        if (feedback === "LIKE")
+            return FeedbackEpisodeType.LIKE
+        else if (feedback === "DISLIKE")
+            return FeedbackEpisodeType.DISLIKE
+
+        else return FeedbackEpisodeType.NOTHING;
+    }
+
     const handleComment = () => {
-        if (comment.trim() === "") return;
-
-        const newComment = {
-            id: comments.length + 1,
-            user: "Você",
-            avatar: "https://randomuser.me/api/portraits/men/4.jpg",
-            text: comment,
-            likes: 0,
-            time: "Agora mesmo"
-        };
-
-        setComments([newComment, ...comments]);
-        setComment("");
+        // TODO: implementar
     };
+
+    const handleFeedback = () => {
+        // TODO: implementar
+    }
 
     return (
         <ScrollView style={styles.container}>
             <View style={styles.videoContainer}>
                 <Video
                     ref={video}
-                    source={{uri: uri}}
+                    source={{ uri: uri }}
                     useNativeControls
                     resizeMode={ResizeMode.CONTAIN}
                     style={styles.video}
@@ -92,17 +88,26 @@ const EpisodeDisplayScreen = () => {
 
             <View style={styles.infoContainer}>
                 <Text style={styles.title}>
-                    Episódio {episode.episodeNumber}: {episode.title}
+                    {episodeInfo.titleEpisode}
                 </Text>
 
                 <View style={styles.statsRow}>
-                    <Text style={styles.stats}>250K visualizações • Lançado há 2 dias</Text>
+                    <Text style={styles.stats}>{episodeInfo.amountViews} visualizações • Lançado há {daysLaunched}</Text>
                 </View>
+            </View>
 
-                <View style={styles.actionsRow}>
+            <View style={styles.descriptionContainer}>
+                <View style={styles.studioContainer}>
+                    <Image
+                        source={{ uri: "https://github.com/AndrewGPFranco.png" }}
+                        style={styles.studioAvatar}
+                    />
+                    <View style={styles.studioInfo}>
+                        <Text style={styles.studioName}>Animes e Mangás</Text>
+                    </View>
                     <TouchableOpacity
                         style={styles.actionButton}
-                        onPress={() => setIsLiked(!isLiked)}
+                        onPress={() => handleFeedback()}
                     >
                         <Ionicons
                             name={isLiked ? "heart" : "heart-outline"}
@@ -113,70 +118,21 @@ const EpisodeDisplayScreen = () => {
                             Curtir
                         </Text>
                     </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.actionButton}>
-                        <Ionicons name="chatbubble-outline" size={22} color="#AAAAAA"/>
-                        <Text style={styles.actionText}>Comentar</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.actionButton}>
-                        <Ionicons name="share-outline" size={22} color="#AAAAAA"/>
-                        <Text style={styles.actionText}>Compartilhar</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.actionButton}>
-                        <Ionicons name="download-outline" size={22} color="#AAAAAA"/>
-                        <Text style={styles.actionText}>Download</Text>
-                    </TouchableOpacity>
                 </View>
             </View>
 
-            {/* Descrição */}
-            <View style={styles.descriptionContainer}>
-                <View style={styles.studioContainer}>
-                    <Image
-                        source={{uri: "https://via.placeholder.com/50"}}
-                        style={styles.studioAvatar}
-                    />
-                    <View style={styles.studioInfo}>
-                        <Text style={styles.studioName}>Animes e Mangás</Text>
-                        <Text style={styles.subscriberCount}>2.4M seguidores</Text>
-                    </View>
-                    <TouchableOpacity
-                        style={[
-                            styles.subscribeButton,
-                            isSubscribed && styles.subscribedButton
-                        ]}
-                        onPress={() => setIsSubscribed(!isSubscribed)}
-                    >
-                        <Text style={[
-                            styles.subscribeText,
-                            isSubscribed && styles.subscribedText
-                        ]}>
-                            {isSubscribed ? "Inscrito" : "Inscrever-se"}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-
-                <Text style={styles.description}>
-                    {episode.description}
-                </Text>
-                <Text style={styles.showMore}>Mostrar mais</Text>
-            </View>
-
-            {/* Comentários */}
             <View style={styles.commentsContainer}>
                 <View style={styles.commentsHeader}>
                     <Text style={styles.commentsCount}>{comments.length} comentários</Text>
                     <TouchableOpacity style={styles.sortButton}>
-                        <Ionicons name="filter-outline" size={18} color="#AAAAAA"/>
+                        <Ionicons name="filter-outline" size={18} color="#AAAAAA" />
                         <Text style={styles.sortText}>Ordenar por</Text>
                     </TouchableOpacity>
                 </View>
 
                 <View style={styles.addCommentContainer}>
                     <Image
-                        source={{uri: "https://github.com/AndrewGPFranco.png"}}
+                        source={{ uri: "https://github.com/AndrewGPFranco.png" }}
                         style={styles.commentAvatar}
                     />
                     <TextInput
@@ -190,29 +146,24 @@ const EpisodeDisplayScreen = () => {
                         style={styles.sendButton}
                         onPress={handleComment}
                     >
-                        <Ionicons name="send" size={20} color="#6200EE"/>
+                        <Ionicons name="send" size={20} color="#6200EE" />
                     </TouchableOpacity>
                 </View>
 
                 {comments.map((item) => (
-                    <View key={item.id} style={styles.commentItem}>
+                    <View key={item.comment} style={styles.commentItem}>
                         <Image
-                            source={{uri: item.avatar}}
+                            source={{ uri: "https://github.com/AndrewGPFranco.png" }}
                             style={styles.commentAvatar}
                         />
                         <View style={styles.commentContent}>
                             <View style={styles.commentHeader}>
-                                <Text style={styles.commentUser}>{item.user}</Text>
-                                <Text style={styles.commentTime}>{item.time}</Text>
+                                <Text style={styles.commentUser}>{item.nameUser}</Text>
                             </View>
-                            <Text style={styles.commentText}>{item.text}</Text>
+                            <Text style={styles.commentText}>{item.comment}</Text>
                             <View style={styles.commentActions}>
                                 <TouchableOpacity style={styles.commentAction}>
-                                    <Ionicons name="heart-outline" size={16} color="#AAAAAA"/>
-                                    <Text style={styles.commentActionText}>{item.likes}</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={styles.commentAction}>
-                                    <Ionicons name="chatbubble-outline" size={16} color="#AAAAAA"/>
+                                    <Ionicons name="chatbubble-outline" size={16} color="#AAAAAA" />
                                     <Text style={styles.commentActionText}>Responder</Text>
                                 </TouchableOpacity>
                             </View>

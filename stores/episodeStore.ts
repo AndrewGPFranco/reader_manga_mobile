@@ -26,8 +26,8 @@ const useEpisodeStore = create<EpisodeStore>((set, get) => ({
         }
     },
 
-    async getEpisode(id: string) {
-        const response = await api.get(`/episode/${id}`, {
+    async getEpisode(idEpisode: string, pageNumber: number, pageSize: number) {
+        const response = await api.get(`/episode/get-info-episode/${idEpisode}/${pageNumber}/${pageSize}`, {
             headers: {
                 Authorization: `${await get().getTokenUser()}`
             }

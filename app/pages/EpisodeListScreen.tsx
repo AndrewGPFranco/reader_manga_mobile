@@ -80,8 +80,7 @@ const EpisodeListScreen = () => {
             style={styles.card}
             onPress={() =>
                 navigation.navigate("EpisodeDisplay", {
-                    id: item.id,
-                    title: item.titleEpisode,
+                    id: item.id
                 })
             }
         >
