@@ -25,11 +25,12 @@ const EpisodeDisplayScreen = () => {
         const idEpisode = route.params.id;
 
         episodeStore.getEpisode(idEpisode, 0, 10).then(response => {
-            episodeInfo.feedback = parseToEnumTypeFeedback(episodeInfo.feedback);
-            setIsLiked(episodeInfo.feedback === FeedbackEpisodeType.LIKE);
-            setDaysLaunched("X dias")
             setEpisodeInfo(response);
-            setComments(episodeInfo.commentsList || []);
+
+            const feedbackEnum = parseToEnumTypeFeedback(response.feedback);
+            setIsLiked(feedbackEnum === FeedbackEpisodeType.LIKE);
+            setDaysLaunched("X dias");
+            setComments(response.commentsList || []);
             setUri(`http://192.168.15.17:8080${response.uriEpisode}`);
         });
 
