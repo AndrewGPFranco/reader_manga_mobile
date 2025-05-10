@@ -25,7 +25,6 @@ const EpisodeDisplayScreen = () => {
         const idEpisode = route.params.id;
 
         episodeStore.getEpisode(idEpisode, 0, 10).then(response => {
-            setEpisodeInfo(response);
 
             const feedbackEnum = parseToEnumTypeFeedback(response.feedback);
             setIsLiked(feedbackEnum === FeedbackEpisodeType.LIKE);
@@ -72,6 +71,16 @@ const EpisodeDisplayScreen = () => {
 
     const handleFeedback = () => {
         // TODO: implementar
+    }
+
+    const renderMoreComments = () => {
+        if (comments.length > 10) {
+            return (
+                <TouchableOpacity style={styles.moreCommentsButton}>
+                    <Text style={styles.moreCommentsText}>Mostrar mais comentários</Text>
+                </TouchableOpacity>
+            )
+        }
     }
 
     return (
@@ -172,9 +181,7 @@ const EpisodeDisplayScreen = () => {
                     </View>
                 ))}
 
-                <TouchableOpacity style={styles.moreCommentsButton}>
-                    <Text style={styles.moreCommentsText}>Mostrar mais comentários</Text>
-                </TouchableOpacity>
+                {renderMoreComments()}
             </View>
         </ScrollView>
     );
