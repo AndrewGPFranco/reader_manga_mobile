@@ -109,7 +109,8 @@ const EpisodeDisplayScreen = () => {
 
     const handleFeedback = async (type: FeedbackEpisodeType) => {
         try {
-            setFeedback(type);
+            await episodeService.handleFeedback(idEpisode, type);
+            await handleEpisode(idEpisode);
         } catch (error) {
             console.error("Erro ao adicionar feedback:", error);
         }

@@ -1,6 +1,7 @@
 import useEpisodeStore from "@/stores/episodeStore";
 import useAnimeStore from "@/stores/animeStore";
 import {AnimeListingVO} from "@/_types/screens/listing-animes/AnimeListingVO";
+import { FeedbackEpisodeType } from "@/enums/FeedbackEpisodeType";
 
 class EpisodeService {
     
@@ -30,6 +31,15 @@ class EpisodeService {
             throw new Error(String(error));
         }
     }
+
+    async handleFeedback(idEpisode: string, type: FeedbackEpisodeType) {
+        try {
+            await this.episodeStore.handleFeedback(idEpisode, type);
+        } catch(error) {
+            throw new Error(String(error));
+        }
+    }
+
 }
 
 export default EpisodeService;

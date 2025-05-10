@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { api } from "@/network/axiosInstance";
 import EpisodeStore from "@/stores/_types/iEpisodeStore";
+import { FeedbackEpisodeType } from "@/enums/FeedbackEpisodeType";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const useEpisodeStore = create<EpisodeStore>((set, get) => ({
@@ -65,6 +66,19 @@ const useEpisodeStore = create<EpisodeStore>((set, get) => ({
     };
 
     await api.post(`/episode/add-comment`, data, {
+      headers: {
+        Authorization: `${await get().getTokenUser()}`,
+      },
+    });
+  },
+
+  async handleFeedback(idEpisode: string, type: FeedbackEpisodeType) {
+    const data = {
+      idEpisode: idEpisode,
+      feedback: type,
+    };
+
+    await api.post(`/episode/handle-feedback`, data, {
       headers: {
         Authorization: `${await get().getTokenUser()}`,
       },
