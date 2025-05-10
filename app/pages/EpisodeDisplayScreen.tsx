@@ -25,7 +25,7 @@ const EpisodeDisplayScreen = () => {
         const idEpisode = route.params.id;
 
         episodeStore.getEpisode(idEpisode, 0, 10).then(response => {
-
+            setEpisodeInfo(response);
             const feedbackEnum = parseToEnumTypeFeedback(response.feedback);
             setIsLiked(feedbackEnum === FeedbackEpisodeType.LIKE);
             setDaysLaunched("X dias");
