@@ -44,6 +44,14 @@ const useEpisodeStore = create<EpisodeStore>((set, get) => ({
         });
 
         return response.data;
+    },
+
+    async updateView(idEpisode: string) {
+         await api.post(`/episode/${idEpisode}/update-view`, {}, {
+            headers: {
+                Authorization: `${await get().getTokenUser()}`
+            }
+        });
     }
 }));
 

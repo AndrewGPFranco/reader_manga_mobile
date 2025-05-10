@@ -8,30 +8,43 @@ import { FeedbackEpisodeType } from '@/enums/FeedbackEpisodeType';
 import { ResizeMode, Video, VideoFullscreenUpdateEvent } from 'expo-av';
 import { EpisodeCommentsVO } from '@/_types/screens/listing-animes/EpisodeCommentsVO';
 import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import EpisodeService from '@/class/services/EpisodeService';
+import { formatDate } from '@/utils/utils';
 
 const EpisodeDisplayScreen = () => {
     const route = useRoute<any>();
     const video = React.useRef(null);
     const episodeStore = useEpisodeStore();
     const [uri, setUri] = useState<string>("");
+    const episodeService = new EpisodeService();
     const [comment, setComment] = useState<string>("");
     const [isLiked, setIsLiked] = useState<boolean>(false);
-    const [daysLaunched, setDaysLaunched] = useState<string>("");
+    const [daysRelease, setDaysRelease] = useState<string>("");
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-    const [comments, setComments] = useState<Array<EpisodeCommentsVO>>([] as Array<EpisodeCommentsVO>);
     const [episodeInfo, setEpisodeInfo] = useState<iEpisodeVO>({} as iEpisodeVO);
+    const [comments, setComments] = useState<Array<EpisodeCommentsVO>>([] as Array<EpisodeCommentsVO>);
 
     useEffect(() => {
-        const idEpisode = route.params.id;
+        const handleEpisode = async () => {
+            try {
+                const idEpisode = route.params.id;
+                await episodeService.updateView(idEpisode);
+                
+                const response = await episodeStore.getEpisode(idEpisode, 0, 10);
 
-        episodeStore.getEpisode(idEpisode, 0, 10).then(response => {
-            setEpisodeInfo(response);
-            const feedbackEnum = parseToEnumTypeFeedback(response.feedback);
-            setIsLiked(feedbackEnum === FeedbackEpisodeType.LIKE);
-            setDaysLaunched("X dias");
-            setComments(response.commentsList || []);
-            setUri(`http://192.168.15.17:8080${response.uriEpisode}`);
-        });
+                setEpisodeInfo(response);
+                const feedbackEnum = parseToEnumTypeFeedback(response.feedback);
+                setIsLiked(feedbackEnum === FeedbackEpisodeType.LIKE);
+                setDaysRelease(formatDate(response.uploaded));
+                setComments(response.commentsList || []);
+
+                setUri(`http://192.168.15.17:8080${response.uriEpisode}`);
+            } catch (error) {
+                console.error("Erro ao carregar episódio:", error);
+            }
+        };
+
+        handleEpisode();
 
         return () => {
             ScreenOrientation
@@ -102,7 +115,7 @@ const EpisodeDisplayScreen = () => {
                 </Text>
 
                 <View style={styles.statsRow}>
-                    <Text style={styles.stats}>{episodeInfo.amountViews} visualizações • Lançado há {daysLaunched}</Text>
+                    <Text style={styles.stats}>{episodeInfo.amountViews} visualizações • Lançado em {daysRelease}</Text>
                 </View>
             </View>
 
@@ -171,12 +184,6 @@ const EpisodeDisplayScreen = () => {
                                 <Text style={styles.commentUser}>{item.nameUser}</Text>
                             </View>
                             <Text style={styles.commentText}>{item.comment}</Text>
-                            <View style={styles.commentActions}>
-                                <TouchableOpacity style={styles.commentAction}>
-                                    <Ionicons name="chatbubble-outline" size={16} color="#AAAAAA" />
-                                    <Text style={styles.commentActionText}>Responder</Text>
-                                </TouchableOpacity>
-                            </View>
                         </View>
                     </View>
                 ))}
@@ -366,10 +373,6 @@ const styles = StyleSheet.create({
         color: '#DDDDDD',
         marginTop: 4,
         lineHeight: 20,
-    },
-    commentActions: {
-        flexDirection: 'row',
-        marginTop: 8,
     },
     commentAction: {
         flexDirection: 'row',

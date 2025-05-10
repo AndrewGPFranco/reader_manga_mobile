@@ -15,8 +15,12 @@ class EpisodeService {
         return await this.animeStore.findImageByAnime(idAnime);
     }
 
-    async getEpisode(title: string, id: string): Promise<any> {
-        return await this.episodeStore.getEpisode(id);
+    async updateView(idEpisode: string): Promise<void> {
+        try {
+            await this.episodeStore.updateView(idEpisode);
+        } catch(error) {
+            throw new Error(String(error));
+        }
     }
 
 }
