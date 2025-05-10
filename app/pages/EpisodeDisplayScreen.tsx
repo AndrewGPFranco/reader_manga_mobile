@@ -18,33 +18,43 @@ const EpisodeDisplayScreen = () => {
     const [uri, setUri] = useState<string>("");
     const episodeService = new EpisodeService();
     const [comment, setComment] = useState<string>("");
+    const [idEpisode, setIdEpisode] = useState<string>("");
     const [isLiked, setIsLiked] = useState<boolean>(false);
+    const [feedback, setFeedback] = useState<FeedbackEpisodeType>(FeedbackEpisodeType.NOTHING);
     const [daysRelease, setDaysRelease] = useState<string>("");
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
     const [episodeInfo, setEpisodeInfo] = useState<iEpisodeVO>({} as iEpisodeVO);
     const [comments, setComments] = useState<Array<EpisodeCommentsVO>>([] as Array<EpisodeCommentsVO>);
 
+    const handleEpisode = async (idEpisode: string) => {
+        try {
+            const response = await episodeStore.getEpisode(idEpisode, 0, 10);
+
+            setIdEpisode(idEpisode);
+            setEpisodeInfo(response);
+            const feedbackEnum = parseToEnumTypeFeedback(response.feedback);
+            setFeedback(feedbackEnum);
+            setDaysRelease(formatDate(response.uploaded));
+            setComments(response.commentsList || []);
+
+            setUri(`http://192.168.15.17:8080${response.uriEpisode}`);
+        } catch (error) {
+            console.error("Erro ao carregar episódio:", error);
+        }
+    };
+
     useEffect(() => {
-        const handleEpisode = async () => {
+        const handleUpdateViews = async (idEpisode: string) => {
             try {
-                const idEpisode = route.params.id;
                 await episodeService.updateView(idEpisode);
-                
-                const response = await episodeStore.getEpisode(idEpisode, 0, 10);
-
-                setEpisodeInfo(response);
-                const feedbackEnum = parseToEnumTypeFeedback(response.feedback);
-                setIsLiked(feedbackEnum === FeedbackEpisodeType.LIKE);
-                setDaysRelease(formatDate(response.uploaded));
-                setComments(response.commentsList || []);
-
-                setUri(`http://192.168.15.17:8080${response.uriEpisode}`);
             } catch (error) {
-                console.error("Erro ao carregar episódio:", error);
+                console.error("Erro ao atualizar visualização do episódio:", error);
             }
         };
 
-        handleEpisode();
+        const idEpisode = route.params.id;
+        handleUpdateViews(idEpisode);
+        handleEpisode(idEpisode);
 
         return () => {
             ScreenOrientation
@@ -79,7 +89,14 @@ const EpisodeDisplayScreen = () => {
     }
 
     const handleComment = () => {
-        // TODO: implementar
+        try {
+            episodeService.addComment(idEpisode, comment);
+            handleEpisode(idEpisode);
+        } catch (error) {
+            console.error("Erro ao adicionar comentário:", error);
+        } finally {
+            renderMoreComments();
+        }
     };
 
     const handleFeedback = () => {
@@ -128,19 +145,34 @@ const EpisodeDisplayScreen = () => {
                     <View style={styles.studioInfo}>
                         <Text style={styles.studioName}>Animes e Mangás</Text>
                     </View>
-                    <TouchableOpacity
-                        style={styles.actionButton}
-                        onPress={() => handleFeedback()}
-                    >
-                        <Ionicons
-                            name={isLiked ? "heart" : "heart-outline"}
-                            size={22}
-                            color={isLiked ? "#FF6B6B" : "#AAAAAA"}
-                        />
-                        <Text style={[styles.actionText, isLiked && styles.actionTextActive]}>
-                            Curtir
-                        </Text>
-                    </TouchableOpacity>
+                    <View style={styles.feedbackContainer}>
+                        <TouchableOpacity
+                            style={styles.actionButton}
+                            onPress={() => handleFeedback()}
+                        >
+                            <Ionicons
+                                name={feedback === FeedbackEpisodeType.DISLIKE ? "thumbs-down" : "thumbs-down-outline"}
+                                size={22}
+                                color={feedback === FeedbackEpisodeType.DISLIKE ? "#FF6B6B" : "#AAAAAA"}
+                            />
+                            <Text style={[styles.actionText, feedback === FeedbackEpisodeType.DISLIKE && styles.actionTextActive]}>
+                                {FeedbackEpisodeType.DISLIKE}
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.actionButton}
+                            onPress={() => handleFeedback()}
+                        >
+                            <Ionicons
+                                name={feedback === FeedbackEpisodeType.LIKE ? "thumbs-up" : "thumbs-up-outline"}
+                                size={22}
+                                color={feedback === FeedbackEpisodeType.LIKE ? "#FF6B6B" : "#AAAAAA"}
+                            />
+                            <Text style={[styles.actionText, feedback === FeedbackEpisodeType.LIKE && styles.actionTextActive]}>
+                                {FeedbackEpisodeType.LIKE}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </View>
 
@@ -391,6 +423,10 @@ const styles = StyleSheet.create({
     moreCommentsText: {
         color: '#6200EE',
         fontSize: 14,
+    },
+    feedbackContainer: {
+        flexDirection: 'row',
+        gap: 30
     }
 });
 
