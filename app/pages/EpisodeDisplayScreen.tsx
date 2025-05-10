@@ -1,15 +1,15 @@
+import { formatDate } from '@/utils/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { iEpisodeVO } from '@/_types/iEpisodeVO';
 import React, { useEffect, useState } from 'react';
 import useEpisodeStore from "@/stores/episodeStore";
 import { useRoute } from "@react-navigation/native";
 import * as ScreenOrientation from 'expo-screen-orientation';
+import EpisodeService from '@/class/services/EpisodeService';
 import { FeedbackEpisodeType } from '@/enums/FeedbackEpisodeType';
 import { ResizeMode, Video, VideoFullscreenUpdateEvent } from 'expo-av';
 import { EpisodeCommentsVO } from '@/_types/screens/listing-animes/EpisodeCommentsVO';
 import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import EpisodeService from '@/class/services/EpisodeService';
-import { formatDate } from '@/utils/utils';
 
 const EpisodeDisplayScreen = () => {
     const route = useRoute<any>();
@@ -25,10 +25,12 @@ const EpisodeDisplayScreen = () => {
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
     const [episodeInfo, setEpisodeInfo] = useState<iEpisodeVO>({} as iEpisodeVO);
     const [comments, setComments] = useState<Array<EpisodeCommentsVO>>([] as Array<EpisodeCommentsVO>);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const handleEpisode = async (idEpisode: string) => {
         try {
-            const response = await episodeStore.getEpisode(idEpisode, 0, 10);
+            setIsLoading(true);
+            const response = await episodeStore.getEpisode(idEpisode);
 
             setIdEpisode(idEpisode);
             setEpisodeInfo(response);
@@ -40,6 +42,8 @@ const EpisodeDisplayScreen = () => {
             setUri(`http://192.168.15.17:8080${response.uriEpisode}`);
         } catch (error) {
             console.error("Erro ao carregar episódio:", error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -88,28 +92,26 @@ const EpisodeDisplayScreen = () => {
         else return FeedbackEpisodeType.NOTHING;
     }
 
-    const handleComment = () => {
+    const handleComment = async () => {
+        if (!comment.trim()) return;
+
         try {
-            episodeService.addComment(idEpisode, comment);
-            handleEpisode(idEpisode);
+            setIsLoading(true);
+            await episodeService.addComment(idEpisode, comment);
+            setComment("");
+            await handleEpisode(idEpisode);
         } catch (error) {
             console.error("Erro ao adicionar comentário:", error);
         } finally {
-            renderMoreComments();
+            setIsLoading(false);
         }
     };
 
-    const handleFeedback = () => {
-        // TODO: implementar
-    }
-
-    const renderMoreComments = () => {
-        if (comments.length > 10) {
-            return (
-                <TouchableOpacity style={styles.moreCommentsButton}>
-                    <Text style={styles.moreCommentsText}>Mostrar mais comentários</Text>
-                </TouchableOpacity>
-            )
+    const handleFeedback = async (type: FeedbackEpisodeType) => {
+        try {
+            setFeedback(type);
+        } catch (error) {
+            console.error("Erro ao adicionar feedback:", error);
         }
     }
 
@@ -148,7 +150,7 @@ const EpisodeDisplayScreen = () => {
                     <View style={styles.feedbackContainer}>
                         <TouchableOpacity
                             style={styles.actionButton}
-                            onPress={() => handleFeedback()}
+                            onPress={() => handleFeedback(FeedbackEpisodeType.DISLIKE)}
                         >
                             <Ionicons
                                 name={feedback === FeedbackEpisodeType.DISLIKE ? "thumbs-down" : "thumbs-down-outline"}
@@ -161,7 +163,7 @@ const EpisodeDisplayScreen = () => {
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={styles.actionButton}
-                            onPress={() => handleFeedback()}
+                            onPress={() => handleFeedback(FeedbackEpisodeType.LIKE)}
                         >
                             <Ionicons
                                 name={feedback === FeedbackEpisodeType.LIKE ? "thumbs-up" : "thumbs-up-outline"}
@@ -179,10 +181,6 @@ const EpisodeDisplayScreen = () => {
             <View style={styles.commentsContainer}>
                 <View style={styles.commentsHeader}>
                     <Text style={styles.commentsCount}>{comments.length} comentários</Text>
-                    <TouchableOpacity style={styles.sortButton}>
-                        <Ionicons name="filter-outline" size={18} color="#AAAAAA" />
-                        <Text style={styles.sortText}>Ordenar por</Text>
-                    </TouchableOpacity>
                 </View>
 
                 <View style={styles.addCommentContainer}>
@@ -198,29 +196,46 @@ const EpisodeDisplayScreen = () => {
                         onChangeText={setComment}
                     />
                     <TouchableOpacity
-                        style={styles.sendButton}
+                        style={[styles.sendButton, !comment.trim() && styles.sendButtonDisabled]}
                         onPress={handleComment}
+                        disabled={!comment.trim() || isLoading}
                     >
-                        <Ionicons name="send" size={20} color="#6200EE" />
+                        <Ionicons
+                            name="send"
+                            size={20}
+                            color={!comment.trim() || isLoading ? "#555555" : "#6200EE"}
+                        />
                     </TouchableOpacity>
                 </View>
 
-                {comments.map((item) => (
-                    <View key={item.comment} style={styles.commentItem}>
-                        <Image
-                            source={{ uri: "https://github.com/AndrewGPFranco.png" }}
-                            style={styles.commentAvatar}
-                        />
-                        <View style={styles.commentContent}>
-                            <View style={styles.commentHeader}>
-                                <Text style={styles.commentUser}>{item.nameUser}</Text>
-                            </View>
-                            <Text style={styles.commentText}>{item.comment}</Text>
-                        </View>
+                {isLoading && comments.length === 0 ? (
+                    <View style={styles.loadingContainer}>
+                        <Text style={styles.loadingText}>Carregando comentários...</Text>
                     </View>
-                ))}
-
-                {renderMoreComments()}
+                ) : (
+                    <>
+                        {comments.length === 0 ? (
+                            <View style={styles.noCommentsContainer}>
+                                <Text style={styles.noCommentsText}>Nenhum comentário ainda. Seja o primeiro a comentar!</Text>
+                            </View>
+                        ) : (
+                            comments.map((item, index) => (
+                                <View key={`${item.comment}-${index}`} style={styles.commentItem}>
+                                    <Image
+                                        source={{ uri: "https://github.com/AndrewGPFranco.png" }}
+                                        style={styles.commentAvatar}
+                                    />
+                                    <View style={styles.commentContent}>
+                                        <View style={styles.commentHeader}>
+                                            <Text style={styles.commentUser}>{item.nameUser}</Text>
+                                        </View>
+                                        <Text style={styles.commentText}>{item.comment}</Text>
+                                    </View>
+                                </View>
+                            ))
+                        )}
+                    </>
+                )}
             </View>
         </ScrollView>
     );
@@ -378,6 +393,9 @@ const styles = StyleSheet.create({
     sendButton: {
         padding: 8,
     },
+    sendButtonDisabled: {
+        opacity: 0.5,
+    },
     commentItem: {
         flexDirection: 'row',
         marginBottom: 20,
@@ -427,6 +445,27 @@ const styles = StyleSheet.create({
     feedbackContainer: {
         flexDirection: 'row',
         gap: 30
+    },
+    loadingContainer: {
+        padding: 20,
+        alignItems: 'center',
+    },
+    loadingMoreContainer: {
+        padding: 10,
+        alignItems: 'center',
+    },
+    loadingText: {
+        color: '#AAAAAA',
+        fontSize: 14,
+    },
+    noCommentsContainer: {
+        padding: 20,
+        alignItems: 'center',
+    },
+    noCommentsText: {
+        color: '#AAAAAA',
+        fontSize: 14,
+        textAlign: 'center',
     }
 });
 
