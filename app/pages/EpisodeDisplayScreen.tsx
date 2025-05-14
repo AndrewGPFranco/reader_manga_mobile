@@ -1,5 +1,5 @@
 import { formatDate } from '@/utils/utils';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome5 } from '@expo/vector-icons';
 import { iEpisodeVO } from '@/_types/iEpisodeVO';
 import React, { useEffect, useState } from 'react';
 import useEpisodeStore from "@/stores/episodeStore";
@@ -9,7 +9,24 @@ import EpisodeService from '@/class/services/EpisodeService';
 import { FeedbackEpisodeType } from '@/enums/FeedbackEpisodeType';
 import { ResizeMode, Video, VideoFullscreenUpdateEvent } from 'expo-av';
 import { EpisodeCommentsVO } from '@/_types/screens/listing-animes/EpisodeCommentsVO';
-import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+    ActivityIndicator,
+    Animated,
+    StatusBar,
+    ImageBackground,
+    Dimensions
+} from 'react-native';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
+
+const { width } = Dimensions.get('window');
 
 const EpisodeDisplayScreen = () => {
     const route = useRoute<any>();
@@ -26,6 +43,10 @@ const EpisodeDisplayScreen = () => {
     const [episodeInfo, setEpisodeInfo] = useState<iEpisodeVO>({} as iEpisodeVO);
     const [comments, setComments] = useState<Array<EpisodeCommentsVO>>([] as Array<EpisodeCommentsVO>);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isSendingComment, setIsSendingComment] = useState<boolean>(false);
+
+    const fadeAnim = React.useRef(new Animated.Value(0)).current;
+    const translateY = React.useRef(new Animated.Value(50)).current;
 
     const handleEpisode = async (idEpisode: string) => {
         try {
@@ -40,6 +61,19 @@ const EpisodeDisplayScreen = () => {
             setComments(response.commentsList || []);
 
             setUri(`http://192.168.15.17:8080${response.uriEpisode}`);
+
+            Animated.parallel([
+                Animated.timing(fadeAnim, {
+                    toValue: 1,
+                    duration: 800,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(translateY, {
+                    toValue: 0,
+                    duration: 600,
+                    useNativeDriver: true,
+                }),
+            ]).start();
         } catch (error) {
             console.error("Erro ao carregar episódio:", error);
         } finally {
@@ -48,6 +82,8 @@ const EpisodeDisplayScreen = () => {
     };
 
     useEffect(() => {
+        StatusBar.setBarStyle('light-content');
+
         const handleUpdateViews = async (idEpisode: string) => {
             try {
                 await episodeService.updateView(idEpisode);
@@ -64,6 +100,7 @@ const EpisodeDisplayScreen = () => {
             ScreenOrientation
                 .lockAsync(ScreenOrientation.OrientationLock.DEFAULT)
                 .catch((e) => console.warn('Erro ao resetar orientação:', e));
+            StatusBar.setBarStyle('default');
         };
     }, []);
 
@@ -93,17 +130,17 @@ const EpisodeDisplayScreen = () => {
     }
 
     const handleComment = async () => {
-        if (!comment.trim()) return;
+        if (!comment.trim() || isSendingComment) return;
 
         try {
-            setIsLoading(true);
+            setIsSendingComment(true);
             await episodeService.addComment(idEpisode, comment);
             setComment("");
             await handleEpisode(idEpisode);
         } catch (error) {
             console.error("Erro ao adicionar comentário:", error);
         } finally {
-            setIsLoading(false);
+            setIsSendingComment(false);
         }
     };
 
@@ -116,290 +153,438 @@ const EpisodeDisplayScreen = () => {
         }
     }
 
+    if (isLoading && !episodeInfo.titleEpisode) {
+        return (
+            <View style={styles.loadingScreen}>
+                <ActivityIndicator size="large" color="#FF5F6D" />
+                <Text style={styles.loadingText}>Carregando episódio...</Text>
+            </View>
+        );
+    }
+
     return (
-        <ScrollView style={styles.container}>
-            <View style={styles.videoContainer}>
-                <Video
-                    ref={video}
-                    source={{ uri: uri }}
-                    useNativeControls
-                    resizeMode={ResizeMode.CONTAIN}
-                    style={styles.video}
-                    onFullscreenUpdate={handleFullscreenUpdate}
-                />
-            </View>
-
-            <View style={styles.infoContainer}>
-                <Text style={styles.title}>
-                    {episodeInfo.titleEpisode}
-                </Text>
-
-                <View style={styles.statsRow}>
-                    <Text style={styles.stats}>{episodeInfo.amountViews} visualizações • Lançado em {daysRelease}</Text>
-                </View>
-            </View>
-
-            <View style={styles.descriptionContainer}>
-                <View style={styles.studioContainer}>
-                    <Image
-                        source={{ uri: "https://github.com/AndrewGPFranco.png" }}
-                        style={styles.studioAvatar}
+        <ImageBackground
+            source={require('@/assets/images/bg.jpg')}
+            style={styles.backgroundImage}
+        >
+            <ScrollView style={styles.container}>
+                <View style={styles.videoContainer}>
+                    <Video
+                        ref={video}
+                        source={{ uri: uri }}
+                        useNativeControls
+                        resizeMode={ResizeMode.CONTAIN}
+                        style={styles.video}
+                        onFullscreenUpdate={handleFullscreenUpdate}
+                        posterSource={{ uri: episodeInfo.thumbnailUrl }}
+                        usePoster={true}
+                        posterStyle={styles.posterStyle}
                     />
-                    <View style={styles.studioInfo}>
-                        <Text style={styles.studioName}>Animes e Mangás</Text>
-                    </View>
-                    <View style={styles.feedbackContainer}>
-                        <TouchableOpacity
-                            style={styles.actionButton}
-                            onPress={() => handleFeedback(FeedbackEpisodeType.DISLIKE)}
-                        >
-                            <Ionicons
-                                name={feedback === FeedbackEpisodeType.DISLIKE ? "thumbs-down" : "thumbs-down-outline"}
-                                size={22}
-                                color={feedback === FeedbackEpisodeType.DISLIKE ? "#FF6B6B" : "#AAAAAA"}
+                    <LinearGradient
+                        colors={['rgba(0,0,0,0.6)', 'transparent']}
+                        style={styles.videoOverlay}
+                        pointerEvents="none"
+                    />
+                </View>
+
+                <Animated.View
+                    style={[
+                        styles.infoContainer,
+                        {
+                            opacity: fadeAnim,
+                            transform: [{ translateY: translateY }]
+                        }
+                    ]}
+                >
+                    <BlurView intensity={40} tint="dark" style={styles.glassEffect}>
+                        <Text style={styles.title}>
+                            {episodeInfo.titleEpisode}
+                        </Text>
+
+                        <View style={styles.statsRow}>
+                            <View style={styles.statsItem}>
+                                <FontAwesome5 name="eye" size={14} color="#FF5F6D" />
+                                <Text style={styles.stats}>{episodeInfo.amountViews} visualizações</Text>
+                            </View>
+                            <View style={styles.separator} />
+                            <View style={styles.statsItem}>
+                                <FontAwesome5 name="calendar-alt" size={14} color="#FF5F6D" />
+                                <Text style={styles.stats}>Lançado em {daysRelease}</Text>
+                            </View>
+                        </View>
+                    </BlurView>
+                </Animated.View>
+
+                <Animated.View
+                    style={[
+                        styles.descriptionContainer,
+                        {
+                            opacity: fadeAnim,
+                            transform: [{ translateY: translateY }]
+                        }
+                    ]}
+                >
+                    <BlurView intensity={30} tint="dark" style={styles.glassEffect}>
+                        <View style={styles.studioContainer}>
+                            <Image
+                                source={require('@/assets/images/profile.jpg')}
+                                style={styles.studioAvatar}
                             />
-                            <Text style={[styles.actionText, feedback === FeedbackEpisodeType.DISLIKE && styles.actionTextActive]}>
-                                {FeedbackEpisodeType.DISLIKE}
+                            <View style={styles.studioInfo}>
+                                <Text style={styles.studioName}>Animes e Mangás</Text>
+                                <Text style={styles.studioTagline}>Seu portal de anime favorito</Text>
+                            </View>
+                        </View>
+
+                        <View style={styles.separator} />
+
+                        <View style={styles.feedbackContainer}>
+                            <TouchableOpacity
+                                style={[
+                                    styles.actionButton,
+                                    feedback === FeedbackEpisodeType.LIKE && styles.actionButtonActive
+                                ]}
+                                onPress={() => handleFeedback(FeedbackEpisodeType.LIKE)}
+                            >
+                                <FontAwesome5
+                                    name="heart"
+                                    size={20}
+                                    color={feedback === FeedbackEpisodeType.LIKE ? "#FF5F6D" : "#AAAAAA"}
+                                    solid={feedback === FeedbackEpisodeType.LIKE}
+                                />
+                                <Text style={[styles.actionText, feedback === FeedbackEpisodeType.LIKE && styles.actionTextActive]}>
+                                    Gostei
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[
+                                    styles.actionButton,
+                                    feedback === FeedbackEpisodeType.DISLIKE && styles.actionButtonActive
+                                ]}
+                                onPress={() => handleFeedback(FeedbackEpisodeType.DISLIKE)}
+                            >
+                                <FontAwesome5
+                                    name="thumbs-down"
+                                    size={20}
+                                    color={feedback === FeedbackEpisodeType.DISLIKE ? "#5C80FF" : "#AAAAAA"}
+                                    solid={feedback === FeedbackEpisodeType.DISLIKE}
+                                />
+                                <Text style={[styles.actionText, feedback === FeedbackEpisodeType.DISLIKE && styles.actionTextActiveBlue]}>
+                                    Não Gostei
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </BlurView>
+                </Animated.View>
+
+                <Animated.View
+                    style={[
+                        styles.commentsContainer,
+                        {
+                            opacity: fadeAnim,
+                            transform: [{ translateY: translateY }]
+                        }
+                    ]}
+                >
+                    <BlurView intensity={30} tint="dark" style={styles.glassEffect}>
+                        <View style={styles.commentsHeader}>
+                            <Text style={styles.commentsCount}>
+                                <FontAwesome5 name="comment" size={16} color="#FF5F6D" solid /> {" "}
+                                {comments.length} comentários
                             </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.actionButton}
-                            onPress={() => handleFeedback(FeedbackEpisodeType.LIKE)}
-                        >
-                            <Ionicons
-                                name={feedback === FeedbackEpisodeType.LIKE ? "thumbs-up" : "thumbs-up-outline"}
-                                size={22}
-                                color={feedback === FeedbackEpisodeType.LIKE ? "#FF6B6B" : "#AAAAAA"}
+                        </View>
+
+                        <View style={styles.addCommentContainer}>
+                            <Image
+                                source={{ uri: "https://github.com/AndrewGPFranco.png" }}
+                                style={styles.commentAvatar}
                             />
-                            <Text style={[styles.actionText, feedback === FeedbackEpisodeType.LIKE && styles.actionTextActive]}>
-                                {FeedbackEpisodeType.LIKE}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </View>
+                            <TextInput
+                                style={styles.commentInput}
+                                placeholder="O que você achou desse episódio?"
+                                placeholderTextColor="#999"
+                                value={comment}
+                                onChangeText={setComment}
+                            />
+                            <TouchableOpacity
+                                style={[styles.sendButton, !comment.trim() && styles.sendButtonDisabled]}
+                                onPress={handleComment}
+                                disabled={!comment.trim() || isSendingComment}
+                            >
+                                {isSendingComment ? (
+                                    <ActivityIndicator size="small" color="#FF5F6D" />
+                                ) : (
+                                    <FontAwesome5
+                                        name="paper-plane"
+                                        size={18}
+                                        color={!comment.trim() ? "#555555" : "#FF5F6D"}
+                                    />
+                                )}
+                            </TouchableOpacity>
+                        </View>
 
-            <View style={styles.commentsContainer}>
-                <View style={styles.commentsHeader}>
-                    <Text style={styles.commentsCount}>{comments.length} comentários</Text>
-                </View>
-
-                <View style={styles.addCommentContainer}>
-                    <Image
-                        source={{ uri: "https://github.com/AndrewGPFranco.png" }}
-                        style={styles.commentAvatar}
-                    />
-                    <TextInput
-                        style={styles.commentInput}
-                        placeholder="Adicione um comentário..."
-                        placeholderTextColor="#777"
-                        value={comment}
-                        onChangeText={setComment}
-                    />
-                    <TouchableOpacity
-                        style={[styles.sendButton, !comment.trim() && styles.sendButtonDisabled]}
-                        onPress={handleComment}
-                        disabled={!comment.trim() || isLoading}
-                    >
-                        <Ionicons
-                            name="send"
-                            size={20}
-                            color={!comment.trim() || isLoading ? "#555555" : "#6200EE"}
-                        />
-                    </TouchableOpacity>
-                </View>
-
-                {isLoading && comments.length === 0 ? (
-                    <View style={styles.loadingContainer}>
-                        <Text style={styles.loadingText}>Carregando comentários...</Text>
-                    </View>
-                ) : (
-                    <>
-                        {comments.length === 0 ? (
-                            <View style={styles.noCommentsContainer}>
-                                <Text style={styles.noCommentsText}>Nenhum comentário ainda. Seja o primeiro a comentar!</Text>
+                        {isLoading && comments.length === 0 ? (
+                            <View style={styles.loadingContainer}>
+                                <ActivityIndicator size="small" color="#FF5F6D" />
+                                <Text style={styles.loadingText}>Carregando comentários...</Text>
                             </View>
                         ) : (
-                            comments.map((item, index) => (
-                                <View key={`${item.comment}-${index}`} style={styles.commentItem}>
-                                    <Image
-                                        source={{ uri: "https://github.com/AndrewGPFranco.png" }}
-                                        style={styles.commentAvatar}
-                                    />
-                                    <View style={styles.commentContent}>
-                                        <View style={styles.commentHeader}>
-                                            <Text style={styles.commentUser}>{item.nameUser}</Text>
-                                        </View>
-                                        <Text style={styles.commentText}>{item.comment}</Text>
+                            <>
+                                {comments.length === 0 ? (
+                                    <View style={styles.noCommentsContainer}>
+                                        <FontAwesome5 name="comment-slash" size={30} color="#666" />
+                                        <Text style={styles.noCommentsText}>Nenhum comentário ainda. Seja o primeiro a comentar!</Text>
                                     </View>
-                                </View>
-                            ))
+                                ) : (
+                                    comments.map((item, index) => (
+                                        <View key={`${item.comment}-${index}`} style={styles.commentItem}>
+                                            <Image
+                                                source={{ uri: "https://github.com/AndrewGPFranco.png" }}
+                                                style={styles.commentAvatar}
+                                            />
+                                            <View style={styles.commentContent}>
+                                                <View style={styles.commentHeader}>
+                                                    <Text style={styles.commentUser}>{item.nameUser}</Text>
+                                                    <View style={styles.userBadge}>
+                                                        <Text style={styles.userBadgeText}>Otaku</Text>
+                                                    </View>
+                                                </View>
+                                                <Text style={styles.commentText}>{item.comment}</Text>
+                                                <View style={styles.commentActions}>
+                                                    <TouchableOpacity style={styles.commentAction}>
+                                                        <FontAwesome5 name="heart" size={14} color="#AAAAAA" />
+                                                        <Text style={styles.commentActionText}>Curtir</Text>
+                                                    </TouchableOpacity>
+                                                    <TouchableOpacity style={styles.commentAction}>
+                                                        <FontAwesome5 name="reply" size={14} color="#AAAAAA" />
+                                                        <Text style={styles.commentActionText}>Responder</Text>
+                                                    </TouchableOpacity>
+                                                </View>
+                                            </View>
+                                        </View>
+                                    ))
+                                )}
+                            </>
                         )}
-                    </>
-                )}
-            </View>
-        </ScrollView>
+                    </BlurView>
+                </Animated.View>
+
+                <View style={styles.spacer} />
+            </ScrollView>
+        </ImageBackground>
     );
 };
 
 const styles = StyleSheet.create({
+    backgroundImage: {
+        flex: 1,
+        width: '100%',
+    },
     container: {
         flex: 1,
-        backgroundColor: '#121212',
+        backgroundColor: 'rgba(18, 18, 36, 0.85)',
+    },
+    loadingScreen: {
+        flex: 1,
+        backgroundColor: '#121224',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loadingText: {
+        color: '#FF5F6D',
+        marginTop: 15,
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    glassEffect: {
+        borderRadius: 20,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
     },
     videoContainer: {
         width: '100%',
         aspectRatio: 16 / 9,
         backgroundColor: '#000000',
+        position: 'relative',
     },
     video: {
         width: '100%',
         height: '100%',
     },
+    posterStyle: {
+        resizeMode: 'cover',
+    },
+    videoOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 60,
+        zIndex: 1,
+    },
     infoContainer: {
-        padding: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: '#222222',
+        margin: 15,
+        marginBottom: 10,
     },
     title: {
-        fontSize: 18,
+        fontSize: 22,
         fontWeight: 'bold',
         color: '#FFFFFF',
-        marginBottom: 8,
+        marginBottom: 10,
+        padding: 15,
+        paddingBottom: 5,
+        textShadowColor: 'rgba(0, 0, 0, 0.7)',
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 3,
     },
     statsRow: {
         flexDirection: 'row',
-        marginBottom: 15,
+        padding: 15,
+        paddingTop: 5,
+        alignItems: 'center',
+    },
+    statsItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     stats: {
         fontSize: 14,
-        color: '#888888',
+        color: '#D4D4D4',
+        marginLeft: 6,
     },
-    actionsRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingVertical: 8,
-    },
-    actionButton: {
-        flexDirection: 'column',
-        alignItems: 'center',
-    },
-    actionText: {
-        fontSize: 12,
-        color: '#AAAAAA',
-        marginTop: 4,
-    },
-    actionTextActive: {
-        color: '#FF6B6B',
+    separator: {
+        width: 1,
+        height: 14,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        marginHorizontal: 15,
     },
     descriptionContainer: {
-        padding: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: '#222222',
+        margin: 15,
+        marginTop: 0,
+        marginBottom: 10,
     },
     studioContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 15,
+        padding: 15,
     },
     studioAvatar: {
         width: 50,
         height: 50,
         borderRadius: 25,
+        borderWidth: 2,
+        borderColor: '#FF5F6D',
     },
     studioInfo: {
         flex: 1,
-        marginLeft: 10,
+        marginLeft: 15,
     },
     studioName: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: 'bold',
         color: '#FFFFFF',
     },
-    subscriberCount: {
+    studioTagline: {
         fontSize: 14,
-        color: '#888888',
+        color: '#D4D4D4',
+        marginTop: 2,
     },
-    subscribeButton: {
-        backgroundColor: '#FF6B6B',
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: 20,
+    feedbackContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        padding: 15,
     },
-    subscribedButton: {
-        backgroundColor: '#333333',
+    actionButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(40, 40, 60, 0.5)',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 30,
     },
-    subscribeText: {
+    actionButtonActive: {
+        backgroundColor: 'rgba(40, 40, 60, 0.8)',
+    },
+    actionText: {
+        fontSize: 14,
         color: '#FFFFFF',
-        fontWeight: 'bold',
-        fontSize: 14,
+        fontWeight: '600',
+        marginLeft: 8,
     },
-    subscribedText: {
-        color: '#AAAAAA',
+    actionTextActive: {
+        color: '#FF5F6D',
     },
-    description: {
-        fontSize: 14,
-        color: '#DDDDDD',
-        lineHeight: 20,
-    },
-    showMore: {
-        color: '#888888',
-        marginTop: 10,
-        fontSize: 14,
+    actionTextActiveBlue: {
+        color: '#5C80FF',
     },
     commentsContainer: {
-        padding: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: '#222222',
+        margin: 15,
+        marginTop: 0,
     },
     commentsHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 15,
-        alignItems: 'center',
+        padding: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(255, 255, 255, 0.1)',
     },
     commentsCount: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: 'bold',
         color: '#FFFFFF',
-    },
-    sortButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    sortText: {
-        color: '#AAAAAA',
-        marginLeft: 5,
-        fontSize: 14,
     },
     addCommentContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 20,
+        padding: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(255, 255, 255, 0.1)',
     },
     commentAvatar: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.2)',
     },
     commentInput: {
         flex: 1,
         height: 40,
-        borderBottomWidth: 1,
-        borderBottomColor: '#333333',
+        backgroundColor: 'rgba(40, 40, 60, 0.5)',
+        borderRadius: 20,
         marginLeft: 10,
         color: '#FFFFFF',
-        paddingHorizontal: 10,
+        paddingHorizontal: 15,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
     },
     sendButton: {
-        padding: 8,
+        padding: 10,
+        marginLeft: 8,
     },
     sendButtonDisabled: {
         opacity: 0.5,
     },
+    loadingContainer: {
+        padding: 30,
+        alignItems: 'center',
+    },
+    noCommentsContainer: {
+        padding: 30,
+        alignItems: 'center',
+    },
+    noCommentsText: {
+        color: '#D4D4D4',
+        fontSize: 16,
+        textAlign: 'center',
+        marginTop: 15,
+        width: '80%',
+    },
     commentItem: {
         flexDirection: 'row',
-        marginBottom: 20,
+        padding: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(255, 255, 255, 0.05)',
     },
     commentContent: {
         flex: 1,
@@ -410,20 +595,31 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     commentUser: {
-        fontSize: 14,
+        fontSize: 16,
         fontWeight: 'bold',
         color: '#FFFFFF',
     },
-    commentTime: {
-        fontSize: 12,
-        color: '#777777',
+    userBadge: {
+        backgroundColor: '#FF5F6D',
+        borderRadius: 12,
+        paddingHorizontal: 8,
+        paddingVertical: 2,
         marginLeft: 8,
+    },
+    userBadgeText: {
+        fontSize: 10,
+        color: '#FFFFFF',
+        fontWeight: 'bold',
     },
     commentText: {
         fontSize: 14,
-        color: '#DDDDDD',
-        marginTop: 4,
+        color: '#EEEEEE',
+        marginTop: 6,
         lineHeight: 20,
+    },
+    commentActions: {
+        flexDirection: 'row',
+        marginTop: 10,
     },
     commentAction: {
         flexDirection: 'row',
@@ -433,41 +629,11 @@ const styles = StyleSheet.create({
     commentActionText: {
         fontSize: 12,
         color: '#AAAAAA',
-        marginLeft: 4,
+        marginLeft: 6,
     },
-    moreCommentsButton: {
-        alignItems: 'center',
-        paddingVertical: 10,
+    spacer: {
+        height: 50,
     },
-    moreCommentsText: {
-        color: '#6200EE',
-        fontSize: 14,
-    },
-    feedbackContainer: {
-        flexDirection: 'row',
-        gap: 30
-    },
-    loadingContainer: {
-        padding: 20,
-        alignItems: 'center',
-    },
-    loadingMoreContainer: {
-        padding: 10,
-        alignItems: 'center',
-    },
-    loadingText: {
-        color: '#AAAAAA',
-        fontSize: 14,
-    },
-    noCommentsContainer: {
-        padding: 20,
-        alignItems: 'center',
-    },
-    noCommentsText: {
-        color: '#AAAAAA',
-        fontSize: 14,
-        textAlign: 'center',
-    }
 });
 
 export default EpisodeDisplayScreen;
