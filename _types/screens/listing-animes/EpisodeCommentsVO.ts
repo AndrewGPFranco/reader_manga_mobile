@@ -1,4 +1,5 @@
 export interface EpisodeCommentsVO {
     nameUser: string,
-    comment: string
+    comment: string,
+    uriPath: string
 }

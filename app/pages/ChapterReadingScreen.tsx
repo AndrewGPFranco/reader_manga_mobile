@@ -12,6 +12,7 @@ import iChapterData from '@/_types/iChapter';
 import useChapterStore from '@/stores/chapterStore';
 import React, { useCallback, useEffect, useState } from 'react';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { handleUriPath } from '@/utils/utils';
 
 type NavigationProps = {
     navigate: (screen: string, params?: any) => void;
@@ -53,7 +54,7 @@ const MangaScreen = () => {
 
         setImagemCarregada(false);
         const imagePath = await chapterStore.getPage(chapterId, index);
-        setImagem(`http://192.168.15.17:8080${imagePath}?t=${Date.now()}`);
+        setImagem(`${handleUriPath(imagePath)}?t=${Date.now()}`);
         setImagemCarregada(true);
     }, [chapterStore]);
 

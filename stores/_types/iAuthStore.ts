@@ -11,6 +11,7 @@ interface AuthStore {
     getRoleUser: () => Promise<string>;
     efetuarLogout: () => Promise<void>;
     getToken(): Promise<string | null>;
+    getProfilePhoto(): Promise<string>;
     getUserId(): Promise<string | null>;
     getUserAutenticado: () => Promise<User>;
     isUserAutenticado: () => Promise<boolean>;

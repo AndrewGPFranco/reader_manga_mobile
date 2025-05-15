@@ -8,4 +8,5 @@ export interface iEpisodeVO {
   uploaded: Date;
   feedback: FeedbackEpisodeType;
   commentsList: Array<EpisodeCommentsVO>;
+  uriPath: string;
 }

@@ -4,6 +4,7 @@ import {api} from "@/network/axiosInstance";
 import ChapterStore from "./_types/iChapterStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from 'expo-file-system';
+import { uriPathServer } from "@/utils/utils";
 
 const useChapterStore = create<ChapterStore>((set, get) => ({
     paginaCache: {},
@@ -284,7 +285,7 @@ const useChapterStore = create<ChapterStore>((set, get) => ({
             };
 
             await api.put(`/api/user/chapter`, data, {
-                baseURL: 'http://192.168.15.17:8080',
+                baseURL: uriPathServer,
                 headers: {
                     Authorization: `${await get().getTokenUser()}`
                 }
@@ -334,7 +335,7 @@ const useChapterStore = create<ChapterStore>((set, get) => ({
                     headers: {
                         Authorization: `${await get().getTokenUser()}`
                     },
-                    baseURL: `http://192.168.15.17:8080`
+                    baseURL: uriPathServer
                 }
             )
             return response.data

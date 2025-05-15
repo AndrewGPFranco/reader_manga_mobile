@@ -4,6 +4,7 @@ import useAuthStore from "@/stores/authStore";
 import {useNavigation} from "@react-navigation/native";
 import {UserSession} from "@/class/UserSession";
 import {NavigationProps} from "@/_types/navigation/NavigationProps";
+import { handleUriPath } from "@/utils/utils";
 
 const ProfileScreen = () => {
     const [user, setUser] = useState<UserSession>();
@@ -47,7 +48,7 @@ const ProfileScreen = () => {
                     <View style={styles.profileCard}>
                         <View style={styles.profileImageContainer}>
                             <Image
-                                source={{uri: `http://192.168.15.17:8080${user?.uriPath}`}}
+                                source={{uri: handleUriPath(user?.uriPath)}}
                                 style={styles.profileImage}
                             />
                             <View style={styles.statusBadge}>

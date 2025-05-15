@@ -1,4 +1,4 @@
-import { formatDate } from '@/utils/utils';
+import { formatDate, handleUriPath } from '@/utils/utils';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { iEpisodeVO } from '@/_types/iEpisodeVO';
 import React, { useEffect, useState } from 'react';
@@ -60,7 +60,7 @@ const EpisodeDisplayScreen = () => {
             setDaysRelease(formatDate(response.uploaded));
             setComments(response.commentsList || []);
 
-            setUri(`http://192.168.15.17:8080${response.uriEpisode}`);
+            setUri(handleUriPath(response.uriEpisode));
 
             Animated.parallel([
                 Animated.timing(fadeAnim, {
@@ -176,7 +176,6 @@ const EpisodeDisplayScreen = () => {
                         resizeMode={ResizeMode.CONTAIN}
                         style={styles.video}
                         onFullscreenUpdate={handleFullscreenUpdate}
-                        posterSource={{ uri: episodeInfo.thumbnailUrl }}
                         usePoster={true}
                         posterStyle={styles.posterStyle}
                     />
@@ -297,7 +296,7 @@ const EpisodeDisplayScreen = () => {
 
                         <View style={styles.addCommentContainer}>
                             <Image
-                                source={{ uri: "https://github.com/AndrewGPFranco.png" }}
+                                source={{ uri: handleUriPath(episodeInfo.uriPath) }}
                                 style={styles.commentAvatar}
                             />
                             <TextInput
@@ -340,7 +339,7 @@ const EpisodeDisplayScreen = () => {
                                     comments.map((item, index) => (
                                         <View key={`${item.comment}-${index}`} style={styles.commentItem}>
                                             <Image
-                                                source={{ uri: "https://github.com/AndrewGPFranco.png" }}
+                                                source={{ uri: handleUriPath(item.uriPath) }}
                                                 style={styles.commentAvatar}
                                             />
                                             <View style={styles.commentContent}>

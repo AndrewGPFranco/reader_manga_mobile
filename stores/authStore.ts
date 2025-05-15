@@ -170,6 +170,16 @@ const useAuthStore = create<AuthStore>((set, get) => ({
     });
 
     return result.status !== 401;
+  },
+
+  async getProfilePhoto() {
+    const token = await get().getToken();
+    
+    const response = await api.get("/user/get-profile-photo", {
+      headers: {Authorization: `${token}`},
+    });
+
+    return response.data.responseObject;
   }
 
 }));
