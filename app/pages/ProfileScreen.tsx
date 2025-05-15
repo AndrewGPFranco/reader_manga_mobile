@@ -47,7 +47,7 @@ const ProfileScreen = () => {
                     <View style={styles.profileCard}>
                         <View style={styles.profileImageContainer}>
                             <Image
-                                source={{uri: "https://github.com/andrewgpfranco.png"}}
+                                source={{uri: `http://192.168.15.17:8080${user?.uriPath}`}}
                                 style={styles.profileImage}
                             />
                             <View style={styles.statusBadge}>

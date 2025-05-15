@@ -53,6 +53,7 @@ const useAuthStore = create<AuthStore>((set, get) => ({
       })
       const userData = result.data
       this.usuarioLogado = new UserSession(
+          userData.uriPath,
           userData.firstName,
           userData.fullName,
           userData.username,

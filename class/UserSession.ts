@@ -1,4 +1,5 @@
 export class UserSession {
+    private _uriPath: string;
     private _firstName: string;
     private _fullName: string;
     private _username: string;
@@ -8,10 +9,11 @@ export class UserSession {
     private _completeReadings: number;
     private _inProgressReadings: number;
 
-    constructor(firstName: string, fullName: string, username: string, email: string, dateBirth: Date,
+    constructor(uriPath: string, firstName: string, fullName: string, username: string, email: string, dateBirth: Date,
                 mangas: number, completeReadings: number, inProgressReadings: number) {
         this._email = email;
         this._mangas = mangas;
+        this._uriPath = uriPath;
         this._username = username;
         this._fullName = fullName;
         this._firstName = firstName;
@@ -83,4 +85,13 @@ export class UserSession {
     set inProgressReadings(value: number) {
         this._inProgressReadings = value;
     }
+
+    get uriPath(): string {
+        return this._uriPath;
+    }
+
+    set uriPath(value: string) {
+        this._uriPath = value;
+    }
+
 }
