@@ -1,13 +1,20 @@
-import {Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
-import {useEffect, useState} from "react";
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, Modal } from "react-native";
+import { useEffect, useState } from "react";
 import useAuthStore from "@/stores/authStore";
-import {useNavigation} from "@react-navigation/native";
-import {UserSession} from "@/class/UserSession";
-import {NavigationProps} from "@/_types/navigation/NavigationProps";
+import { useNavigation } from "@react-navigation/native";
+import { UserSession } from "@/class/UserSession";
+import { NavigationProps } from "@/_types/navigation/NavigationProps";
 import { handleUriPath } from "@/utils/utils";
+import { Feather } from "@expo/vector-icons";
+import * as DocumentPicker from 'expo-document-picker';
+import UserService from "@/class/services/UserService";
+import { SelectedFileType } from "@/_types/iSelectedFileType";
 
 const ProfileScreen = () => {
+    const userService = new UserService();
     const [user, setUser] = useState<UserSession>();
+    const [changePhoto, setChangePhoto] = useState<boolean>(false);
+    const [selectedFile, setSelectedFile] = useState<SelectedFileType | null>(null);
 
     const authStore = useAuthStore();
     const navigation = useNavigation<NavigationProps>();
@@ -20,10 +27,10 @@ const ProfileScreen = () => {
         try {
             const user = await authStore.getUser();
 
-            if (user != null)
-                setUser(user);
-            else
+            if (user === null)
                 Alert.alert("Ocorreu um problema ao buscar as informações do usuário.")
+
+            setUser(user);
         } catch (error) {
             console.log(error);
             Alert.alert(String(error));
@@ -35,25 +42,74 @@ const ProfileScreen = () => {
         navigation.navigate("Login");
     }
 
+    const handleChangePhoto = () => {
+        setChangePhoto(true)
+    }
+
+    const pickDocument = async () => {
+        try {
+            const result = await DocumentPicker.getDocumentAsync({
+                type: ['image/jpeg', 'image/png', 'image/webp'],
+                copyToCacheDirectory: true,
+            });
+
+            if (!result.canceled && result.assets && result.assets.length > 0) {
+                const file = result.assets[0];
+                setSelectedFile({
+                    uri: file.uri,
+                    name: file.name,
+                    type: file.mimeType ?? 'application/octet-stream',
+                });
+            }
+        } catch (err) {
+            console.error('Erro ao selecionar arquivo:', err);
+            Alert.alert('Erro', 'Não foi possível selecionar o arquivo');
+        }
+    };
+
+    const cancelChangePhoto = () => {
+        setSelectedFile(null);
+        setChangePhoto(false);
+    }
+
+    const makePhotoExchange = async () => {
+        try {
+            await userService.handleChangePhoto(selectedFile);
+            setChangePhoto(false);
+            getUserInfo();
+        } catch(error) {
+            Alert.alert(String(error));
+        }
+    }
+
     return (
         <View style={styles.fullScreenContainer}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <View style={styles.background}>
                     <View style={styles.mangaHeader}>
-                        <View style={styles.decorativeLine}/>
+                        <View style={styles.decorativeLine} />
                         <Text style={styles.headerText}>PERFIL</Text>
-                        <View style={styles.decorativeLine}/>
+                        <View style={styles.decorativeLine} />
                     </View>
 
                     <View style={styles.profileCard}>
                         <View style={styles.profileImageContainer}>
                             <Image
-                                source={{uri: handleUriPath(user?.uriPath)}}
+                                source={{ uri: handleUriPath(user?.uriPath) }}
                                 style={styles.profileImage}
                             />
                             <View style={styles.statusBadge}>
                                 <Text style={styles.statusText}>ONLINE</Text>
                             </View>
+                        </View>
+
+                        <View style={styles.changePhoto}>
+                            <Feather
+                                name="upload"
+                                size={24}
+                                color="white"
+                                onPress={handleChangePhoto}
+                            />
                         </View>
 
                         <View style={styles.nameContainer}>
@@ -82,12 +138,12 @@ const ProfileScreen = () => {
                                 <Text style={styles.statValue}>{user?.mangas ?? 0}</Text>
                                 <Text style={styles.statLabel}>Mangás</Text>
                             </View>
-                            <View style={styles.statDivider}/>
+                            <View style={styles.statDivider} />
                             <View style={styles.statItem}>
                                 <Text style={styles.statValue}>{user?.inProgressReadings ?? 0}</Text>
                                 <Text style={styles.statLabel}>Em andamento</Text>
                             </View>
-                            <View style={styles.statDivider}/>
+                            <View style={styles.statDivider} />
                             <View style={styles.statItem}>
                                 <Text style={styles.statValue}>{user?.completeReadings ?? 0}</Text>
                                 <Text style={styles.statLabel}>Leituras finalizadas</Text>
@@ -102,11 +158,54 @@ const ProfileScreen = () => {
                     </View>
 
                     <View style={styles.mangaFooter}>
-                        <View style={styles.decorativeLine}/>
-                        <View style={styles.decorativeLine}/>
+                        <View style={styles.decorativeLine} />
+                        <View style={styles.decorativeLine} />
                     </View>
                 </View>
             </ScrollView>
+
+            <Modal
+                visible={changePhoto}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setChangePhoto(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Alterar Foto de Perfil</Text>
+
+                        <View style={styles.formGroup}>
+                            <TouchableOpacity style={styles.uploadButton} onPress={pickDocument}>
+                                <Text style={styles.uploadButtonText}>
+                                    {selectedFile ? 'Arquivo selecionado' : 'Selecionar arquivo'}
+                                </Text>
+                            </TouchableOpacity>
+                            {selectedFile && (
+                                <Text style={styles.fileName} numberOfLines={1} ellipsizeMode="middle">
+                                    {selectedFile.name}
+                                </Text>
+                            )}
+                        </View>
+
+                        <View style={styles.modalButtons}>
+                            {selectedFile && (
+                                <TouchableOpacity
+                                    style={styles.confirmButton}
+                                    onPress={async () => {
+                                        await makePhotoExchange();
+                                    }}
+                                >
+                                    <Text style={styles.buttonText}>Alterar foto</Text>
+                                </TouchableOpacity>
+                            )}
+
+                            <TouchableOpacity style={styles.cancelButton} onPress={cancelChangePhoto}>
+                                <Text style={styles.cancelButtonText}>Cancelar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 }
@@ -166,7 +265,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#2c2c44',
         shadowColor: '#ff4d6d',
-        shadowOffset: {width: 0, height: 5},
+        shadowOffset: { width: 0, height: 5 },
         shadowOpacity: 0.2,
         shadowRadius: 10,
         elevation: 10,
@@ -200,6 +299,7 @@ const styles = StyleSheet.create({
     },
     nameContainer: {
         alignItems: 'center',
+        marginTop: 10,
         marginBottom: 25,
     },
     profileName: {
@@ -207,7 +307,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#ffffff',
         textShadowColor: '#ff4d6d',
-        textShadowOffset: {width: 0, height: 2},
+        textShadowOffset: { width: 0, height: 2 },
         textShadowRadius: 3,
         marginBottom: 5,
     },
@@ -276,6 +376,90 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 14,
     },
+    changePhoto: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: -45,
+        marginLeft: 150
+    },
+    uploadButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    formGroup: {
+        marginBottom: 15,
+    },
+    uploadButtonText: {
+        marginTop: 10,
+        color: 'white',
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: 16,
+        fontWeight: '500',
+        padding: 12,
+        borderRadius: 8,
+    },
+    fileName: {
+        fontSize: 14,
+        color: '#bd93f9',
+    },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.75)',
+        padding: 20,
+    },
+    modalContent: {
+        backgroundColor: '#1a1a2e',
+        borderRadius: 12,
+        padding: 20,
+        width: '90%',
+        borderWidth: 2,
+        borderColor: '#ff6b6b',
+        elevation: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#ffffff',
+        marginBottom: 15,
+        textAlign: 'center',
+        textTransform: 'uppercase',
+    },
+    modalButtons: {
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+    },
+    confirmButton: {
+        backgroundColor: '#ff6b6b',
+        padding: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    buttonText: {
+        color: '#ffffff',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    cancelButton: {
+        padding: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#999',
+    },
+    cancelButtonText: {
+        color: '#ffffff',
+        fontSize: 16,
+    }
 });
 
 export default ProfileScreen;

@@ -1,6 +1,7 @@
 import { User } from "@/class/User";
 import { UserSession } from "@/class/UserSession";
 import { UserRegister } from "@/class/UserRegister";
+import { SelectedFileType } from "@/_types/iSelectedFileType";
 
 interface AuthStore {
     user: User;
@@ -25,6 +26,7 @@ interface AuthStore {
     register: (user: UserRegister) => Promise<string>;
     setToken(token: string, id: string): Promise<void>;
     efetuarLogin: (email: string, password: string) => Promise<void>;
+    handleChangePhoto(selectedFile: SelectedFileType): Promise<void>;
 }
 
 export default AuthStore;

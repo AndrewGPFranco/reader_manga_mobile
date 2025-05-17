@@ -4,7 +4,7 @@ export function formatDate(date: Date): string {
 }
 
 export function handleUriPath(path: string | undefined): string {
-    return `http://192.168.15.17:8080${path}`;
+    return `http://192.168.15.17:8080${path}?t=${Date.now()}`;
 }
 
 export const uriPathServer = "http://192.168.15.17:8080";
