@@ -46,7 +46,7 @@ const MangaLibraryScreen = () => {
 
                 setMangasArray(mangas.mangaList)
             } catch (error: any) {
-                Alert.alert(error.message || 'Erro ao buscar os mangás')
+                Alert.alert(error.message ?? 'Erro ao buscar os mangás')
             }
         }
 

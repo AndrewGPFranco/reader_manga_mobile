@@ -17,10 +17,8 @@ const ProgressReadingScreen = () => {
     const navigation = useNavigation<NavigationProps>();
     const chapterStore = useChapterStore();
 
-    const [page, setPage] = useState(1);
     const [isShowDialog, setIsShowDialog] = useState(false);
     const [chapters, setChapters] = useState<iChapterData[]>([]);
-    const [pageTotal, setPageTotal] = useState<number | undefined>(0);
     const [totalQuantidadePaginas, setTotalQuantidadePaginas] = useState<number>(0);
     const [totalALer, setTotalALer] = useState<number>(0);
     const [selectedChapter, setSelectedChapter] = useState<iChapterData>({} as iChapterData);
@@ -28,15 +26,14 @@ const ProgressReadingScreen = () => {
     useEffect(() => {
         const fetchChapters = async () => {
             try {
-                const data = await chapterStore.getAllReadingProgress(page - 1);
+                const data = await chapterStore.getAllReadingProgress(0);
                 setChapters(data);
-                setPageTotal(data.length > 0 ? data[0].numberPageOfPageable : 0);
             } catch (error) {
                 console.error("Erro ao carregar os capítulos:", error);
             }
         };
         fetchChapters();
-    }, [page]);
+    }, []);
 
     useEffect(() => {
         const quantidadeTotalPaginas = quantidadeTotalPaginasParaLer();
@@ -49,7 +46,7 @@ const ProgressReadingScreen = () => {
         setChapters([]);
         Alert.alert(result);
 
-        setChapters(await chapterStore.getAllReadingProgress(page - 1));
+        setChapters(await chapterStore.getAllReadingProgress(0));
     }
 
     const askContinueReading = (chapter: iChapterData) => {
@@ -93,16 +90,12 @@ const ProgressReadingScreen = () => {
                             <Text style={styles.statLabel}>Mangás</Text>
                         </View>
                         <View style={styles.statItem}>
-                            <Text style={styles.statNumber}>X</Text>
-                            <Text style={styles.statLabel}>Dias seguidos</Text>
-                        </View>
-                        <View style={styles.statItem}>
                             <Text style={styles.statNumber}>{ totalALer }</Text>
-                            <Text style={styles.statLabel}>Restante</Text>
+                            <Text style={styles.statLabel}>Págs. Restantes</Text>
                         </View>
                         <View style={styles.statItem}>
                             <Text style={styles.statNumber}>{ totalQuantidadePaginas }</Text>
-                            <Text style={styles.statLabel}>Páginas</Text>
+                            <Text style={styles.statLabel}>Total de Páginas</Text>
                         </View>
                     </View>
                 }
