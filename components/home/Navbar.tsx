@@ -1,8 +1,9 @@
 import { View, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import UserService from "@/class/services/UserService";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { handleUriPath } from "@/utils/utils";
+import { useFocusEffect } from "expo-router";
 
 type NavigationProps = {
     navigate: (screen: string, params?: any) => void;
@@ -13,9 +14,11 @@ const Navbar = () => {
     const [photo, setPhoto] = useState<string>("");
     const navigation = useNavigation<NavigationProps>();
 
-    useEffect(() => {
-        handleProfilePhoto();
-    }, []);
+    useFocusEffect(
+        useCallback(() => {
+            handleProfilePhoto();
+        }, [])
+    );
 
     const handleProfilePhoto = async () => {
         const uriProfilePhoto = await userService.getProfilePhoto();
